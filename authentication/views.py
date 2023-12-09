@@ -18,6 +18,7 @@ from django.contrib.auth.decorators import login_required
 from authentication.models import Player
 from django.http import JsonResponse
 from .forms import PlayerSearchForm
+from .models import SavedPlayer
 
 
 
@@ -179,6 +180,7 @@ def game(request):
     form = PlayerSearchForm()
     player_data = []
     error_message = None
+    confirmation_message = None
 
     if request.method == 'POST':
         form = PlayerSearchForm(request.POST)
@@ -197,7 +199,7 @@ def game(request):
         			all_players = response.json()  # Get all players
         			# Filter player data to retrieve name, position, and team
         			player_data = [
-        				{'name': player['FirstName'], 'position': player['Position'], 'team': player['CurrentTeam']} 
+        				{'fname': player['FirstName'],'lname' : player['LastName'], 'position': player['Position'], 'team': player['CurrentTeam'], 'ID' : player['PlayerID']} 
         				for player in all_players 
         				if player['FirstName'].split()[0] == searched_first_name and (searched_last_name is None or player['LastName'] == searched_last_name)
         			]
@@ -206,5 +208,23 @@ def game(request):
         			print(f"Response Content: {response.content}")
         	else:
         		error_message = f'Error: Unable to fetch player data. Status code: {response.status_code}. Content: {response.content.decode("utf-8")}'
-    return render(request, 'authentication/game.html', {'form': form, 'player_data': player_data, 'error_message': error_message})
+    
+    selected_player = request.POST.get('selected_player')
+    if selected_player is not None:
+    	try:
+    		player_info = selected_player.split(',')
+    		player_id = player_info[0]
+    		player_fname = player_info[1]
+    		player_lname = player_info[2]
+    		player_position = player_info[3]
+    		player_team = player_info[4]
+    		confirmation_message = f"You have selected {player_fname} {player_lname} - {player_position} for {player_team} to score a TD this week."
+    	except ValueError:
+    		pass
+    return render(request, 'authentication/game.html', 
+    	{'form': form, 
+    	'player_data': player_data, 
+    	'error_message': error_message, 
+    	'confirmation_message' : confirmation_message
+    	})
 

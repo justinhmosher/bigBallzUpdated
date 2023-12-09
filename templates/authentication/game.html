@@ -13,16 +13,25 @@
     <h2>Search Results</h2>
 <!-- Your Django template code -->
 {% if player_data %}
-    <ul>
-        {% for player in player_data %}
-            <li>
-                Name: {{ player.name }}, Position: {{ player.position }}, Team: {{ player.team }}
-            </li>
-        {% endfor %}
-    </ul>
+    <h3>Select a player:</h3>
+    <form method="post">
+        {% csrf_token %}
+        <ul>
+            {% for player in player_data %}
+                <li>
+                    {{ player.fname }} {{ player.lname }} - {{ player.position }} - {{ player.team }}
+                    <button type="submit" name="selected_player" value="{{ player.ID }},{{ player.fname }},{{ player.lname }},{{ player.position }},{{ player.team }}">Select</button>
+                </li>
+            {% endfor %}
+        </ul>
+    </form>
 {% else %}
     <p>No player data available or no matching players found.</p>
 {% endif %}
 
-</body>
+<!-- Display selected player confirmation -->
+{% if confirmation_message %}
+     <div>{{ confirmation_message }}</div>
+{% endif %}
+
 
