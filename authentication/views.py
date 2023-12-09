@@ -184,7 +184,7 @@ def game(request):
         form = PlayerSearchForm(request.POST)
         if form.is_valid():
             player_name = form.cleaned_data['player_name']
-            api_key = '4f62be5c652c49459729ff6878848f7d'  # Replace with your actual API key
+            api_key = config('API_SPORTS')  # Replace with your actual API key
             api_endpoint = 'https://api.sportsdata.io/v3/nfl/scores/json/Players'  # Example endpoint for player data
 
             headers = {'Ocp-Apim-Subscription-Key': api_key}
