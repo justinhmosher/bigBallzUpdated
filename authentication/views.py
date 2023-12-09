@@ -183,22 +183,28 @@ def game(request):
     if request.method == 'POST':
         form = PlayerSearchForm(request.POST)
         if form.is_valid():
-            player_name = form.cleaned_data['player_name']
-            api_key = config('API_SPORTS')  # Replace with your actual API key
-            api_endpoint = 'https://api.sportsdata.io/v3/nfl/scores/json/Players'  # Example endpoint for player data
+        	searched_name_parts = form.cleaned_data['player_name'].split()
+        	searched_first_name = form.cleaned_data['player_name'].split()[0]
+        	searched_last_name = searched_name_parts[-1] if len(searched_name_parts) > 1 else None
+        	api_key = config('API_SPORTS')  # Replace with your actual API key
+        	api_endpoint = 'https://api.sportsdata.io/v3/nfl/scores/json/Players'  # Example endpoint for player data
 
-            headers = {'Ocp-Apim-Subscription-Key': api_key}
-            params = {'search': player_name, 'format': 'json'}  # Specify JSON format
-
-            response = requests.get(api_endpoint, headers=headers, params=params)
-
-            if response.status_code == 200:
-                try:
-                    player_data = response.json()  # Try parsing JSON content
-                except requests.exceptions.JSONDecodeError:
-                    error_message = 'Error: Unexpected response format or empty response'
-                    print(f"Response Content: {response.content}")
-            else:
-                error_message = f'Error: Unable to fetch player data. Status code: {response.status_code}. Content: {response.content.decode("utf-8")}'
-
+        	headers = {'Ocp-Apim-Subscription-Key': api_key}
+        	params = {'format': 'json'}  # Specify JSON format
+        	response = requests.get(api_endpoint, headers=headers, params=params)
+        	if response.status_code == 200:
+        		try:
+        			all_players = response.json()  # Get all players
+        			# Filter player data to retrieve name, position, and team
+        			player_data = [
+        				{'name': player['FirstName'], 'position': player['Position'], 'team': player['CurrentTeam']} 
+        				for player in all_players 
+        				if player['FirstName'].split()[0] == searched_first_name and (searched_last_name is None or player['LastName'] == searched_last_name)
+        			]
+        		except requests.exceptions.JSONDecodeError:
+        			error_message = 'Error: Unexpected response format or empty response'
+        			print(f"Response Content: {response.content}")
+        	else:
+        		error_message = f'Error: Unable to fetch player data. Status code: {response.status_code}. Content: {response.content.decode("utf-8")}'
     return render(request, 'authentication/game.html', {'form': form, 'player_data': player_data, 'error_message': error_message})
+

@@ -11,19 +11,18 @@
     </form>
 
     <h2>Search Results</h2>
-    {% if player_data %}
-        <ul>
-            {% for player in player_data %}
-                <li>{{ player.FirstName }} {{ player.LastName }} - {{ player.Team }}</li>
-                <!-- Adjust the fields according to the API response -->
-            {% endfor %}
-        </ul>
-    {% else %}
-        {% if error_message %}
-            <p>{{ error_message }}</p>
-        {% else %}
-            <p>No results found.</p>
-        {% endif %}
-    {% endif %}
+<!-- Your Django template code -->
+{% if player_data %}
+    <ul>
+        {% for player in player_data %}
+            <li>
+                Name: {{ player.name }}, Position: {{ player.position }}, Team: {{ player.team }}
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>No player data available or no matching players found.</p>
+{% endif %}
+
 </body>
 
