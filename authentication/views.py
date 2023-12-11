@@ -1,4 +1,4 @@
-from django.shortcuts import redirect, render
+from django.shortcuts import redirect, render, get_object_or_404
 from django.http import HttpResponse
 from django.contrib.auth.models import User
 from django.contrib import messages
@@ -15,11 +15,10 @@ from django.template.loader import render_to_string
 import requests
 from decouple import config
 from django.contrib.auth.decorators import login_required
-from authentication.models import Player
+#from authentication.models import Player
 from django.http import JsonResponse
-from .forms import PlayerSearchForm
-from .models import SavedPlayer
-
+from .forms import PlayerSearchForm, Pickform, Pick1Form
+from .models import Pick
 
 
 def home(request):
@@ -54,6 +53,8 @@ def signup(request):
 
 		if password1 != password2:
 			messages.error(request,"Passwors didn't match!")
+
+		print("hello")
 
 		#Finding users location
 		user_ip_address = request.META.get('HTTP_X_FORWARDED_FOR') or request.META.get('REMOTE_ADDR')
@@ -181,6 +182,8 @@ def game(request):
     player_data = []
     error_message = None
     confirmation_message = None
+    confirmation_message1 = None
+    num = -1
 
     if request.method == 'POST':
         form = PlayerSearchForm(request.POST)
@@ -208,10 +211,21 @@ def game(request):
         			print(f"Response Content: {response.content}")
         	else:
         		error_message = f'Error: Unable to fetch player data. Status code: {response.status_code}. Content: {response.content.decode("utf-8")}'
-    
+    #if request.method == 'POST':
+    confirmation_messages = []
+    team_name = request.user.username
+    pick_instance = get_object_or_404(Pick, team_name = team_name)
+    #selected_player = Pick1Form(request.POST,instance = pick_instance)
     selected_player = request.POST.get('selected_player')
     if selected_player is not None:
+    	print(selected_player)
+    	pick_instance.pick1 = selected_player
+    	pick_instance.save()
+    
+    """
     	try:
+    		form = Pickform()
+    	
     		player_info = selected_player.split(',')
     		player_id = player_info[0]
     		player_fname = player_info[1]
@@ -219,12 +233,28 @@ def game(request):
     		player_position = player_info[3]
     		player_team = player_info[4]
     		confirmation_message = f"You have selected {player_fname} {player_lname} - {player_position} for {player_team} to score a TD this week."
+    		num = 0
+
     	except ValueError:
     		pass
+    selected_player1 = request.POST.get('selected_player1')
+    if selected_player1 is not None:
+    	try:
+    		player_info1 = selected_player1.split(',')
+    		player_id1 = player_info1[0]
+    		player_fname1 = player_info1[1]
+    		player_lname1 = player_info1[2]
+    		player_position1 = player_info1[3]
+    		player_team1 = player_info1[4]
+    		confirmation_message1 = f"You have selected {player_fname1} {player_lname1} - {player_position1} for {player_team1} to score a TD this week."
+    		num = 1
+    	except ValueError:
+    		pass
+    confirmation_messages.append(confirmation_message)
+    confirmation_messages.append(confirmation_message1)
+    """
     return render(request, 'authentication/game.html', 
     	{'form': form, 
     	'player_data': player_data, 
-    	'error_message': error_message, 
-    	'confirmation_message' : confirmation_message
+    	'error_message': error_message
     	})
-

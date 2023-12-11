@@ -1,3 +1,5 @@
+{% load numeric_tags %}
+
 <head>
     <title>Player Search</title>
 </head>
@@ -12,6 +14,9 @@
 
     <h2>Search Results</h2>
 <!-- Your Django template code -->
+
+<!--{{ player.ID }},{{ player.fname }},{{ player.lname }},{{ player.position }},{{ player.team }}-->
+
 {% if player_data %}
     <h3>Select a player:</h3>
     <form method="post">
@@ -20,7 +25,7 @@
             {% for player in player_data %}
                 <li>
                     {{ player.fname }} {{ player.lname }} - {{ player.position }} - {{ player.team }}
-                    <button type="submit" name="selected_player" value="{{ player.ID }},{{ player.fname }},{{ player.lname }},{{ player.position }},{{ player.team }}">Select</button>
+                    <button type="submit" name="selected_player" value="{{ player.fname }}">Select</button>
                 </li>
             {% endfor %}
         </ul>
@@ -29,9 +34,18 @@
     <p>No player data available or no matching players found.</p>
 {% endif %}
 
-<!-- Display selected player confirmation -->
+<!-- Display selected player confirmation
 {% if confirmation_message %}
      <div>{{ confirmation_message }}</div>
+{% endif %}
+-->
+
+{% if confirmation_message %}
+    <h3>{{ confirmation_message }}</h3>
+{% endif %}
+
+{%  if confirmation_message1 %}
+    <h3>{{ confirmation_message1 }}</h3>
 {% endif %}
 
 

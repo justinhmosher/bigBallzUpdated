@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+"""
 class Player(models.Model):
     team = models.CharField(max_length=100)
     position = models.CharField(max_length=100)
@@ -15,3 +16,18 @@ class SavedPlayer(models.Model):
 
     def __str__(self):
         return f"{self.user.username}'s pick: {self.player_name}"
+
+class UserProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    # Add any other profile-related fields here
+"""
+
+class Pick(models.Model):
+    your_primary_key = models.AutoField(primary_key=True)
+    team_name = models.CharField(max_length = 100, default='Default Team Name')
+    isin = models.BooleanField()
+    week = models.IntegerField()
+    pick1 = models.CharField(max_length = 100)
+    pick2 = models.CharField(max_length = 100)
+    def __str__(self):
+        return f"{self.team_name}"
