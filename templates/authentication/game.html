@@ -38,7 +38,6 @@
 {% if confirmation_message %}
      <div>{{ confirmation_message }}</div>
 {% endif %}
--->
 
 {% if confirmation_message %}
     <h3>{{ confirmation_message }}</h3>
@@ -47,5 +46,12 @@
 {%  if confirmation_message1 %}
     <h3>{{ confirmation_message1 }}</h3>
 {% endif %}
+
+--->
+
+{% for user in user_data %}
+<h2>You selected {{ user.pick1 }} to score this week!</h2>
+<h2>You selected {{ user.pick2 }} to score this week!</h2>
+{% endfor %}
 
 

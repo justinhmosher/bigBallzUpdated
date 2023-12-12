@@ -11,5 +11,6 @@ urlpatterns = [
     path('signout',views.signout,name="signout"),
     path('activate/<uidb64>/<token>',views.activate,name='activate'),
     path('sample',views.sample,name="sample"),
-    path('game/',views.game,name="game")
+    path('game/',views.game,name="game"),
+    path('simplergame',views.simplergame, name = 'simplergame')
 ]

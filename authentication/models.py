@@ -25,6 +25,7 @@ class UserProfile(models.Model):
 class Pick(models.Model):
     your_primary_key = models.AutoField(primary_key=True)
     team_name = models.CharField(max_length = 100, default='Default Team Name')
+    email = models.EmailField(max_length = 100, default = "useremail@gamil.com")
     isin = models.BooleanField()
     week = models.IntegerField()
     pick1 = models.CharField(max_length = 100)

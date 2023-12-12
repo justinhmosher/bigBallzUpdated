@@ -178,83 +178,64 @@ def sample(request):
 
 @login_required
 def game(request):
-    form = PlayerSearchForm()
-    player_data = []
-    error_message = None
-    confirmation_message = None
-    confirmation_message1 = None
-    num = -1
+	user_data = Pick.objects.filter(team_name = request.user.username)
+	form = PlayerSearchForm()
+	player_data = []
+	error_message = None
+	confirmation_message = None
+	confirmation_message1 = None
 
-    if request.method == 'POST':
-        form = PlayerSearchForm(request.POST)
-        if form.is_valid():
-        	searched_name_parts = form.cleaned_data['player_name'].split()
-        	searched_first_name = form.cleaned_data['player_name'].split()[0]
-        	searched_last_name = searched_name_parts[-1] if len(searched_name_parts) > 1 else None
-        	api_key = config('API_SPORTS')  # Replace with your actual API key
-        	api_endpoint = 'https://api.sportsdata.io/v3/nfl/scores/json/Players'  # Example endpoint for player data
+	if request.method == 'POST':
+		form = PlayerSearchForm(request.POST)
+		if form.is_valid():
+			searched_name_parts = form.cleaned_data['player_name'].split()
+			searched_first_name = form.cleaned_data['player_name'].split()[0]
+			searched_last_name = searched_name_parts[-1] if len(searched_name_parts) > 1 else None
+			api_key = config('API_SPORTS')  # Replace with your actual API key
+			api_endpoint = 'https://api.sportsdata.io/v3/nfl/scores/json/Players'  # Example endpoint for player data
+			headers = {'Ocp-Apim-Subscription-Key': api_key}
+			params = {'format': 'json'}  # Specify JSON format
+			response = requests.get(api_endpoint, headers=headers, params=params)
+			if response.status_code == 200:
+				try:
+					all_players = response.json()  # Get all players
+					# Filter player data to retrieve name, position, and team
+					player_data = [
+						{'fname': player['FirstName'],'lname' : player['LastName'], 'position': player['Position'], 'team': player['CurrentTeam'], 'ID' : player['PlayerID']} 
+						for player in all_players 
+						if player['FirstName'].split()[0] == searched_first_name and (searched_last_name is None or player['LastName'] == searched_last_name) and ((player['Position'] == "RB") or (player['Position'] == "WR") or (player['Position'] == "TE"))
+					]
+				except requests.exceptions.JSONDecodeError:
+					error_message = 'Error: Unexpected response format or empty response'
+					print(f"Response Content: {response.content}")
+			else:
+				error_message = f'Error: Unable to fetch player data. Status code: {response.status_code}. Content: {response.content.decode("utf-8")}'
+	team_name = request.user.username
+	pick_instance = get_object_or_404(Pick, team_name = team_name)
+	selected_player = request.POST.get('selected_player')
+	if selected_player is not None:
+		print(selected_player)
+		pick_instance.pick1 = selected_player
+		pick_instance.save()
+	return render(request, 'authentication/game.html', 
+		{'form': form, 
+		'player_data': player_data, 
+		'error_message': error_message,
+		'user_data' : user_data
+		})
 
-        	headers = {'Ocp-Apim-Subscription-Key': api_key}
-        	params = {'format': 'json'}  # Specify JSON format
-        	response = requests.get(api_endpoint, headers=headers, params=params)
-        	if response.status_code == 200:
-        		try:
-        			all_players = response.json()  # Get all players
-        			# Filter player data to retrieve name, position, and team
-        			player_data = [
-        				{'fname': player['FirstName'],'lname' : player['LastName'], 'position': player['Position'], 'team': player['CurrentTeam'], 'ID' : player['PlayerID']} 
-        				for player in all_players 
-        				if player['FirstName'].split()[0] == searched_first_name and (searched_last_name is None or player['LastName'] == searched_last_name)
-        			]
-        		except requests.exceptions.JSONDecodeError:
-        			error_message = 'Error: Unexpected response format or empty response'
-        			print(f"Response Content: {response.content}")
-        	else:
-        		error_message = f'Error: Unable to fetch player data. Status code: {response.status_code}. Content: {response.content.decode("utf-8")}'
-    #if request.method == 'POST':
-    confirmation_messages = []
-    team_name = request.user.username
-    pick_instance = get_object_or_404(Pick, team_name = team_name)
-    #selected_player = Pick1Form(request.POST,instance = pick_instance)
-    selected_player = request.POST.get('selected_player')
-    if selected_player is not None:
-    	print(selected_player)
-    	pick_instance.pick1 = selected_player
-    	pick_instance.save()
-    
-    """
-    	try:
-    		form = Pickform()
-    	
-    		player_info = selected_player.split(',')
-    		player_id = player_info[0]
-    		player_fname = player_info[1]
-    		player_lname = player_info[2]
-    		player_position = player_info[3]
-    		player_team = player_info[4]
-    		confirmation_message = f"You have selected {player_fname} {player_lname} - {player_position} for {player_team} to score a TD this week."
-    		num = 0
-
-    	except ValueError:
-    		pass
-    selected_player1 = request.POST.get('selected_player1')
-    if selected_player1 is not None:
-    	try:
-    		player_info1 = selected_player1.split(',')
-    		player_id1 = player_info1[0]
-    		player_fname1 = player_info1[1]
-    		player_lname1 = player_info1[2]
-    		player_position1 = player_info1[3]
-    		player_team1 = player_info1[4]
-    		confirmation_message1 = f"You have selected {player_fname1} {player_lname1} - {player_position1} for {player_team1} to score a TD this week."
-    		num = 1
-    	except ValueError:
-    		pass
-    confirmation_messages.append(confirmation_message)
-    confirmation_messages.append(confirmation_message1)
-    """
-    return render(request, 'authentication/game.html', 
-    	{'form': form, 
-    	'player_data': player_data, 
-    	'error_message': error_message
-    	})
+@login_required
+def simplergame(request):
+	all_data = Pick.objects.all
+	team_name = request.user.username
+	"""
+	team_email = request.user.email
+	data_teams = Pick.objects.filter(email = team_email)
+	"""
+	user_data = Pick.objects.get(team_name = team_name)
+	if user_data.isin == False:
+		return render("authentication/lost.html")
+	else:
+		return render(request,"authentication/in.html", {
+			'pick1' : user_data.pick1
+			})
