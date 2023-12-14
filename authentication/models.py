@@ -25,10 +25,11 @@ class UserProfile(models.Model):
 class Pick(models.Model):
     your_primary_key = models.AutoField(primary_key=True)
     team_name = models.CharField(max_length = 100, default='Default Team Name')
+    username = models.CharField(max_length = 100, default = "username")
     email = models.EmailField(max_length = 100, default = "useremail@gamil.com")
-    isin = models.BooleanField()
-    week = models.IntegerField()
-    pick1 = models.CharField(max_length = 100)
-    pick2 = models.CharField(max_length = 100)
+    isin = models.BooleanField(default = True)
+    week = models.IntegerField(default = 1)
+    pick1 = models.CharField(max_length = 100, default = "N/A")
+    pick2 = models.CharField(max_length = 100, default = "N/A")
     def __str__(self):
         return f"{self.team_name}"

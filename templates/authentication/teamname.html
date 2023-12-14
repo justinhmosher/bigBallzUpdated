@@ -1,0 +1,25 @@
+{% for message in messages %}
+<div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+<strong>Message:</strong> {{ message }}
+<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+<span aria-hidden="true">&times;</span>
+</button>
+</div>
+{% endfor %}
+
+
+<head>
+    <title>Submit Team Name</title>
+</head>
+<body>
+
+<h2>Submit a Team Name</h2>
+
+<form action="{% url 'teamname' %}" method="post">  <!-- Replace 'teamname' with your actual view name or URL -->
+    {% csrf_token %}
+    <label for="teamName">Team Name:</label><br>
+    <input type="text" id="teamName" name="team_name"><br><br>
+    <input type="submit" value="Submit">
+</form>
+
+</body>

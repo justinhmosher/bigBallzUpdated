@@ -17,7 +17,7 @@ from decouple import config
 from django.contrib.auth.decorators import login_required
 #from authentication.models import Player
 from django.http import JsonResponse
-from .forms import PlayerSearchForm, Pickform, Pick1Form
+from .forms import PlayerSearchForm, Pickform, Pick1Form, CreateTeam
 from .models import Pick
 
 
@@ -53,8 +53,6 @@ def signup(request):
 
 		if password1 != password2:
 			messages.error(request,"Passwors didn't match!")
-
-		print("hello")
 
 		#Finding users location
 		user_ip_address = request.META.get('HTTP_X_FORWARDED_FOR') or request.META.get('REMOTE_ADDR')
@@ -131,7 +129,28 @@ def signup(request):
 
 		return redirect('signin')
 
-	return render(request,"authentication/signup.html")	
+	return render(request,"authentication/signup.html")
+
+def teamname(request):
+
+	if request.method == "POST":
+		form = CreateTeam(request.POST)
+		if form.is_valid():
+			team_name = form.cleaned_data['team_name']
+			username = request.user.username
+			if Pick.objects.filter(team_name = team_name).exists():
+				messages.error(request,"Team name already exists!")
+				return redirect('teamname')
+			elif len(team_name) > 15 or len(team_name) < 6:
+				messages.error(request,"Team name need to be between 5-14 characters")
+				return redirect("teamname")
+			else:
+				new_pick = Pick(team_name=team_name)
+				new_pick.save()
+		else:
+			messages.error(request,"Please submit a valid teamname")
+			return redirect('teamname')
+	return render(request,"authentication/teamname.html")
 
 
 def signin(request):
@@ -226,16 +245,20 @@ def game(request):
 
 @login_required
 def simplergame(request):
-	all_data = Pick.objects.all
-	team_name = request.user.username
-	"""
-	team_email = request.user.email
-	data_teams = Pick.objects.filter(email = team_email)
-	"""
-	user_data = Pick.objects.get(team_name = team_name)
-	if user_data.isin == False:
-		return render("authentication/lost.html")
+	username = request.user.username
+	if not Pick.object.filter(username = username).exists():
+		return render('authentication/teamname.html')
 	else:
-		return render(request,"authentication/in.html", {
-			'pick1' : user_data.pick1
-			})
+		all_data = Pick.objects.all
+		team_name = request.team_name
+		"""
+		team_email = request.user.email
+		data_teams = Pick.objects.filter(email = team_email)
+		"""
+		user_data = Pick.objects.get(team_name = team_name)
+		if user_data.isin == False:
+			return render("authentication/lost.html")
+		else:
+			return render(request,"authentication/in.html", {
+				'pick1' : user_data.pick1
+				})
