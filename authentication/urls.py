@@ -12,6 +12,6 @@ urlpatterns = [
     path('teamname',views.teamname,name = "teamname"),
     path('activate/<uidb64>/<token>',views.activate,name='activate'),
     path('sample',views.sample,name="sample"),
-    path('game/',views.game,name="game"),
-    path('simplergame',views.simplergame, name = 'simplergame')
+    path('game',views.game,name="game"),
+    path('checking',views.checking, name = 'checking')
 ]

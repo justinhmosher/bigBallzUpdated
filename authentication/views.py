@@ -145,8 +145,9 @@ def teamname(request):
 				messages.error(request,"Team name need to be between 5-14 characters")
 				return redirect("teamname")
 			else:
-				new_pick = Pick(team_name=team_name)
+				new_pick = Pick(team_name=team_name,username= request.user.username)
 				new_pick.save()
+				return redirect('checking')
 		else:
 			messages.error(request,"Please submit a valid teamname")
 			return redirect('teamname')
@@ -164,7 +165,7 @@ def signin(request):
 		if user is not None:
 			login(request, user)
 			fname = user.first_name
-			return render(request, "authentication/index.html", {'fname': fname})
+			return redirect('checking')
 
 		else:
 			messages.error(request, "Bad Credentials!")
@@ -197,7 +198,7 @@ def sample(request):
 
 @login_required
 def game(request):
-	user_data = Pick.objects.filter(team_name = request.user.username)
+	user_data = Pick.objects.filter(username = request.user.username)
 	form = PlayerSearchForm()
 	player_data = []
 	error_message = None
@@ -229,13 +230,11 @@ def game(request):
 					print(f"Response Content: {response.content}")
 			else:
 				error_message = f'Error: Unable to fetch player data. Status code: {response.status_code}. Content: {response.content.decode("utf-8")}'
-	team_name = request.user.username
-	pick_instance = get_object_or_404(Pick, team_name = team_name)
 	selected_player = request.POST.get('selected_player')
 	if selected_player is not None:
-		print(selected_player)
-		pick_instance.pick1 = selected_player
-		pick_instance.save()
+		user_pick = Pick.objects.get(username = request.user.username)
+		user_pick.pick1 = selected_player
+		user_pick.save()
 	return render(request, 'authentication/game.html', 
 		{'form': form, 
 		'player_data': player_data, 
@@ -244,21 +243,14 @@ def game(request):
 		})
 
 @login_required
-def simplergame(request):
+def checking(request):
 	username = request.user.username
-	if not Pick.object.filter(username = username).exists():
-		return render('authentication/teamname.html')
+	if not Pick.objects.filter(username = username).exists():
+		#return render(request, 'authentication/teamname.html')
+		return redirect('teamname')
 	else:
-		all_data = Pick.objects.all
-		team_name = request.team_name
-		"""
-		team_email = request.user.email
-		data_teams = Pick.objects.filter(email = team_email)
-		"""
-		user_data = Pick.objects.get(team_name = team_name)
-		if user_data.isin == False:
-			return render("authentication/lost.html")
+		user_data = Pick.objects.get(username = username)
+		if user_data.isin == True:
+			return redirect('game')
 		else:
-			return render(request,"authentication/in.html", {
-				'pick1' : user_data.pick1
-				})
+			return render(request,'authentication/lost.html')
