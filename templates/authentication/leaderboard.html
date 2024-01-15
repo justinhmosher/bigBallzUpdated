@@ -1,0 +1,18 @@
+<h2>Player Picks Counts</h2>
+
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Player</th>
+                <th>Number of Picks</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for player_count in player_counts %}
+                <tr>
+                    <td>{{ player_count.pick1 }}</td>
+                    <td>{{ player_count.count }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>

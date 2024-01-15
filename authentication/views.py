@@ -19,6 +19,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from .forms import PlayerSearchForm, Pickform, Pick1Form, CreateTeam
 from .models import Pick
+from django.db.models import Count
 
 
 def home(request):
@@ -196,6 +197,10 @@ def activate(request, uidb64, token):
 def sample(request):
 	return render(request,"authentication/sample.html")
 
+def leaderboard(request):
+	player_counts = Pick.objects.values('pick1').annotate(count=Count('pick1')).order_by('-count')
+	return render(request,'authentication/leaderboard.html',{'player_counts':player_counts})
+
 @login_required
 def game(request):
 	user_data = Pick.objects.filter(username = request.user.username)
@@ -246,7 +251,6 @@ def game(request):
 def checking(request):
 	username = request.user.username
 	if not Pick.objects.filter(username = username).exists():
-		#return render(request, 'authentication/teamname.html')
 		return redirect('teamname')
 	else:
 		user_data = Pick.objects.get(username = username)
