@@ -238,7 +238,10 @@ def game(request):
 	selected_player = request.POST.get('selected_player')
 	if selected_player is not None:
 		user_pick = Pick.objects.get(username = request.user.username)
-		user_pick.pick1 = selected_player
+		if user_pick.pick1 == "N/A":
+			user_pick.pick1 = selected_player
+		else:
+			user_pick.pick2 = selected_player
 		user_pick.save()
 	return render(request, 'authentication/game.html', 
 		{'form': form, 
