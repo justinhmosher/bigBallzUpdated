@@ -33,3 +33,11 @@ class Pick(models.Model):
     pick2 = models.CharField(max_length = 100, default = "N/A")
     def __str__(self):
         return f"{self.team_name}"
+
+class Paid(models.Model):
+    your_primary_key = models.AutoField(primary_key=True)
+    username = models.CharField(max_length = 100, default = "username")
+    paid_status = models.BooleanField(default = False)
+    def __str__(self):
+        return f"{self.username}"
+

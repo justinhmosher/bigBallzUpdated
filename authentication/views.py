@@ -18,7 +18,7 @@ from django.contrib.auth.decorators import login_required
 #from authentication.models import Player
 from django.http import JsonResponse
 from .forms import PlayerSearchForm, Pickform, Pick1Form, CreateTeam
-from .models import Pick
+from .models import Pick,Paid
 from django.db.models import Count,F,ExpressionWrapper,fields
 from datetime import datetime
 from itertools import chain
@@ -299,16 +299,23 @@ def game(request):
 
 @login_required
 def checking(request):
-	username = request.user.username
-	current_day = datetime.now().weekday()
-	if not Pick.objects.filter(username = username).exists():
-		return redirect('teamname')
+	if not Paid.objects.filter(username = request.user.username).exists():
+		new_user = Paid(username = request.user.username)
+		new_user.save()
+	paid = Paid.objects.get(username = request.user.username)
+	if paid.paid_status == False:
+		return render(request,'authentication/pay.html')
 	else:
-		user_data = Pick.objects.get(username = username)
-		if user_data.isin == True:
-			if current_day in [1,2]:
-				return redirect('game')
-			else:
-				return redirect('leaderboard')
+		username = request.user.username
+		current_day = datetime.now().weekday()
+		if not Pick.objects.filter(username = username).exists():
+			return redirect('teamname')
 		else:
-			return redirect('playerboard')
+			user_data = Pick.objects.get(username = username)
+			if user_data.isin == True:
+				if current_day in [1,2]:
+					return redirect('game')
+				else:
+					return redirect('leaderboard')
+			else:
+				return redirect('playerboard')
