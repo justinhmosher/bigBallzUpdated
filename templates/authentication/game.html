@@ -49,7 +49,17 @@
 
 {% for user in user_data %}
 <h2>Pick #1: {{ user.pick1 }}</h2>
+    <form method="post" action="{% url 'game' %}">
+         {% csrf_token %}
+        <input type="hidden" name="change_pick" value="pick1">
+        <button type="submit">Change</button>
+    </form>
 <h2>Pick #2: {{ user.pick2 }}</h2>
+    <form method="post" action="{% url 'game' %}">
+         {% csrf_token %}
+        <input type="hidden" name="change_pick" value="pick2">
+        <button type="submit">Change</button>
+    </form>
 {% endfor %}
 
 

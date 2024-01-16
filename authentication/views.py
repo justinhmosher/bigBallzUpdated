@@ -19,7 +19,11 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from .forms import PlayerSearchForm, Pickform, Pick1Form, CreateTeam
 from .models import Pick
-from django.db.models import Count
+from django.db.models import Count,F,ExpressionWrapper,fields
+from datetime import datetime
+from itertools import chain
+from collections import defaultdict
+
 
 
 def home(request):
@@ -197,9 +201,40 @@ def activate(request, uidb64, token):
 def sample(request):
 	return render(request,"authentication/sample.html")
 
+def playerboard(request):
+	player_counts1 = Pick.objects.filter(isin=True).values('pick1').annotate(count=Count('pick1')).order_by('-count')
+	player_counts2 = Pick.objects.filter(isin=True).values('pick2').annotate(count=Count('pick2')).order_by('-count')
+	
+	player_counts = defaultdict(int)
+
+	for player_count in chain(player_counts1, player_counts2):
+		player_name = player_count.get('pick1') or player_count.get('pick2')
+		player_counts[player_name] += player_count['count']
+
+	sorted_player_counts = sorted(player_counts.items(), key=lambda x: x[1], reverse=True)
+	
+	total_in = Pick.objects.filter(isin = True).count()
+
+	return render(request,'authentication/playerboard.html',{'player_counts':sorted_player_counts,'total_in':total_in})
+
+@login_required
 def leaderboard(request):
-	player_counts = Pick.objects.values('pick1').annotate(count=Count('pick1')).order_by('-count')
-	return render(request,'authentication/leaderboard.html',{'player_counts':player_counts})
+	player_counts1 = Pick.objects.filter(isin=True).values('pick1').annotate(count=Count('pick1')).order_by('-count')
+	player_counts2 = Pick.objects.filter(isin=True).values('pick2').annotate(count=Count('pick2')).order_by('-count')
+	
+	player_counts = defaultdict(int)
+
+	for player_count in chain(player_counts1, player_counts2):
+		player_name = player_count.get('pick1') or player_count.get('pick2')
+		player_counts[player_name] += player_count['count']
+
+	sorted_player_counts = sorted(player_counts.items(), key=lambda x: x[1], reverse=True)
+	
+	total_in = Pick.objects.filter(isin = True).count()
+
+	user_data = Pick.objects.get(username = request.user.username)
+
+	return render(request,'authentication/leaderboard.html',{'player_counts':sorted_player_counts,'total_in':total_in, 'user_data':user_data})
 
 @login_required
 def game(request):
@@ -235,6 +270,7 @@ def game(request):
 					print(f"Response Content: {response.content}")
 			else:
 				error_message = f'Error: Unable to fetch player data. Status code: {response.status_code}. Content: {response.content.decode("utf-8")}'
+
 	selected_player = request.POST.get('selected_player')
 	if selected_player is not None:
 		user_pick = Pick.objects.get(username = request.user.username)
@@ -243,6 +279,17 @@ def game(request):
 		else:
 			user_pick.pick2 = selected_player
 		user_pick.save()
+
+	change_pick = request.POST.get('change_pick')
+	if change_pick == 'pick1':
+		user_pick = Pick.objects.get(username = request.user.username)
+		user_pick.pick1 = "N/A"
+		user_pick.save()
+	elif change_pick == "pick2":
+		user_pick = Pick.objects.get(username = request.user.username)
+		user_pick.pick2 = "N/A"
+		user_pick.save()
+
 	return render(request, 'authentication/game.html', 
 		{'form': form, 
 		'player_data': player_data, 
@@ -253,11 +300,15 @@ def game(request):
 @login_required
 def checking(request):
 	username = request.user.username
+	current_day = datetime.now().weekday()
 	if not Pick.objects.filter(username = username).exists():
 		return redirect('teamname')
 	else:
 		user_data = Pick.objects.get(username = username)
 		if user_data.isin == True:
-			return redirect('game')
+			if current_day in [1,2]:
+				return redirect('game')
+			else:
+				return redirect('leaderboard')
 		else:
-			return render(request,'authentication/lost.html')
+			return redirect('playerboard')
