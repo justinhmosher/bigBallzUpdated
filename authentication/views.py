@@ -27,34 +27,34 @@ from collections import defaultdict
 
 
 def home(request):
-	return render(request, "authentication/index.html")
+	return render(request, "authentication/sample.html")
 
 def signup(request):
 	
 	if request.method == "POST":
 
 		username = request.POST.get('username')
-		fname = request.POST.get('fname')
-		lname = request.POST.get('lname')
+		#fname = request.POST.get('fname')
+		#lname = request.POST.get('lname')
 		email = request.POST.get('email')
 		password1 = request.POST.get('password1')
 		password2 = request.POST.get('password2')
 
 		if User.objects.filter(username = username):
 			messages.error(request, "Username already exists!  Please try another.")
-			return redirect('home')
+			return redirect('signup')
 
 		if User.objects.filter(email = email):
 			messages.error(request, "Email already registered!  Please try another.")
-			return redirect('home')
+			return redirect('signup')
 
 		if len(username) > 15:
 			messages.error(request, "Username is too long!  Please try another. (15 max)")
-			return redirect('home')
+			return redirect('signup')
 		
 		if len(username) < 6:
 			messages.error(request, "Username is too short!  Please try another. (at least 5)")
-			return redirect('home')
+			return redirect('signup')
 
 		if password1 != password2:
 			messages.error(request,"Passwors didn't match!")
@@ -79,8 +79,8 @@ def signup(request):
 
 			else:
 				myuser = User.objects.create_user(username, email, password1)
-				myuser.first_name = fname
-				myuser.last_name = lname
+				#myuser.first_name = fname
+				#myuser.last_name = lname
 				myuser.is_active = False
 
 				myuser.save()
@@ -102,7 +102,7 @@ def signup(request):
 		mail_item.Subject = "Welcome to Big Ballz League"
 		mail_item.BodyFormat = 1
 
-		mail_item.Body = "Hello" + myuser.first_name + "!! \n" + "Welcome to The Big Ballz League!! \n Thank you for joining our waitlist \n We have also sent you a confirmation email, please confirm your email address in order to activate your account! \n\n Thank You, \n League Commissioner"
+		mail_item.Body = "Hello player !! \n" + "Welcome to The Big Ballz League!! \n Thank you for joining our waitlist \n We have also sent you a confirmation email, please confirm your email address in order to activate your account! \n\n Thank You, \n League Commissioner"
 		mail_item.Sender = "commissioner@bigballzdfsl.com"
 		mail_item.To = myuser.email
 
@@ -118,7 +118,7 @@ def signup(request):
 		mail_item1.Subject = "Confirm your email for The Big Ballz Leage!"
 		mail_item1.BodyFormat = 1
 		mail_item1.Body = render_to_string('authentication/email_confirmation.html',{
-			'name' : myuser.first_name,
+			#'name' : myuser.first_name,
 			'domain' : current_site.domain,
 			'uid' : urlsafe_base64_encode(force_bytes(myuser.pk)),
 			'token' : generate_token.make_token(myuser),
@@ -134,7 +134,7 @@ def signup(request):
 
 		return redirect('signin')
 
-	return render(request,"authentication/signup.html")
+	return render(request,"authentication/signsamp.html")
 
 def teamname(request):
 
@@ -169,12 +169,12 @@ def signin(request):
 
 		if user is not None:
 			login(request, user)
-			fname = user.first_name
+			#fname = user.first_name
 			return redirect('checking')
 
 		else:
 			messages.error(request, "Bad Credentials!")
-			return redirect('home')	
+			return redirect('signin')	
 
 	return render(request, "authentication/signin.html")
 
@@ -198,8 +198,8 @@ def activate(request, uidb64, token):
 	else:
 		return render(request, 'authentication/activation_failed.html')	
 
-def sample(request):
-	return render(request,"authentication/sample.html")
+def signsamp(request):
+	return render(request,"authentication/signsamp.html")
 
 def playerboard(request):
 	player_counts1 = Pick.objects.filter(isin=True).values('pick1').annotate(count=Count('pick1')).order_by('-count')
