@@ -3,13 +3,24 @@
     <title>Player Search</title>
 </head>
 <body>
+{% for message in messages %}
+<div class="alert alert-{{ message.tags }} alert-dismissible fade show d-inline-block" role="alert">
+<strong>Message:</strong> {{ message }}
+<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+<span aria-hidden="true">&times;</span>
+</button>
+</div>
+{% endfor %}
+
+
     <h1>Search for NFL Players</h1>
 
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Search</button>
-    </form>
+<form class ="d-flex" method="post" action="{% url 'game' %}">
+    {% csrf_token %}
+    <input class = "form-control me-2" type="searched" name="searched">
+    <button type="submit">Search</button>
+</form>
+
 
     <h2>Search Results</h2>
 
@@ -20,8 +31,8 @@
             <ul>
                 {% for player in player_data %}
                     <li>
-                        {{ player.fname }} {{ player.lname }} - {{ player.position }} - {{ player.team }}
-                        <button type="submit" name="selected_player" value="{{ player.fname }} {{ player.lname }}">Select</button>
+                        {{ player.name }}
+                        <button type="submit" name="selected_player" value="{{ player.name }}">Select</button>
                     </li>
                 {% endfor %}
             </ul>
@@ -31,21 +42,6 @@
     {% endif %}
 </body>
 
-
-<!-- Display selected player confirmation
-{% if confirmation_message %}
-     <div>{{ confirmation_message }}</div>
-{% endif %}
-
-{% if confirmation_message %}
-    <h3>{{ confirmation_message }}</h3>
-{% endif %}
-
-{%  if confirmation_message1 %}
-    <h3>{{ confirmation_message1 }}</h3>
-{% endif %}
-
---->
 
 {% for user in user_data %}
 <h2>Pick #1: {{ user.pick1 }}</h2>

@@ -23,10 +23,12 @@ class Command(BaseCommand):
             for player_data in data:
                 # Adjust the fields based on the actual structure of the API response
                 if (player_data['CurrentTeam'] is not None) and ((player_data['Position'] == "RB") or (player_data['Position'] == "WR") or (player_data['Position'] == "TE")):
+                    first_name=player_data['FirstName']  # Replace with the actual field in the API response
+                    last_name=player_data['LastName']
+                    player_name = first_name + " " + last_name 
                     new_player = NFLPlayer(
-                        first_name=player_data['FirstName'],  # Replace with the actual field in the API response
-                        last_name=player_data['LastName'],  # Replace with the actual field in the API response
-                        position=player_data['Position'],
+                        name = player_name,
+                        position =player_data['Position'],
                         team_name = player_data['CurrentTeam'],
                         player_ID = player_data['PlayerID']   # Replace with the actual field in the API response
                     )

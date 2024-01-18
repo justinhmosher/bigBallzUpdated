@@ -42,10 +42,9 @@ class Paid(models.Model):
         return f"{self.username}"
 
 class NFLPlayer(models.Model):
-    first_name = models.CharField(max_length= 100, default = "player first name")
-    last_name = models.CharField(max_length= 100, default = "player last name")
+    name = models.CharField(max_length=100,default = "player name")
     position = models.CharField(max_length= 100, default = "player position name")
     team_name = models.CharField(max_length= 100, default = "player team name")
     player_ID = models.CharField(max_length= 100, default = "player ID")
     def __str__(self):
-        return f"{self.first_name} {self.last_name}"
+        return f"{self.name}"

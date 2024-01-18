@@ -18,7 +18,7 @@ from django.contrib.auth.decorators import login_required
 #from authentication.models import Player
 from django.http import JsonResponse
 from .forms import PlayerSearchForm, Pickform, Pick1Form, CreateTeam
-from .models import Pick,Paid
+from .models import Pick,Paid,NFLPlayer
 from django.db.models import Count,F,ExpressionWrapper,fields
 from datetime import datetime
 from itertools import chain
@@ -28,6 +28,15 @@ from collections import defaultdict
 
 def home(request):
 	return render(request, "authentication/sample.html")
+
+def search(request):
+	if request.method == "POST":
+		search = request.POST.get('searched')
+		players = NFLPlayer.objects.filter(name__contains=search)[:5]
+		return render(request, "authentication/search.html",{'players':players})
+	#selected_player = POST.get('selected_player')
+	else:
+		return render(request, "authentication/search.html")
 
 def signup(request):
 	
@@ -239,60 +248,52 @@ def leaderboard(request):
 @login_required
 def game(request):
 	user_data = Pick.objects.filter(username = request.user.username)
-	form = PlayerSearchForm()
+	user_pick = Pick.objects.get(username = request.user.username)
 	player_data = []
 	error_message = None
-	confirmation_message = None
-	confirmation_message1 = None
 
 	if request.method == 'POST':
-		form = PlayerSearchForm(request.POST)
-		if form.is_valid():
-			searched_name_parts = form.cleaned_data['player_name'].split()
-			searched_first_name = form.cleaned_data['player_name'].split()[0]
-			searched_last_name = searched_name_parts[-1] if len(searched_name_parts) > 1 else None
-			api_key = config('API_SPORTS')  # Replace with your actual API key
-			api_endpoint = 'https://api.sportsdata.io/v3/nfl/scores/json/Players'  # Example endpoint for player data
-			headers = {'Ocp-Apim-Subscription-Key': api_key}
-			params = {'format': 'json'}  # Specify JSON format
-			response = requests.get(api_endpoint, headers=headers, params=params)
-			if response.status_code == 200:
-				try:
-					all_players = response.json()  # Get all players
-					# Filter player data to retrieve name, position, and team
-					player_data = [
-						{'fname': player['FirstName'],'lname' : player['LastName'], 'position': player['Position'], 'team': player['CurrentTeam'], 'ID' : player['PlayerID']} 
-						for player in all_players 
-						if player['FirstName'].split()[0] == searched_first_name and (searched_last_name is None or player['LastName'] == searched_last_name) and ((player['Position'] == "RB") or (player['Position'] == "WR") or (player['Position'] == "TE"))
-					]
-				except requests.exceptions.JSONDecodeError:
-					error_message = 'Error: Unexpected response format or empty response'
-					print(f"Response Content: {response.content}")
+		search = request.POST.get('searched')
+
+		if search is not None:
+			player_data = NFLPlayer.objects.filter(name__contains=search)[:5]
+		
+		selected_player = request.POST.get('selected_player')
+		try:
+			player_data_selected = NFLPlayer.objects.get(name=selected_player)
+		except NFLPlayer.DoesNotExist:
+			player_data_selected = None 
+		try:
+			player_data_pick1 = NFLPlayer.objects.get(name=user_pick.pick1)
+		except NFLPlayer.DoesNotExist:
+			player_data_pick1 = None 
+		try:
+			player_data_pick2 = NFLPlayer.objects.get(name=user_pick.pick2)
+		except NFLPlayer.DoesNotExist:
+			player_data_pick2= None 
+		if selected_player is not None:
+			if user_pick.pick1 == "N/A":
+				if player_data_selected.team_name == player_data_pick2.team_name:
+					messages.error(request,"Selected players cannot be on the same team")
+				else:
+					user_pick.pick1 = selected_player
 			else:
-				error_message = f'Error: Unable to fetch player data. Status code: {response.status_code}. Content: {response.content.decode("utf-8")}'
+				if player_data_selected.team_name == player_data_pick1.team_name:
+					messages.error(request,"Selected players cannot be on the same team")
+				else:
+					user_pick.pick2 = selected_player
+			user_pick.save()
 
-	selected_player = request.POST.get('selected_player')
-	if selected_player is not None:
-		user_pick = Pick.objects.get(username = request.user.username)
-		if user_pick.pick1 == "N/A":
-			user_pick.pick1 = selected_player
-		else:
-			user_pick.pick2 = selected_player
-		user_pick.save()
-
-	change_pick = request.POST.get('change_pick')
-	if change_pick == 'pick1':
-		user_pick = Pick.objects.get(username = request.user.username)
-		user_pick.pick1 = "N/A"
-		user_pick.save()
-	elif change_pick == "pick2":
-		user_pick = Pick.objects.get(username = request.user.username)
-		user_pick.pick2 = "N/A"
-		user_pick.save()
+		change_pick = request.POST.get('change_pick')
+		if change_pick == 'pick1':
+			user_pick.pick1 = "N/A"
+			user_pick.save()
+		elif change_pick == "pick2":
+			user_pick.pick2 = "N/A"
+			user_pick.save()
 
 	return render(request, 'authentication/game.html', 
-		{'form': form, 
-		'player_data': player_data, 
+		{'player_data': player_data, 
 		'error_message': error_message,
 		'user_data' : user_data
 		})
