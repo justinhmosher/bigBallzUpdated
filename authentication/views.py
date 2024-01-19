@@ -34,7 +34,6 @@ def search(request):
 		search = request.POST.get('searched')
 		players = NFLPlayer.objects.filter(name__contains=search)[:5]
 		return render(request, "authentication/search.html",{'players':players})
-	#selected_player = POST.get('selected_player')
 	else:
 		return render(request, "authentication/search.html")
 
@@ -43,8 +42,6 @@ def signup(request):
 	if request.method == "POST":
 
 		username = request.POST.get('username')
-		#fname = request.POST.get('fname')
-		#lname = request.POST.get('lname')
 		email = request.POST.get('email')
 		password1 = request.POST.get('password1')
 		password2 = request.POST.get('password2')
@@ -88,8 +85,6 @@ def signup(request):
 
 			else:
 				myuser = User.objects.create_user(username, email, password1)
-				#myuser.first_name = fname
-				#myuser.last_name = lname
 				myuser.is_active = False
 
 				myuser.save()
@@ -127,17 +122,12 @@ def signup(request):
 		mail_item1.Subject = "Confirm your email for The Big Ballz Leage!"
 		mail_item1.BodyFormat = 1
 		mail_item1.Body = render_to_string('authentication/email_confirmation.html',{
-			#'name' : myuser.first_name,
 			'domain' : current_site.domain,
 			'uid' : urlsafe_base64_encode(force_bytes(myuser.pk)),
 			'token' : generate_token.make_token(myuser),
 			})
 		mail_item1.Sender = "commissioner@bigballzdfsl.com"
 		mail_item1.To = myuser.email
-
-		#email.fail_silently = True
-
-		#mail_item1.Display()
 		mail_item1.Save()
 		mail_item1.Send()
 
@@ -191,6 +181,69 @@ def signout(request):
 	logout(request)
 	messages.success(request, "Logged Out Successfully")
 	return redirect('home')
+
+def forgotPassEmail(request):
+	if request.method == "POST":
+		email = request.POST.get('email')
+
+		if User.objects.get(email=email):
+
+			myuser = User.objects.get(email = email)
+
+			olApp = win32.Dispatch('Outlook.Application',pythoncom.CoInitialize())
+			olNS = olApp.GetNameSpace('MAPI')
+
+			mail_item1 = olApp.createItem(0)
+
+			current_site = get_current_site(request)
+
+			mail_item1.Subject = "Confirm your email for The Big Ballz Leage!"
+			mail_item1.BodyFormat = 1
+			mail_item1.Body = render_to_string('authentication/email_change.html',{
+				'domain' : current_site.domain,
+				'uid' : urlsafe_base64_encode(force_bytes(myuser.pk)),
+				'token' : generate_token.make_token(myuser),
+				})
+
+			mail_item1.Sender = "commissioner@bigballzdfsl.com"
+			mail_item1.To = email
+
+			mail_item1.Display()
+			mail_item1.Save()
+			mail_item1.Send()
+
+			return redirect('signin')
+		else:
+			messages.error(request,"Please provide a valid email")
+
+	return render(request,'authentication/forgotPassEmail.html')
+
+def passreset(request, uidb64, token):
+		try:
+			uid = force_str(urlsafe_base64_decode(uidb64))
+			myuser = User.objects.get(pk=uid)
+		except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+			myuser = None
+		if myuser is not None and generate_token.check_token(myuser,token):
+			email = myuser.email
+			return redirect('passchange',email = email)
+
+def passchange(request,email):
+	if request.method == "POST":
+		myuser = User.objects.get(email = email)
+		pass1 = request.POST.get('password1')
+		pass2 = request.POST.get('password2')
+		if pass1 == pass2:
+
+			myuser.set_password(pass1)
+			myuser.save()
+
+			return redirect('signin')
+		else:
+			messages.error(request,"passwords do not match, try again")
+			return redirect('passchange',email = email)
+	return render(request,'authentication/passchange.html',{'email':email})
+
 
 def activate(request, uidb64, token):
 	try:

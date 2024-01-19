@@ -1,0 +1,7 @@
+<form action="/forgotPassEmail" method="post">
+{% csrf_token %}	
+	<br>
+	<label for="">Email</label>
+	<input type="text" id = "email" name="email" placeholder="Enter Your email" required>
+	<button type="submit">Sign In</button>
+</form>

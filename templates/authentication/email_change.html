@@ -1,0 +1,12 @@
+{% autoescape off %}
+
+I see you forgot your password!
+
+Hello,
+
+To change your password please click this link!
+
+Confirmation Link: http://{{ domain }}{% url 'passreset' uidb64=uid token=token %}
+
+
+{% endautoescape %}
