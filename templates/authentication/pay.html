@@ -7,7 +7,7 @@
     <style>
         body {
             font-family: 'Arial', sans-serif;
-            background-color: #f4f4f4;
+            background-color: #4CAF50; /* Green background color */
             display: flex;
             align-items: center;
             justify-content: center;
@@ -17,11 +17,12 @@
 
         .loading-container {
             text-align: center;
+            color: #fff; /* White text color for better contrast */
         }
 
         .loading-text {
-            font-size: 18px;
-            margin-bottom: 10px;
+            font-size: 30px;
+            margin-bottom: 30px;
         }
 
         .loading-bubbles {
@@ -29,33 +30,46 @@
             margin: 0 auto;
         }
 
-        .loading-bubble {
-            background-color: #3498db;
+        .loading-bubble-left,
+        .loading-bubble-middle,
+        .loading-bubble-right {
+            background-color: #fff; /* Black bubble color */
             border-radius: 50%;
             display: inline-block;
             margin: 0 5px;
-            width: 12px;
-            height: 12px;
-            animation: loading-animation 0.8s infinite ease-in-out;
+            width: 20px;
+            height: 20px;
+            animation: loading-animation 1.5s infinite ease-in-out;
+        }
+
+        .loading-bubble-middle {
+            animation-delay: 0.2s;
+        }
+
+        .loading-bubble-right {
+            animation-delay: 0.4s;
         }
 
         @keyframes loading-animation {
-            0%, 100% {
+            0%, 25% {
                 transform: scale(1);
             }
-            50% {
+            50%, 75% {
                 transform: scale(1.5);
+            }
+            100% {
+                transform: scale(1);
             }
         }
     </style>
 </head>
 <body>
     <div class="loading-container">
-        <p class="loading-text">We are verifying your payment status...</p>
+        <h1 class="loading-text">We are verifying your payment status</h1>
         <div class="loading-bubbles">
-            <div class="loading-bubble"></div>
-            <div class="loading-bubble"></div>
-            <div class="loading-bubble"></div>
+            <div class="loading-bubble-left"></div>
+            <div class="loading-bubble-middle"></div>
+            <div class="loading-bubble-right"></div>
         </div>
     </div>
 </body>

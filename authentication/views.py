@@ -185,7 +185,7 @@ def forgotPassEmail(request):
 	if request.method == "POST":
 		email = request.POST.get('email')
 
-		if User.objects.get(email=email):
+		if User.objects.filter(email=email).exists():
 
 			myuser = User.objects.get(email = email)
 
@@ -211,7 +211,8 @@ def forgotPassEmail(request):
 			mail_item1.Save()
 			mail_item1.Send()
 
-			return redirect('signin')
+			messages.success(request,"We sent password change instructions over email")
+			return redirect('forgotPassEmail')
 		else:
 			messages.error(request,"Please provide a valid email")
 
@@ -231,6 +232,7 @@ def passreset(request, uidb64, token):
 			if pass1 == pass2:
 				myuser.set_password(pass1)
 				myuser.save()
+				print("hi")
 
 				return redirect('signin')
 			else:
@@ -317,9 +319,11 @@ def game(request):
 		try:
 			player_data_pick2 = NFLPlayer.objects.get(name=user_pick.pick2)
 		except NFLPlayer.DoesNotExist:
-			player_data_pick2= None 
+			player_data_pick2 = None 
 		if selected_player is not None:
-			if user_pick.pick1 == "N/A":
+			if user_pick.pick1 == "N/A" and user_pick.pick2 == "N/A":
+				user_pick.pick1 = selected_player
+			elif user_pick.pick1 == "N/A":
 				if player_data_selected.team_name == player_data_pick2.team_name:
 					messages.error(request,"Selected players cannot be on the same team")
 				else:
@@ -361,7 +365,7 @@ def checking(request):
 		else:
 			user_data = Pick.objects.get(username = username)
 			if user_data.isin == True:
-				if current_day in [1,2]:
+				if current_day not in [1,2]:
 					return redirect('game')
 				else:
 					return redirect('leaderboard')
