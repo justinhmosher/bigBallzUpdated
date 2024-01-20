@@ -168,7 +168,6 @@ def signin(request):
 
 		if user is not None:
 			login(request, user)
-			#fname = user.first_name
 			return redirect('checking')
 
 		else:
@@ -219,30 +218,25 @@ def forgotPassEmail(request):
 	return render(request,'authentication/forgotPassEmail.html')
 
 def passreset(request, uidb64, token):
-		try:
-			uid = force_str(urlsafe_base64_decode(uidb64))
-			myuser = User.objects.get(pk=uid)
-		except (TypeError, ValueError, OverflowError, User.DoesNotExist):
-			myuser = None
-		if myuser is not None and generate_token.check_token(myuser,token):
-			email = myuser.email
-			return redirect('passchange',email = email)
+	try:
+		uid = force_str(urlsafe_base64_decode(uidb64))
+		myuser = User.objects.get(pk=uid)
+	except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+		myuser = None
+	if myuser is not None and generate_token.check_token(myuser,token):
 
-def passchange(request,email):
-	if request.method == "POST":
-		myuser = User.objects.get(email = email)
-		pass1 = request.POST.get('password1')
-		pass2 = request.POST.get('password2')
-		if pass1 == pass2:
+		if request.method == "POST":
+			pass1 = request.POST.get('password1')
+			pass2 = request.POST.get('password2')
+			if pass1 == pass2:
+				myuser.set_password(pass1)
+				myuser.save()
 
-			myuser.set_password(pass1)
-			myuser.save()
-
-			return redirect('signin')
-		else:
-			messages.error(request,"passwords do not match, try again")
-			return redirect('passchange',email = email)
-	return render(request,'authentication/passchange.html',{'email':email})
+				return redirect('signin')
+			else:
+				messages.error("Passwors do not match")
+				return redirect('passreset',uidb64=uidb64,token=token)
+	return render(request,'authentication/passreset.html',{'uidb64':uidb64,'token':token})
 
 
 def activate(request, uidb64, token):

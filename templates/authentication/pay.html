@@ -1,1 +1,62 @@
-Please Pay!
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verifying Payment Status</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .loading-container {
+            text-align: center;
+        }
+
+        .loading-text {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .loading-bubbles {
+            display: inline-block;
+            margin: 0 auto;
+        }
+
+        .loading-bubble {
+            background-color: #3498db;
+            border-radius: 50%;
+            display: inline-block;
+            margin: 0 5px;
+            width: 12px;
+            height: 12px;
+            animation: loading-animation 0.8s infinite ease-in-out;
+        }
+
+        @keyframes loading-animation {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.5);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-container">
+        <p class="loading-text">We are verifying your payment status...</p>
+        <div class="loading-bubbles">
+            <div class="loading-bubble"></div>
+            <div class="loading-bubble"></div>
+            <div class="loading-bubble"></div>
+        </div>
+    </div>
+</body>
+</html>

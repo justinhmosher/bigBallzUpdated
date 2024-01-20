@@ -18,6 +18,5 @@ urlpatterns = [
     path('playerboard',views.playerboard,name = 'playerboard'),
     path('search',views.search,name='search'),
     path('forgotPassEmail',views.forgotPassEmail,name='forgotPassEmail'),
-    path('passreset/<uidb64>/<token>',views.passreset,name='passreset'),
-    path('passchange/<str:email>',views.passchange,name='passchange')
+    path('passreset/<uidb64>/<token>',views.passreset,name='passreset')
 ]
