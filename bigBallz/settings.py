@@ -80,10 +80,19 @@ TEMPLATES = [
     },
 ]
 
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR,'authentication/static/')
+]
+STATIC_ROOT = os.path.join(BASE_DIR,'static')
+MEDIA_ROOT = os.path.join(BASE_DIR,'media')
+
 WSGI_APPLICATION = 'bigBallz.wsgi.application'
 
 LOGIN_URL = '/signin'
 LOGOUT_REDIRECT_URL = '/sample'
+STATIC_URL = '/static/'
+MEDIA_URL = '/media/'
+
 
 
 

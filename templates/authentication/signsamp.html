@@ -24,6 +24,7 @@
       justify-content: center;
       align-items: center;
       height: 100vh; /* Set height to 100% of the viewport height for vertical centering */
+      padding-bottom: 100vh;
     }
     /* Custom CSS */
     .btn-submit-container {
@@ -58,7 +59,7 @@
     }
 </style>
 
-
+<div class="text-center">
 {% for message in messages %}
 <div class="alert alert-{{ message.tags }} alert-dismissible fade show d-inline-block" role="alert">
 <strong>Message:</strong> {{ message }}
@@ -67,6 +68,15 @@
 </button>
 </div>
 {% endfor %}
+</div>
+
+{% load static %}
+
+<div class="text-center">
+        <a href="/">
+            <img src="{% static 'words.png' %}" alt="logo"  style="width: auto; height: 300px;" />
+        </a>
+</div>
 
 <div class="center-container">
 <div class="form-container">

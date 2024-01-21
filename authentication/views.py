@@ -26,6 +26,7 @@ from collections import defaultdict
 
 
 
+
 def home(request):
 	return render(request, "authentication/sample.html")
 

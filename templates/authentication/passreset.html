@@ -83,7 +83,7 @@
     }
 </style>
 
-
+<div class="text-center">
 {% for message in messages %}
 <div class="alert alert-{{ message.tags }} alert-dismissible fade show d-inline-block" role="alert">
 <strong>Message:</strong> {{ message }}
@@ -92,6 +92,7 @@
 </button>
 </div>
 {% endfor %}
+</div>
 
 <div class="center-container">
 <div class="form-container">
