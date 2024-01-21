@@ -28,7 +28,7 @@ from collections import defaultdict
 
 
 def home(request):
-	return render(request, "authentication/sample.html")
+	return render(request, "authentication/homepage.html")
 
 def search(request):
 	if request.method == "POST":
