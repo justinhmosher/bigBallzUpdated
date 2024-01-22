@@ -30,6 +30,9 @@ from collections import defaultdict
 def home(request):
 	return render(request, "authentication/homepage.html")
 
+def tournaments(request):
+	return render(request, "authentication/tournaments.html")
+
 def search(request):
 	if request.method == "POST":
 		search = request.POST.get('searched')
