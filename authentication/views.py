@@ -304,6 +304,8 @@ def game(request):
 	user_pick = Pick.objects.get(username = request.user.username)
 	player_data = []
 	error_message = None
+	pick1_data = None
+	pick2_data = None
 
 	if request.method == 'POST':
 		search = request.POST.get('searched')
@@ -347,10 +349,27 @@ def game(request):
 			user_pick.pick2 = "N/A"
 			user_pick.save()
 
+	print(user_pick.pick1)
+
+	if user_pick.pick1 != "N/A":
+		pick1_data = NFLPlayer.objects.filter(name = user_pick.pick1)
+	else:
+		pick1_data = None
+	if user_pick.pick2 != "N/A":
+		pick2_data = NFLPlayer.objects.filter(name = user_pick.pick2)
+	else:
+		pick2_data = None
+
+	print(pick1_data)
+
+
+
 	return render(request, 'authentication/game.html', 
 		{'player_data': player_data, 
 		'error_message': error_message,
-		'user_data' : user_data
+		'user_data' : user_data,
+		'pick1_data':pick1_data,
+		'pick2_data':pick2_data
 		})
 
 @login_required
