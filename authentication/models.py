@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+#from Pillow import ImageTk, Image
 
 class Pick(models.Model):
     your_primary_key = models.AutoField(primary_key=True)

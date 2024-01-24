@@ -388,7 +388,7 @@ def checking(request):
 		else:
 			user_data = Pick.objects.get(username = username)
 			if user_data.isin == True:
-				if current_day not in [1,2]:
+				if current_day in [1,2]:
 					return redirect('game')
 				else:
 					return redirect('leaderboard')
