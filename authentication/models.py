@@ -27,6 +27,7 @@ class NFLPlayer(models.Model):
     team_name = models.CharField(max_length= 100, default = "player team name")
     player_ID = models.CharField(max_length= 100, default = "player ID")
     image = models.ImageField(null = True, blank = True, upload_to='images/')
+    color = models.CharField(max_length=100,default = "#000000")
     def __str__(self):
         return f"{self.name}"
 

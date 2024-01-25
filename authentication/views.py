@@ -23,6 +23,7 @@ from django.db.models import Count,F,ExpressionWrapper,fields
 from datetime import datetime
 from itertools import chain
 from collections import defaultdict
+from datetime import datetime
 
 
 
@@ -378,8 +379,11 @@ def checking(request):
 		new_user = Paid(username = request.user.username)
 		new_user.save()
 	paid = Paid.objects.get(username = request.user.username)
+	current_month = datetime.now().month
 	if paid.paid_status == False:
 		return render(request,'authentication/pay.html')
+	elif (paid.paid_status == True) and ((current_month < 9) and (current_month > 3)):
+		return render(request,'authentication/waiting.html')
 	else:
 		username = request.user.username
 		current_day = datetime.now().weekday()
@@ -393,4 +397,7 @@ def checking(request):
 				else:
 					return redirect('leaderboard')
 			else:
-				return redirect('playerboard')
+				if current_day in [1,2]:
+					return render(request,'authentication/picking.html')
+				else:
+					return redirect('playerboard')

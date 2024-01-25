@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verifying Payment Status</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #ffffff; /* Green background color */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .loading-container {
+            text-align: center;
+            color: #000000; /* White text color for better contrast */
+        }
+
+        .loading-text {
+            font-size: 30px;
+            margin-bottom: 30px;
+        }
+
+        .loading-bubbles {
+            display: inline-block;
+            margin: 0 auto;
+        }
+
+        .loading-bubble-left,
+        .loading-bubble-middle,
+        .loading-bubble-right {
+            background-color: #000000; /* Black bubble color */
+            border-radius: 50%;
+            display: inline-block;
+            margin: 0 5px;
+            width: 20px;
+            height: 20px;
+            animation: loading-animation 1.5s infinite ease-in-out;
+        }
+
+        .loading-bubble-middle {
+            animation-delay: 0.2s;
+        }
+
+        .loading-bubble-right {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes loading-animation {
+            0%, 25% {
+                transform: scale(1);
+            }
+            50%, 75% {
+                transform: scale(1.5);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-container">
+        <h1 class="loading-text">Thank you for joining the league!</h1>
+        <h1 class="loading-text">Please come back the Tuesday before week 1 to select your picks!</h1>
+        <br>
+        <br>
+        <div class="loading-bubbles">
+            <div class="loading-bubble-left"></div>
+            <div class="loading-bubble-middle"></div>
+            <div class="loading-bubble-right"></div>
+        </div>
+    </div>
+</body>
+</html>

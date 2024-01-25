@@ -235,14 +235,14 @@
 --->
     <svg class="bd-placeholder-img card-img-top" width="100%" height="225" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: Thumbnail" preserveAspectRatio="xMidYMid slice" focusable="false">
         <text fill="#000000">{{ pick.name }}</text>
-        <rect width="100%" height="100%" fill="#d9d9d9"/>
-        <text x="50%" y="50%" fill="#000000" dy=".3em" text-anchor="middle" font-size="25">
+        <rect width="100%" height="100%" fill='{{ pick.color }}'/>
+        <text x="50%" y="50%" fill="#ffffff" dy=".3em" text-anchor="middle" font-size="25">
             {{ pick.name }}
         </text>
 <!--
         <image href="{% static 'Ravens.png' %}" x="50%" y="20%" height="100px" width="100px" transform="translate(-40, 15)"/>
 --->
-        <text x="50%" y="75%" fill="#000000" dy=".3em" text-anchor="middle">
+        <text x="50%" y="75%" fill="#ffffff" dy=".3em" text-anchor="middle">
             <tspan>{{ pick.position }}</tspan> - <tspan>{{ pick.team_name }}</tspan>
         </text>
     </svg>
@@ -264,15 +264,15 @@
         {% else %}
         {% for pick in pick2_data %}
     <svg class="bd-placeholder-img card-img-top" width="100%" height="225" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: Thumbnail" preserveAspectRatio="xMidYMid slice" focusable="false">
-        <text fill="#000000">{{ pick.name }}</text>
-        <rect width="100%" height="100%" fill="#d9d9d9"/>
-        <text x="50%" y="50%" fill="#000000" dy=".3em" text-anchor="middle" font-size="25">
+        <text fill="#ffffff">{{ pick.name }}</text>
+        <rect width="100%" height="100%" fill='{{ pick.color }}'/>
+        <text x="50%" y="50%" fill="#ffffff" dy=".3em" text-anchor="middle" font-size="25">
             {{ pick.name }}
         </text>
 <!--
         <image href="{% static 'Ravens.png' %}" x="50%" y="20%" height="100px" width="100px" transform="translate(-40, 15)"/>
 --->
-        <text x="50%" y="75%" fill="#000000" dy=".3em" text-anchor="middle">
+        <text x="50%" y="75%" fill="#ffffff" dy=".3em" text-anchor="middle">
             <tspan>{{ pick.position }}</tspan> - <tspan>{{ pick.team_name }}</tspan>
         </text>
     </svg>
