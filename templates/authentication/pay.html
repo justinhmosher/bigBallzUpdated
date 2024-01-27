@@ -49,6 +49,16 @@
         .loading-bubble-right {
             animation-delay: 0.4s;
         }
+        .top-left {
+        padding-left: 5vh;
+        padding-top: 3vh;
+        }
+     .image-boarder {
+        width: auto;
+        height: 50px;
+        border: 2px solid black;
+        border-radius: 10px;
+        }
 
         @keyframes loading-animation {
             0%, 25% {
@@ -64,6 +74,11 @@
     </style>
 </head>
 <body>
+    <div class="top-left">
+        <a href="{% url 'signout' %}">
+        <img src="{% static 'home.png' %}" alt="logo" class="image-boarder">
+        </a>
+    </div>
     <div class="loading-container">
         <h1 class="loading-text">We are verifying your payment status</h1>
         <div class="loading-bubbles">

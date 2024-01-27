@@ -35,9 +35,25 @@
     top: 0;
     /*background-color: #fff;  Ensure the header background isn't transparent */
     }
+    .top-left {
+        padding-left: 5vh;
+        padding-top: 3vh;
+    }
+     .image-boarder {
+        width: auto;
+        height: 50px;
+        border: 2px solid black;
+        border-radius: 10px;
+     }
 
 
 </style>
+
+    <div class="top-left">
+        <a href="{% url '' %}">
+        <img src="{% static 'signout.png' %}" alt="logo" class="image-boarder">
+        </a>
+    </div>
 
 <br>
 <br>

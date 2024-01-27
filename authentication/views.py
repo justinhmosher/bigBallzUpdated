@@ -18,7 +18,7 @@ from django.contrib.auth.decorators import login_required
 #from authentication.models import Player
 from django.http import JsonResponse
 from .forms import PlayerSearchForm, Pickform, Pick1Form, CreateTeam
-from .models import Pick,Paid,NFLPlayer
+from .models import Pick,Paid,NFLPlayer,Week
 from django.db.models import Count,F,ExpressionWrapper,fields
 from datetime import datetime
 from itertools import chain
@@ -363,8 +363,6 @@ def game(request):
 
 	print(pick1_data)
 
-
-
 	return render(request, 'authentication/game.html', 
 		{'player_data': player_data, 
 		'error_message': error_message,
@@ -379,7 +377,10 @@ def checking(request):
 		new_user = Paid(username = request.user.username)
 		new_user.save()
 	paid = Paid.objects.get(username = request.user.username)
+	count = Pick.objects.filter(isin=True).count()
 	current_month = datetime.now().month
+	week = Week.objects.first()
+	week = week.week
 	if paid.paid_status == False:
 		return render(request,'authentication/pay.html')
 	elif (paid.paid_status == True) and ((current_month < 9) and (current_month > 3)):
@@ -392,8 +393,11 @@ def checking(request):
 		else:
 			user_data = Pick.objects.get(username = username)
 			if user_data.isin == True:
-				if current_day in [1,2]:
+				if current_day not in [1,2] and count > 1 and week != 23:
 					return redirect('game')
+				elif count == 1 or week == 23:
+					winners = Pick.objects.filter(isin=True)
+					return render(request,'authentication/win.html',{'winners':winners})
 				else:
 					return redirect('leaderboard')
 			else:

@@ -93,6 +93,16 @@
         white-space: nowrap;
         -webkit-overflow-scrolling: touch;
       }
+      .top-left {
+        padding-left: 5vh;
+        padding-top: 3vh;
+    }
+     .image-boarder {
+        width: auto;
+        height: 50px;
+        border: 2px solid black;
+        border-radius: 10px;
+     }
 
       .btn-bd-primary {
         --bd-violet-bg: #712cf9;
@@ -185,6 +195,13 @@
 
 <main>
 {% load static %}
+
+
+    <div class="top-left">
+        <a href="{% url 'signout' %}">
+        <img src="{% static 'signout.png' %}" alt="logo" class="image-boarder">
+        </a>
+    </div>
 
   <section class="py-5 text-center container">
     <div class="row py-lg-5">
