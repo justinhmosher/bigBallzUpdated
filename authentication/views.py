@@ -385,10 +385,9 @@ def checking(request):
 	end_date = dates.endDate
 	week = Week.objects.first()
 	week = week.week
-	print(current_day)
-	print(start_date)
-	print(end_date)
-	if paid.paid_status == False:
+	if paid.paid_status == False and (start_date <= current_day < end_date):
+		return render(request,'authentication/inplay.html')
+	elif paid.paid_status == False:
 		return render(request,'authentication/pay.html')
 	elif (paid.paid_status == True) and not (start_date <= current_day < end_date):
 		#((current_day > start_date) and (current_day < end_date)):
