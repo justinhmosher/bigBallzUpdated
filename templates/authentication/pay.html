@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Verifying Payment Status</title>
@@ -50,9 +49,12 @@
             animation-delay: 0.4s;
         }
         .top-left {
-        padding-left: 5vh;
-        padding-top: 3vh;
+            position: absolute; /* Change from padding to absolute positioning */
+            top: 0; /* Align to the top edge */
+            left: 0; /* Align to the left edge */
+            padding: 20px; /* Add some padding to move it slightly from the very edge */
         }
+
      .image-boarder {
         width: auto;
         height: 50px;
@@ -72,10 +74,9 @@
             }
         }
     </style>
-</head>
-<body>
+{% load static %}
     <div class="top-left">
-        <a href="{% url 'signout' %}">
+        <a href="tournaments">
         <img src="{% static 'home.png' %}" alt="logo" class="image-boarder">
         </a>
     </div>
@@ -87,5 +88,5 @@
             <div class="loading-bubble-right"></div>
         </div>
     </div>
-</body>
+
 </html>

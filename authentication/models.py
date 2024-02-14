@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from datetime import date
 #from Pillow import ImageTk, Image
 
 class Pick(models.Model):
@@ -30,6 +31,13 @@ class NFLPlayer(models.Model):
     color = models.CharField(max_length=100,default = "#000000")
     def __str__(self):
         return f"{self.name}"
+
+class Date(models.Model):
+    sport = models.CharField(max_length=100,default = "type a sport")
+    startDate = models.DateField(default=date.today)
+    endDate = models.DateField(default=date.today)
+    def __str__(self):
+        return f"{self.sport}"
 
 class Week(models.Model):
     week = models.IntegerField(default = 1)

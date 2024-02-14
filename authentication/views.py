@@ -18,12 +18,13 @@ from django.contrib.auth.decorators import login_required
 #from authentication.models import Player
 from django.http import JsonResponse
 from .forms import PlayerSearchForm, Pickform, Pick1Form, CreateTeam
-from .models import Pick,Paid,NFLPlayer,Week
+from .models import Pick,Paid,NFLPlayer,Week,Date
 from django.db.models import Count,F,ExpressionWrapper,fields
 from datetime import datetime
 from itertools import chain
 from collections import defaultdict
 from datetime import datetime
+from django.utils import timezone
 
 
 
@@ -173,7 +174,7 @@ def signin(request):
 
 		if user is not None:
 			login(request, user)
-			return redirect('checking')
+			return render(request,'authentication/tournaments.html')
 
 		else:
 			messages.error(request, "Bad Credentials!")
@@ -378,13 +379,20 @@ def checking(request):
 		new_user.save()
 	paid = Paid.objects.get(username = request.user.username)
 	count = Pick.objects.filter(isin=True).count()
-	current_month = datetime.now().month
+	current_day = timezone.now().date()
+	dates = Date.objects.get(sport = "Football")
+	start_date = dates.startDate
+	end_date = dates.endDate
 	week = Week.objects.first()
 	week = week.week
+	print(current_day)
+	print(start_date)
+	print(end_date)
 	if paid.paid_status == False:
 		return render(request,'authentication/pay.html')
-	elif (paid.paid_status == True) and ((current_month < 9) and (current_month > 3)):
-		return render(request,'authentication/waiting.html')
+	elif (paid.paid_status == True) and not (start_date <= current_day < end_date):
+		#((current_day > start_date) and (current_day < end_date)):
+		return render(request,'authentication/waiting.html',{'start_date':start_date})
 	else:
 		username = request.user.username
 		current_day = datetime.now().weekday()

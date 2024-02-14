@@ -50,8 +50,10 @@
             animation-delay: 0.4s;
         }
         .top-left {
-        padding-left: 5vh;
-        padding-top: 3vh;
+            position: absolute; /* Change from padding to absolute positioning */
+            top: 0; /* Align to the top edge */
+            left: 0; /* Align to the left edge */
+            padding: 20px; /* Add some padding to move it slightly from the very edge */
         }
      .image-boarder {
         width: auto;
@@ -73,8 +75,9 @@
         }
     </style>
 </head>
+{% load static %}
     <div class="top-left">
-        <a href="{% url 'signout' %}">
+        <a href="tournaments">
         <img src="{% static 'home.png' %}" alt="logo" class="image-boarder">
         </a>
     </div>
@@ -82,7 +85,7 @@
 <body>
     <div class="loading-container">
         <h1 class="loading-text">Thank you for joining the league!</h1>
-        <h1 class="loading-text">Please come back the Tuesday before week 1 to select your picks!</h1>
+        <h1 class="loading-text">Please come back {{ start_date }} to select your picks!</h1>
         <br>
         <br>
         <div class="loading-bubbles">

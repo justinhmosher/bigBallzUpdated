@@ -1,4 +1,3 @@
-# yourapp/management/commands/fetch_books.py
 import requests
 from django.core.management.base import BaseCommand
 from authentication.models import NFLPlayer

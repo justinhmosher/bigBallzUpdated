@@ -1,3 +1,4 @@
+<!--
 {% for message in messages %}
 <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
 <strong>Message:</strong> {{ message }}
@@ -15,7 +16,7 @@
 
 <h2>Submit a Team Name</h2>
 
-<form action="{% url 'teamname' %}" method="post">  <!-- Replace 'teamname' with your actual view name or URL -->
+<form action="{% url 'teamname' %}" method="post">  Replace 'teamname' with your actual view name or URL
     {% csrf_token %}
     <label for="teamName">Team Name:</label><br>
     <input type="text" id="teamName" name="team_name"><br><br>
@@ -23,3 +24,102 @@
 </form>
 
 </body>
+--->
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+<style type="text/css">
+    .custom-width {
+      width: 300px; /* Adjust the width as desired */
+    }
+    .custom-padding {
+      padding-left: 50px;
+      box-sizing: border-box; /* Adjust the left padding as desired */
+    }
+    /* Custom CSS */
+    .custom-input {
+      padding-left: 10px; /* Adjust the padding as desired */
+      padding-right: 10px; /* Adjust the padding as desired */
+    }
+    /* Custom CSS */
+    .outer-padding {
+      padding-left: 50px; /* Adjust the padding-left as desired */
+      padding-right: 20px; /* Adjust the padding-right as desired */
+      padding-top: 50px;
+    }
+    .center-container {
+      display: flex;
+      justify-content: center;
+      align-items: flex-state;
+      height: 100vh; /* Set height to 100% of the viewport height for vertical centering */
+      padding-bottom: 100vh;
+    }
+    /* Custom CSS */
+    .btn-submit-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+       /* Set the height of the container */
+    }
+
+    .btn-submit {
+      display: block;
+      margin: auto; /* No margin on top and bottom, 0 on left and right */
+      width: 200px; /* Set the desired width */ /* Set the desired width */
+    }
+    .form-container {
+      background-color: #f0f0f0; /* Grey background color */
+      border-radius: 10px; /* Rounded corners */
+      /*padding: 20px;  Add padding inside the container */
+      width: 400px; /* Set the desired width */
+      height: 300px; /* Set the desired height */
+      margin: auto; /* Center the container horizontally */
+    }
+    .alert-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh; /* Set the height to the viewport height for vertical centering */
+    }
+    .sign-up-text{
+     align-items: center;
+    }
+</style>
+
+<div class="text-center">
+{% for message in messages %}
+<div class="alert alert-{{ message.tags }} alert-dismissible fade show d-inline-block" role="alert">
+<strong>Message:</strong> {{ message }}
+<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+<span aria-hidden="true">&times;</span>
+</button>
+</div>
+{% endfor %}
+</div>
+
+{% load static %}
+
+<div class="text-center">
+        <a href="#">
+            <img src="{% static 'words.png' %}" alt="logo"  style="width: auto; height: 265px;" />
+        </a>
+</div>
+
+<div class="center-container">
+<div class="form-container">
+<div class="outer-padding">
+<div class="text-center">
+<h2>Enter Team Name</h2>
+</div>
+<form action="{% url 'teamname' %}" method="post">
+{% csrf_token %}  
+  <div class="mb-3">
+    <label class="form-label">Team Name</label>
+    <input type="text" class="form-control custom-width" id="teamName" name="team_name">
+  </div>
+  <button type="submit" class="btn btn-primary btn-submit">Submit</button>
+</form>
+</div>
+</div>
+</div>
