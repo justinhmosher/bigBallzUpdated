@@ -61,6 +61,9 @@
         border: 2px solid black;
         border-radius: 10px;
         }
+    .center-box{
+        margin-top: 80px;
+    }
 
         @keyframes loading-animation {
             0%, 25% {
@@ -80,13 +83,23 @@
         <img src="{% static 'home.png' %}" alt="logo" class="image-boarder">
         </a>
     </div>
+    <br>
+    <br>
+    <br>
     <div class="loading-container">
+    <div class="center-box">
         <h1 class="loading-text">We are verifying your payment status</h1>
         <div class="loading-bubbles">
             <div class="loading-bubble-left"></div>
             <div class="loading-bubble-middle"></div>
             <div class="loading-bubble-right"></div>
         </div>
+    </div>
+        <br>
+        <br>
+        <h3>Please Venmo @justinmosher ${{ amount }}</h3>
+        <br>
+        <h5>You selected {{ num }} teams ($50 per team).  To change amount, <a href="teamcount">Click Here.</a></h5>
     </div>
 
 </html>

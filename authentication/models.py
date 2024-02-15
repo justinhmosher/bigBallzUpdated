@@ -6,10 +6,10 @@ from datetime import date
 class Pick(models.Model):
     your_primary_key = models.AutoField(primary_key=True)
     team_name = models.CharField(max_length = 100, default='Default Team Name')
+    teamnumber = models.IntegerField(default=1)
     username = models.CharField(max_length = 100, default = "username")
     email = models.EmailField(max_length = 100, default = "useremail@gamil.com")
     isin = models.BooleanField(default = True)
-    week = models.IntegerField(default = 1)
     pick1 = models.CharField(max_length = 100, default = "N/A")
     pick2 = models.CharField(max_length = 100, default = "N/A")
     def __str__(self):
@@ -19,6 +19,7 @@ class Paid(models.Model):
     your_primary_key = models.AutoField(primary_key=True)
     username = models.CharField(max_length = 100, default = "username")
     paid_status = models.BooleanField(default = False)
+    numteams = models.IntegerField(default = 0)
     def __str__(self):
         return f"{self.username}"
 

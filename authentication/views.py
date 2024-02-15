@@ -238,7 +238,6 @@ def passreset(request, uidb64, token):
 			if pass1 == pass2:
 				myuser.set_password(pass1)
 				myuser.save()
-				print("hi")
 
 				return redirect('signin')
 			else:
@@ -280,6 +279,23 @@ def playerboard(request):
 	total_in = Pick.objects.filter(isin = True).count()
 
 	return render(request,'authentication/playerboard.html',{'player_counts':sorted_player_counts,'total_in':total_in})
+
+@login_required
+def teamcount(request):
+	team = Paid.objects.get(username = request.user.username)
+	if request.method == 'POST':
+		num_teams = request.POST.get('num_teams')
+		if int(num_teams) > 20:
+			messages.error(request,'Maximum of 20 teams allowed')
+			return redirect('teamcount')
+		elif int(num_teams) < 1:
+			messages.error(request,'Minimum of 1 team')
+			return redirect('teamcount')
+		else:
+			team.numteams = num_teams
+			team.save()
+			return redirect('checking')
+	return render(request,'authentication/teamcount.html')
 
 @login_required
 def leaderboard(request):
@@ -351,7 +367,6 @@ def game(request):
 			user_pick.pick2 = "N/A"
 			user_pick.save()
 
-	print(user_pick.pick1)
 
 	if user_pick.pick1 != "N/A":
 		pick1_data = NFLPlayer.objects.filter(name = user_pick.pick1)
@@ -362,7 +377,6 @@ def game(request):
 	else:
 		pick2_data = None
 
-	print(pick1_data)
 
 	return render(request, 'authentication/game.html', 
 		{'player_data': player_data, 
@@ -387,10 +401,12 @@ def checking(request):
 	week = week.week
 	if paid.paid_status == False and (start_date <= current_day < end_date):
 		return render(request,'authentication/inplay.html')
+	elif paid.paid_status == False and paid.numteams == 0:
+		return redirect('teamcount')
 	elif paid.paid_status == False:
-		return render(request,'authentication/pay.html')
+		amount = paid.numteams * 50
+		return render(request,'authentication/pay.html',{'num':paid.numteams,'amount':amount})
 	elif (paid.paid_status == True) and not (start_date <= current_day < end_date):
-		#((current_day > start_date) and (current_day < end_date)):
 		return render(request,'authentication/waiting.html',{'start_date':start_date})
 	else:
 		username = request.user.username

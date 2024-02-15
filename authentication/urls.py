@@ -21,5 +21,6 @@ urlpatterns = [
     path('search',views.search,name='search'),
     path('forgotPassEmail',views.forgotPassEmail,name='forgotPassEmail'),
     path('passreset/<uidb64>/<token>',views.passreset,name='passreset'),
-    path('tournaments',views.tournaments,name='tournaments')
+    path('tournaments',views.tournaments,name='tournaments'),
+    path('teamcount',views.teamcount,name='teamcount')
 ]+static(settings.MEDIA_URL,document_root = settings.MEDIA_ROOT)

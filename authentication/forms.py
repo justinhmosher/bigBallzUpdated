@@ -8,7 +8,7 @@ class PlayerSearchForm(forms.Form):
 class Pickform(forms.ModelForm):
     class Meta:
         model = Pick
-        fields = ['team_name','isin','week','pick1','pick2']
+        fields = ['team_name','isin','pick1','pick2']
 
 class Pick1Form(forms.ModelForm):
     class Meta:
