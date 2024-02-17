@@ -332,7 +332,6 @@ def game(request):
 	user_data = Pick.objects.filter(username = request.user.username)
 	user_pick_data = Pick.objects.filter(username = request.user.username,isin = True)
 	player_data = []
-	error_message = None
 	pick1_data = None
 	pick2_data = None
 
@@ -354,12 +353,10 @@ def game(request):
 				messages.error(request,"Selected players cannot be on the same team")
 
 		change_pick = request.POST.get('change_pick','{}')
-		print("Raw JSON string:", change_pick)
 		try:
 			data = json.loads(change_pick)
 			pick = data.get('pick')
 			team = data.get('team')
-			# Use team or another identifier to find the correct pick to modify
 			for user_pick in user_pick_data.filter(teamnumber=team):
 				if pick == 'pick1':
 					user_pick.pick1 = "N/A"
@@ -380,7 +377,6 @@ def game(request):
 
 	return render(request, 'authentication/game.html', 
 		{'player_data': player_data, 
-		'error_message': error_message,
 		'user_pick_data' : user_pick_data
 		})
 
