@@ -11,7 +11,15 @@ class Pick(models.Model):
     email = models.EmailField(max_length = 100, default = "useremail@gamil.com")
     isin = models.BooleanField(default = True)
     pick1 = models.CharField(max_length = 100, default = "N/A")
+    pick1_team = models.CharField(max_length = 100, default = "N/A")
+    pick1_position = models.CharField(max_length = 100, default = "N/A")
+    pick1_color = models.CharField(max_length = 100, default = "N/A")
+    pick1_player_ID = models.CharField(max_length= 100, default = "player ID")
     pick2 = models.CharField(max_length = 100, default = "N/A")
+    pick2_team = models.CharField(max_length = 100, default = "N/A")
+    pick2_position = models.CharField(max_length = 100, default = "N/A")
+    pick2_color = models.CharField(max_length = 100, default = "N/A")
+    pick2_player_ID = models.CharField(max_length= 100, default = "player ID")
     def __str__(self):
         return f"{self.team_name}"
 

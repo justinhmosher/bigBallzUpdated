@@ -25,6 +25,7 @@ from itertools import chain
 from collections import defaultdict
 from datetime import datetime
 from django.utils import timezone
+import json
 
 
 
@@ -141,6 +142,7 @@ def signup(request):
 
 	return render(request,"authentication/signsamp.html")
 
+@login_required
 def teamname(request):
 
 	if request.method == "POST":
@@ -155,8 +157,16 @@ def teamname(request):
 				messages.error(request,"Team name need to be between 5-14 characters")
 				return redirect("teamname")
 			else:
+				paid = Paid.objects.get(username = request.user.username)
+				teamcount = paid.numteams
+				for i in range(teamcount):
+					new_pick = Pick(team_name=team_name,username= request.user.username,teamnumber = i+1)
+					new_pick.save()
+				"""
 				new_pick = Pick(team_name=team_name,username= request.user.username)
 				new_pick.save()
+				return redirect('checking')
+				"""
 				return redirect('checking')
 		else:
 			messages.error(request,"Please submit a valid teamname")
@@ -316,10 +326,11 @@ def leaderboard(request):
 
 	return render(request,'authentication/leaderboard.html',{'player_counts':sorted_player_counts,'total_in':total_in, 'user_data':user_data})
 
+
 @login_required
 def game(request):
 	user_data = Pick.objects.filter(username = request.user.username)
-	user_pick = Pick.objects.get(username = request.user.username)
+	user_pick_data = Pick.objects.filter(username = request.user.username,isin = True)
 	player_data = []
 	error_message = None
 	pick1_data = None
@@ -335,56 +346,112 @@ def game(request):
 		try:
 			player_data_selected = NFLPlayer.objects.get(name=selected_player)
 		except NFLPlayer.DoesNotExist:
-			player_data_selected = None 
+			player_data_selected = None
+			messages.error(request, "Selected player does not exist.")
+		if player_data_selected is not None:
+			num = game_search(request.user.username,player_data_selected)
+			if num == 1:
+				messages.error(request,"Selected players cannot be on the same team")
+
+		change_pick = request.POST.get('change_pick','{}')
+		print("Raw JSON string:", change_pick)
 		try:
-			player_data_pick1 = NFLPlayer.objects.get(name=user_pick.pick1)
-		except NFLPlayer.DoesNotExist:
-			player_data_pick1 = None 
-		try:
-			player_data_pick2 = NFLPlayer.objects.get(name=user_pick.pick2)
-		except NFLPlayer.DoesNotExist:
-			player_data_pick2 = None 
-		if selected_player is not None:
-			if user_pick.pick1 == "N/A" and user_pick.pick2 == "N/A":
-				user_pick.pick1 = selected_player
-			elif user_pick.pick1 == "N/A":
-				if player_data_selected.team_name == player_data_pick2.team_name:
-					messages.error(request,"Selected players cannot be on the same team")
-				else:
-					user_pick.pick1 = selected_player
-			else:
-				if player_data_selected.team_name == player_data_pick1.team_name:
-					messages.error(request,"Selected players cannot be on the same team")
-				else:
-					user_pick.pick2 = selected_player
-			user_pick.save()
-
-		change_pick = request.POST.get('change_pick')
-		if change_pick == 'pick1':
-			user_pick.pick1 = "N/A"
-			user_pick.save()
-		elif change_pick == "pick2":
-			user_pick.pick2 = "N/A"
-			user_pick.save()
-
-
-	if user_pick.pick1 != "N/A":
-		pick1_data = NFLPlayer.objects.filter(name = user_pick.pick1)
-	else:
-		pick1_data = None
-	if user_pick.pick2 != "N/A":
-		pick2_data = NFLPlayer.objects.filter(name = user_pick.pick2)
-	else:
-		pick2_data = None
-
+			data = json.loads(change_pick)
+			pick = data.get('pick')
+			team = data.get('team')
+			# Use team or another identifier to find the correct pick to modify
+			for user_pick in user_pick_data.filter(teamnumber=team):
+				if pick == 'pick1':
+					user_pick.pick1 = "N/A"
+					user_pick.pick1_team = "N/A"
+					user_pick.pick1_position = "N/A" 
+					user_pick.pick1_color = "N/A"
+					user_pick.pick1_player_ID = "N/A"
+				elif pick == "pick2":
+					user_pick.pick2 = "N/A"
+					user_pick.pick2 = "N/A"
+					user_pick.pick2_team = "N/A"
+					user_pick.pick2_position = "N/A" 
+					user_pick.pick2_color = "N/A"
+					user_pick.pick2_player_ID = "N/A"
+				user_pick.save()
+		except json.JSONDecodeError:
+			messages.error(request, "Invalid change pick data.")
 
 	return render(request, 'authentication/game.html', 
 		{'player_data': player_data, 
 		'error_message': error_message,
-		'user_data' : user_data,
-		'pick1_data':pick1_data,
-		'pick2_data':pick2_data
+		'user_pick_data' : user_pick_data
 		})
+
+def game_search(username,playerdata):
+	user_pick_data = Pick.objects.filter(username = username,isin = True)
+	for pick in user_pick_data:
+		if pick.pick1 == 'N/A':
+			try:
+				player_data_pick2 = NFLPlayer.objects.get(name=pick.pick2)
+				if player_data_pick2.team_name == playerdata.team_name:
+					return 1
+				else:
+					pick.pick1 = playerdata.name
+					pick.pick1_team = playerdata.team_name
+					pick.pick1_position = playerdata.position 
+					pick.pick1_color = playerdata.color
+					pick.pick1_player_ID = playerdata.player_ID
+					pick.save()
+					break
+			except NFLPlayer.DoesNotExist:
+				pick.pick1 = playerdata.name
+				pick.pick1_team = playerdata.team_name
+				pick.pick1_position = playerdata.position
+				pick.pick1_color = playerdata.color
+				pick.pick1_player_ID = playerdata.player_ID
+				pick.save()
+				break
+		elif pick.pick2 == 'N/A':
+			try:
+				player_data_pick1 = NFLPlayer.objects.get(name=pick.pick1)
+				if player_data_pick1.team_name == playerdata.team_name:
+					return 1
+				else:
+					pick.pick2 = playerdata.name
+					pick.pick2_team = playerdata.team_name
+					pick.pick2_position = playerdata.position
+					pick.pick2_color = playerdata.color
+					pick.pick2_player_ID = playerdata.player_ID
+					pick.save()
+					break
+			except NFLPlayer.DoesNotExist:
+				pick.pick2 = playerdata.name
+				pick.pick2_team = playerdata.team_name
+				pick.pick2_position = playerdata.position
+				pick.pick2_color = playerdata.color
+				pick.pick2_player_ID = playerdata.player_ID
+				pick.save()
+				break
+	for pick in user_pick_data:
+		try:
+			player_data_pick2 = NFLPlayer.objects.get(name=pick.pick2)
+			if player_data_pick2.team_name == playerdata.team_name:
+				return 1
+			else:
+				pick.pick1 = playerdata.name
+				pick.pick1_team = playerdata.team_name
+				pick.pick1_position = playerdata.position 
+				pick.pick1_color = playerdata.color
+				pick.pick1_player_ID = playerdata.player_ID
+				pick.save()
+				break
+		except NFLPlayer.DoesNotExist:
+				pick.pick1 = playerdata.name
+				pick.pick1_team = playerdata.team_name
+				pick.pick1_position = playerdata.position
+				pick.pick1_color = playerdata.color
+				pick.pick1_player_ID = playerdata.player_ID
+				pick.save()
+				break
+	return 2
+
 
 @login_required
 def checking(request):
@@ -392,6 +459,7 @@ def checking(request):
 		new_user = Paid(username = request.user.username)
 		new_user.save()
 	paid = Paid.objects.get(username = request.user.username)
+	#pick = Pick.objects.get(username = request.user.username)
 	count = Pick.objects.filter(isin=True).count()
 	current_day = timezone.now().date()
 	dates = Date.objects.get(sport = "Football")
@@ -414,8 +482,12 @@ def checking(request):
 		if not Pick.objects.filter(username = username).exists():
 			return redirect('teamname')
 		else:
-			user_data = Pick.objects.get(username = username)
-			if user_data.isin == True:
+			user_data = Pick.objects.filter(username = username)
+			count_ins = 0
+			for i in user_data:
+				if i.isin == True:
+					count_ins +=1
+			if count_ins >= 1:
 				if current_day not in [1,2] and count > 1 and week != 23:
 					return redirect('game')
 				elif count == 1 or week == 23:
