@@ -162,11 +162,6 @@ def teamname(request):
 				for i in range(teamcount):
 					new_pick = Pick(team_name=team_name,username= request.user.username,teamnumber = i+1)
 					new_pick.save()
-				"""
-				new_pick = Pick(team_name=team_name,username= request.user.username)
-				new_pick.save()
-				return redirect('checking')
-				"""
 				return redirect('checking')
 		else:
 			messages.error(request,"Please submit a valid teamname")
@@ -184,7 +179,7 @@ def signin(request):
 
 		if user is not None:
 			login(request, user)
-			return render(request,'authentication/tournaments.html')
+			return redirect(tournaments)
 
 		else:
 			messages.error(request, "Bad Credentials!")
@@ -322,10 +317,18 @@ def leaderboard(request):
 	
 	total_in = Pick.objects.filter(isin = True).count()
 
-	user_data = Pick.objects.get(username = request.user.username)
+	user_data = Pick.objects.filter(username = request.user.username, isin = True)
 
 	return render(request,'authentication/leaderboard.html',{'player_counts':sorted_player_counts,'total_in':total_in, 'user_data':user_data})
 
+def tournaments(request):
+	dates = Date.objects.get(sport = "Football")
+	start_date = dates.startDate
+	today = datetime.now().date()
+	days_until_start = (start_date - today).days
+	print(days_until_start)
+
+	return render(request,'authentication/tournaments.html',{'days':days_until_start})
 
 @login_required
 def game(request):
@@ -379,6 +382,7 @@ def game(request):
 		{'player_data': player_data, 
 		'user_pick_data' : user_pick_data
 		})
+
 
 def game_search(username,playerdata):
 	user_pick_data = Pick.objects.filter(username = username,isin = True)
@@ -484,7 +488,7 @@ def checking(request):
 				if i.isin == True:
 					count_ins +=1
 			if count_ins >= 1:
-				if current_day not in [1,2] and count > 1 and week != 23:
+				if current_day in [1,2] and count > 1 and week != 23:
 					return redirect('game')
 				elif count == 1 or week == 23:
 					winners = Pick.objects.filter(isin=True)

@@ -23,7 +23,7 @@
       justify-content: center;
       align-items: flex-state;
       padding-bottom: 7vh;
-      padding-top: 7vh;
+      padding-top: 3vh;
     }
     .scrollable-table {
     display: block;
@@ -45,21 +45,35 @@
         border: 2px solid black;
         border-radius: 10px;
      }
+     .span-container{
+        padding-left: 10vh;
+        padding-right: 10vh;
+     }
 
 
 </style>
 {% load static %}
 
     <div class="top-left">
-        <a href="{% url 'signout' %}">
-        <img src="{% static 'signout.png' %}" alt="logo" class="image-boarder">
+        <a href="{% url 'tournaments' %}">
+        <img src="{% static 'home.png' %}" alt="logo" class="image-boarder">
         </a>
     </div>
 
 <br>
 <br>
-<h3 class="text-center">You selected {{ user_data.pick1 }} and {{ user_data.pick2 }} to score!</h3>
 
+<h4 class="text-center">You selected:</h4>
+<h4 class="text-center span-container">
+{% for user in user_data %}
+    <span>{{ user.pick1 }}, {{ user.pick2 }}{% if not forloop.last %}; {% endif %}</span>
+{% endfor %}
+<h4 class="text-center"> to score!</h4>
+</h4>
+
+<br>
+
+<h4 class="text-center">Teams left: {{ total_in }}</h4>
 
 <div class="center-container">
 <div class="form-container">
@@ -83,8 +97,3 @@
 </div>
 </div>
 </div>
-<br>
-<br>
-<br>
-
-<h4 class="text-center">Teams left: {{ total_in }}</h4>
