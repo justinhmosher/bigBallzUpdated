@@ -33,9 +33,6 @@ import json
 def home(request):
 	return render(request, "authentication/homepage.html")
 
-def tournaments(request):
-	return render(request, "authentication/tournaments.html")
-
 def search(request):
 	if request.method == "POST":
 		search = request.POST.get('searched')
@@ -48,29 +45,18 @@ def signup(request):
 	
 	if request.method == "POST":
 
-		username = request.POST.get('username')
+		#username = request.POST.get('username')
 		email = request.POST.get('email')
 		password1 = request.POST.get('password1')
 		password2 = request.POST.get('password2')
-
-		if User.objects.filter(username = username):
-			messages.error(request, "Username already exists!  Please try another.")
-			return redirect('signup')
 
 		if User.objects.filter(email = email):
 			messages.error(request, "Email already registered!  Please try another.")
 			return redirect('signup')
 
-		if len(username) > 15:
-			messages.error(request, "Username is too long!  Please try another. (15 max)")
-			return redirect('signup')
-		
-		if len(username) < 6:
-			messages.error(request, "Username is too short!  Please try another. (at least 5)")
-			return redirect('signup')
-
 		if password1 != password2:
 			messages.error(request,"Passwors didn't match!")
+			return redirect('signup')
 
 		#Finding users location
 		user_ip_address = request.META.get('HTTP_X_FORWARDED_FOR') or request.META.get('REMOTE_ADDR')
@@ -78,7 +64,7 @@ def signup(request):
 		access_key = config('API_KEY')
 		ipstack_url = f'http://api.ipstack.com/{user_ip_address}?access_key={access_key}'
 		response = requests.get(ipstack_url)
-
+		"""
 		if response.status_code==200:
 			location_data = response.json()
 			user_state = location_data.get('region_name')
@@ -89,8 +75,8 @@ def signup(request):
 			if user_state in disallowed_states:
 				messages.error(request,"You are in a disallowed state.")
 				return redirect('home')
-
 			else:
+				username = email
 				myuser = User.objects.create_user(username, email, password1)
 				myuser.is_active = False
 
@@ -99,7 +85,12 @@ def signup(request):
 		else:
 			messages.error(request,"Failed to register location data")
 			return redirect('home')
+		"""
+		username = email
+		myuser = User.objects.create_user(username, email, password1)
+		myuser.is_active = False
 
+		myuser.save()
 
 		messages.success(request, "Your Account has been successfully created!  We have sent you a confirmation email, please confirm your email in order to activate your account.")
 
@@ -140,7 +131,7 @@ def signup(request):
 
 		return redirect('signin')
 
-	return render(request,"authentication/signsamp.html")
+	return render(request,"authentication/signup.html")
 
 @login_required
 def teamname(request):
@@ -179,7 +170,7 @@ def signin(request):
 
 		if user is not None:
 			login(request, user)
-			return redirect(tournaments)
+			return redirect('tournaments')
 
 		else:
 			messages.error(request, "Bad Credentials!")
@@ -326,7 +317,6 @@ def tournaments(request):
 	start_date = dates.startDate
 	today = datetime.now().date()
 	days_until_start = (start_date - today).days
-	print(days_until_start)
 
 	return render(request,'authentication/tournaments.html',{'days':days_until_start})
 
