@@ -9,7 +9,7 @@
     <meta name="description" content="">
     <meta name="author" content="Mark Otto, Jacob Thornton, and Bootstrap contributors">
     <meta name="generator" content="Hugo 0.118.2">
-    <title>Album example · Bootstrap v5.3</title>
+    <title>The Chosen</title>
 
     <link rel="canonical" href="https://getbootstrap.com/docs/5.3/examples/album/">
 
@@ -197,7 +197,7 @@
             Starts in {{ days }} days
         {% endif %}
     </p>
-    <a href="checking" class="btn btn-primary btn-lg mx-auto w-50">Play</a>
+    <a href="checking" class="btn btn-primary btn-lg mx-auto w-50">{% if days <= 0 %}Play{% else %}Join{% endif %}</a>
 </div>
 
             </div>
@@ -209,7 +209,7 @@
             <div class="card-body">
               <p class="card-text">Pick two players to get a hit every day.  If ONE OR BOTH get a hit, you move onto the next day.  If NEITHER get a hit, you are out!  Repeated selections ARE allowed.  Last man standing wins the pot!</p>
                 <div class="d-flex justify-content-center">
-                <a href="#" class="btn btn-primary btn-lg my-2 w-50">Play</a>
+                <a href="#" class="btn btn-primary btn-lg my-2 w-50">Join</a>
             </div>
               </div>
           </div>
@@ -220,7 +220,7 @@
             <div class="card-body">
               <p class="card-text">Pick two players to make a 3-pointer every day.  If ONE OR BOTH score a 3-pointer, you move onto the next day.  If NEITHER score a 3-pointer, you are out!  Repeated selections ARE NOT allowed.  Last man standing wins the pot!</p>
               <div class="d-flex justify-content-center">
-                <a href="#" class="btn btn-primary btn-lg my-2 w-50">Play</a>
+                <a href="#" class="btn btn-primary btn-lg my-2 w-50">Join</a>
             </div>
             </div>
           </div>

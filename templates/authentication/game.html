@@ -13,7 +13,7 @@
     <meta name="description" content="">
     <meta name="author" content="Mark Otto, Jacob Thornton, and Bootstrap contributors">
     <meta name="generator" content="Hugo 0.118.2">
-    <title>Player Selection</title>
+    <title>The Chosen</title>
 
     <link rel="canonical" href="https://getbootstrap.com/docs/5.3/examples/album/">
 
@@ -263,6 +263,7 @@
     <form method="post" action="{% url 'game' %}">
          {% csrf_token %}
         <input type="hidden" name="change_pick" value='{"pick":"pick1", "team":"{{ user.teamnumber }}"}'>
+        <p class="text-center">Team #{{ user.teamnumber }}</p>
         <button type="submit" class="btn btn-primary btn-submit">Change</button>
     </form>
             </div>
@@ -288,6 +289,7 @@
     <form method="post" action="{% url 'game' %}">
          {% csrf_token %}
         <input type="hidden" name="change_pick" value='{"pick":"pick2", "team":"{{ user.teamnumber }}"}'>
+        <p class="text-center">Team #{{ user.teamnumber }}</p>
         <button type="submit" class="btn btn-primary btn-submit">Change</button>
     </form>
             </div>

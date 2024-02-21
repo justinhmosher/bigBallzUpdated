@@ -18,7 +18,7 @@ from django.contrib.auth.decorators import login_required
 #from authentication.models import Player
 from django.http import JsonResponse
 from .forms import PlayerSearchForm, Pickform, Pick1Form, CreateTeam
-from .models import Pick,Paid,NFLPlayer,Week,Date
+from .models import Pick,Paid,NFLPlayer,Week,Date,PastPick
 from django.db.models import Count,F,ExpressionWrapper,fields
 from datetime import datetime
 from itertools import chain
@@ -323,7 +323,7 @@ def tournaments(request):
 @login_required
 def game(request):
 	user_data = Pick.objects.filter(username = request.user.username)
-	user_pick_data = Pick.objects.filter(username = request.user.username,isin = True)
+	user_pick_data = Pick.objects.filter(username = request.user.username,isin = True).order_by('teamnumber')
 	player_data = []
 	pick1_data = None
 	pick2_data = None
@@ -332,7 +332,7 @@ def game(request):
 		search = request.POST.get('searched')
 
 		if search is not None:
-			player_data = NFLPlayer.objects.filter(name__contains=search)[:5]
+			player_data = NFLPlayer.objects.filter(name__icontains=search)[:5]
 		
 		selected_player = request.POST.get('selected_player')
 		try:
@@ -344,6 +344,8 @@ def game(request):
 			num = game_search(request.user.username,player_data_selected)
 			if num == 1:
 				messages.error(request,"Selected players cannot be on the same team")
+			elif num ==3:
+				messages.error(request,"Your selected player has already scored a TD")
 
 		change_pick = request.POST.get('change_pick','{}')
 		try:
@@ -375,13 +377,22 @@ def game(request):
 
 
 def game_search(username,playerdata):
-	user_pick_data = Pick.objects.filter(username = username,isin = True)
+	user_pick_data = Pick.objects.filter(username = username,isin = True).order_by('teamnumber')
 	for pick in user_pick_data:
+		past_picks = PastPick.objects.filter(username = username,teamnumber = pick.teamnumber)
+		scorers = []
+		for past in past_picks:
+			if past.pick1 != "N/A":
+				scorers.append(past.pick1)
+			elif past.pick2 != "N/A":
+				scorers.append(past.pick2)
 		if pick.pick1 == 'N/A':
 			try:
 				player_data_pick2 = NFLPlayer.objects.get(name=pick.pick2)
 				if player_data_pick2.team_name == playerdata.team_name:
 					return 1
+				elif playerdata.player_ID in scorers:
+					return 3
 				else:
 					pick.pick1 = playerdata.name
 					pick.pick1_team = playerdata.team_name
@@ -389,7 +400,7 @@ def game_search(username,playerdata):
 					pick.pick1_color = playerdata.color
 					pick.pick1_player_ID = playerdata.player_ID
 					pick.save()
-					break
+					return 2
 			except NFLPlayer.DoesNotExist:
 				pick.pick1 = playerdata.name
 				pick.pick1_team = playerdata.team_name
@@ -397,12 +408,14 @@ def game_search(username,playerdata):
 				pick.pick1_color = playerdata.color
 				pick.pick1_player_ID = playerdata.player_ID
 				pick.save()
-				break
+				return 2
 		elif pick.pick2 == 'N/A':
 			try:
 				player_data_pick1 = NFLPlayer.objects.get(name=pick.pick1)
 				if player_data_pick1.team_name == playerdata.team_name:
 					return 1
+				elif playerdata.player_ID in scorers:
+					return 3
 				else:
 					pick.pick2 = playerdata.name
 					pick.pick2_team = playerdata.team_name
@@ -410,7 +423,7 @@ def game_search(username,playerdata):
 					pick.pick2_color = playerdata.color
 					pick.pick2_player_ID = playerdata.player_ID
 					pick.save()
-					break
+					return 2
 			except NFLPlayer.DoesNotExist:
 				pick.pick2 = playerdata.name
 				pick.pick2_team = playerdata.team_name
@@ -418,12 +431,17 @@ def game_search(username,playerdata):
 				pick.pick2_color = playerdata.color
 				pick.pick2_player_ID = playerdata.player_ID
 				pick.save()
-				break
+				return 2
+
 	for pick in user_pick_data:
+		past_picks = PastPick.objects.filter(username = username,teamnumber = pick.teamnumber)
+		scorers = []
 		try:
 			player_data_pick2 = NFLPlayer.objects.get(name=pick.pick2)
 			if player_data_pick2.team_name == playerdata.team_name:
 				return 1
+			elif playerdata.player_ID in scorers:
+				return 3
 			else:
 				pick.pick1 = playerdata.name
 				pick.pick1_team = playerdata.team_name
@@ -431,7 +449,7 @@ def game_search(username,playerdata):
 				pick.pick1_color = playerdata.color
 				pick.pick1_player_ID = playerdata.player_ID
 				pick.save()
-				break
+				return 2
 		except NFLPlayer.DoesNotExist:
 				pick.pick1 = playerdata.name
 				pick.pick1_team = playerdata.team_name
@@ -439,8 +457,9 @@ def game_search(username,playerdata):
 				pick.pick1_color = playerdata.color
 				pick.pick1_player_ID = playerdata.player_ID
 				pick.save()
-				break
+				return 2
 	return 2
+
 
 
 @login_required
@@ -481,7 +500,11 @@ def checking(request):
 				if current_day in [1,2] and count > 1 and week != 23:
 					return redirect('game')
 				elif count == 1 or week == 23:
-					winners = Pick.objects.filter(isin=True)
+					winners_list = Pick.objects.filter(isin=True)
+					winners = []
+					for win in winners_list:
+						if win.team_name not in winners:
+							winners.append(win.team_name)
 					return render(request,'authentication/win.html',{'winners':winners})
 				else:
 					return redirect('leaderboard')
