@@ -45,7 +45,6 @@ def signup(request):
 	
 	if request.method == "POST":
 
-		#username = request.POST.get('username')
 		email = request.POST.get('email')
 		password1 = request.POST.get('password1')
 		password2 = request.POST.get('password2')
@@ -104,7 +103,7 @@ def signup(request):
 		mail_item.Subject = "Welcome to Big Ballz League"
 		mail_item.BodyFormat = 1
 
-		mail_item.Body = "Hello player !! \n" + "Welcome to The Big Ballz League!! \n Thank you for joining our waitlist \n We have also sent you a confirmation email, please confirm your email address in order to activate your account! \n\n Thank You, \n League Commissioner"
+		mail_item.Body = "Hello player !! \n \n" + "Welcome to The Chosen Fantasy Games!! \n \n We have also sent you a confirmation email, please confirm your email address in order to activate your account! \n\n Thank You, \n League Commissioner"
 		mail_item.Sender = "commissioner@bigballzdfsl.com"
 		mail_item.To = myuser.email
 
@@ -117,7 +116,7 @@ def signup(request):
 		mail_item1 = olApp.createItem(0)
 
 		current_site = get_current_site(request)
-		mail_item1.Subject = "Confirm your email for The Big Ballz Leage!"
+		mail_item1.Subject = "Confirm your email for The Chosen Fantasy Games!"
 		mail_item1.BodyFormat = 1
 		mail_item1.Body = render_to_string('authentication/email_confirmation.html',{
 			'domain' : current_site.domain,
@@ -468,7 +467,6 @@ def checking(request):
 		new_user = Paid(username = request.user.username)
 		new_user.save()
 	paid = Paid.objects.get(username = request.user.username)
-	#pick = Pick.objects.get(username = request.user.username)
 	count = Pick.objects.filter(isin=True).count()
 	current_day = timezone.now().date()
 	dates = Date.objects.get(sport = "Football")
@@ -476,8 +474,10 @@ def checking(request):
 	end_date = dates.endDate
 	week = Week.objects.first()
 	week = week.week
-	if paid.paid_status == False and (start_date <= current_day < end_date):
-		return render(request,'authentication/inplay.html')
+	if paid.paid_status == False and (start_date <= current_day < end_date) and datetime.now().weekday() in [1,2]:
+		return render(request,'authentication/picking.html')
+	elif paid.paid_status == False and (start_date <= current_day < end_date) and datetime.now().weekday() not in [1,2]:
+		return redirect('playerboard')
 	elif paid.paid_status == False and paid.numteams == 0:
 		return redirect('teamcount')
 	elif paid.paid_status == False:

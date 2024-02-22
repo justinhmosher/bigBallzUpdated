@@ -14,8 +14,9 @@
     .form-container-inner{
       background-color: #f0f0f0; /* Grey background color */
       border-radius: 20px; /* Rounded corners */
-      padding: 20px;  Add padding inside the container 
-      width: 350px; /* Set the desired width */
+      padding-top: 20px;  /*Add padding inside the container */
+      padding-left: 40px;
+        width: 350px; /* Set the desired width */
       margin: auto; /* Center the container horizontally */
     }
     .center-container {
@@ -46,8 +47,8 @@
         border-radius: 10px;
      }
 
-
 </style>
+{% load static %}
 
     <div class="top-left">
         <a href="{% url 'tournaments' %}">
@@ -59,12 +60,8 @@
 <br>
 <br>
 <br>
-<br>
-<br>
 
-<h3 class="text-center">League player selection:</h3>
-
-
+<h2 class="text-center">League Picks</h2>
 
 <div class="center-container">
 <div class="form-container">
@@ -89,7 +86,6 @@
 </div>
 </div>
 <br>
-<br>
-<br>
+
 
 <h4 class="text-center">Teams left: {{ total_in }}</h4>

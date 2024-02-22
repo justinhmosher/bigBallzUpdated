@@ -188,16 +188,21 @@
           <div class="card shadow-sm">
             <img src="{% static 'football.png' %}" class="card-img-top" alt="Description of Image" style="width: auto; height: 500px;" class="img-fluid" />
             <div class="card-body">
-              <p class="card-text">Pick two players to score a touchdown every week.  If ONE OR BOTH score a touchdown, you move onto the next week.  If NEITHER score a touchdown, you are out!  Repeated selections ARE allowed. Last man standing wins the pot!</p>
+              <p class="card-text">Pick two players to score a touchdown every week.  If ONE OR BOTH score a touchdown, you move onto the next week.  If NEITHER score a touchdown, you are out!  Repeated selections ARE NOT allowed. Last man standing wins the pot!</p>
 <div class="d-flex flex-column justify-content-center">
-    <p class="text-center mb-3 {% if days <= 0 %}text-green{% else %}text-red{% endif %}">
+  <div style="text-align: center;">
+  <a href="{% static 'The Chosen Rules.pdf' %}" target="_blank">Rules</a>
+</div>
+  <br>
+    <a href="checking" class="btn btn-primary btn-lg mx-auto w-50 text-center">{% if days <= 0 %}Play{% else %}Join{% endif %}</a>
+      <br>
+          <p class="text-center mb-3 {% if days <= 0 %}text-green{% else %}text-red{% endif %}">
         {% if days <= 0 %}
             Game has started!
         {% else %}
             Starts in {{ days }} days
         {% endif %}
     </p>
-    <a href="checking" class="btn btn-primary btn-lg mx-auto w-50">{% if days <= 0 %}Play{% else %}Join{% endif %}</a>
 </div>
 
             </div>
