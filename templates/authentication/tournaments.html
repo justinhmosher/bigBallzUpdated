@@ -115,6 +115,17 @@
         color: red;
         font-weight: bold;
       }
+      @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+        100% { transform: scale(1); }
+      }
+
+      .pot-value {
+        display: inline-block;
+        color: #35CF32;
+      font-size: 1.3em;
+      }
 
     </style>
 
@@ -188,19 +199,24 @@
           <div class="card shadow-sm">
             <img src="{% static 'football.png' %}" class="card-img-top" alt="Description of Image" style="width: auto; height: 500px;" class="img-fluid" />
             <div class="card-body">
-              <p class="card-text">Pick two players to score a touchdown every week.  If ONE OR BOTH score a touchdown, you move onto the next week.  If NEITHER score a touchdown, you are out!  Repeated selections ARE NOT allowed. Last man standing wins the pot!</p>
+              <h2 class="text-center"><span class="pot-value">Pot: ${{ pot }}</span></h2>
+              <p class="card-text">
+              1) Pick two players to score a touchdown every week.<br>
+              2) If ONE OR BOTH score a touchdown, you move onto the next week.  <br>
+              3) If NEITHER score a touchdown, you are out!  <br>
+              4) Repeated selections ARE NOT allowed. <br>
+              5) Last man standing wins the pot!</p>
 <div class="d-flex flex-column justify-content-center">
   <div style="text-align: center;">
   <a href="{% static 'The Chosen Rules.pdf' %}" target="_blank">Rules</a>
 </div>
   <br>
     <a href="checking" class="btn btn-primary btn-lg mx-auto w-50 text-center">{% if days <= 0 %}Play{% else %}Join{% endif %}</a>
-      <br>
           <p class="text-center mb-3 {% if days <= 0 %}text-green{% else %}text-red{% endif %}">
         {% if days <= 0 %}
             Game has started!
         {% else %}
-            Starts in {{ days }} days
+            {{ days }} days left to join!
         {% endif %}
     </p>
 </div>

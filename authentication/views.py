@@ -18,7 +18,7 @@ from django.contrib.auth.decorators import login_required
 #from authentication.models import Player
 from django.http import JsonResponse
 from .forms import PlayerSearchForm, Pickform, Pick1Form, CreateTeam
-from .models import Pick,Paid,NFLPlayer,Week,Date,PastPick
+from .models import Pick,Paid,NFLPlayer,Game,PastPick
 from django.db.models import Count,F,ExpressionWrapper,fields
 from datetime import datetime
 from itertools import chain
@@ -312,12 +312,13 @@ def leaderboard(request):
 	return render(request,'authentication/leaderboard.html',{'player_counts':sorted_player_counts,'total_in':total_in, 'user_data':user_data})
 
 def tournaments(request):
-	dates = Date.objects.get(sport = "Football")
-	start_date = dates.startDate
+	game = Game.objects.get(sport = "Football")
+	start_date = game.startDate
 	today = datetime.now().date()
 	days_until_start = (start_date - today).days
+	pot = game.pot
 
-	return render(request,'authentication/tournaments.html',{'days':days_until_start})
+	return render(request,'authentication/tournaments.html',{'days':days_until_start,"pot":pot})
 
 @login_required
 def game(request):
@@ -469,11 +470,10 @@ def checking(request):
 	paid = Paid.objects.get(username = request.user.username)
 	count = Pick.objects.filter(isin=True).count()
 	current_day = timezone.now().date()
-	dates = Date.objects.get(sport = "Football")
-	start_date = dates.startDate
-	end_date = dates.endDate
-	week = Week.objects.first()
-	week = week.week
+	game = Game.objects.get(sport = "Football")
+	start_date = game.startDate
+	end_date = game.endDate
+	week = game.week
 	if paid.paid_status == False and (start_date <= current_day < end_date) and datetime.now().weekday() in [1,2]:
 		return render(request,'authentication/picking.html')
 	elif paid.paid_status == False and (start_date <= current_day < end_date) and datetime.now().weekday() not in [1,2]:
