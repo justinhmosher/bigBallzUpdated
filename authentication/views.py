@@ -5,11 +5,9 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from bigBallz import settings
 from django.core.mail import send_mail
-#import win32com.client as win32
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-import pythoncom
 from django.contrib.sites.shortcuts import get_current_site
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
@@ -18,7 +16,6 @@ from django.template.loader import render_to_string
 import requests
 from decouple import config
 from django.contrib.auth.decorators import login_required
-#from authentication.models import Player
 from django.http import JsonResponse
 from .forms import PlayerSearchForm, Pickform, Pick1Form, CreateTeam
 from .models import Pick,Paid,NFLPlayer,Game,PastPick
@@ -26,7 +23,6 @@ from django.db.models import Count,F,ExpressionWrapper,fields
 from datetime import datetime
 from itertools import chain
 from collections import defaultdict
-from datetime import datetime
 from django.utils import timezone
 import json
 
