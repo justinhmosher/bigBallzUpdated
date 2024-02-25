@@ -5,7 +5,10 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from bigBallz import settings
 from django.core.mail import send_mail
-import win32com.client as win32
+#import win32com.client as win32
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 import pythoncom
 from django.contrib.sites.shortcuts import get_current_site
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
@@ -58,12 +61,13 @@ def signup(request):
 			return redirect('signup')
 
 		#Finding users location
+		"""
 		user_ip_address = request.META.get('HTTP_X_FORWARDED_FOR') or request.META.get('REMOTE_ADDR')
 
 		access_key = config('API_KEY')
 		ipstack_url = f'http://api.ipstack.com/{user_ip_address}?access_key={access_key}'
 		response = requests.get(ipstack_url)
-		"""
+		
 		if response.status_code==200:
 			location_data = response.json()
 			user_state = location_data.get('region_name')
@@ -94,39 +98,39 @@ def signup(request):
 		messages.success(request, "Your Account has been successfully created!  We have sent you a confirmation email, please confirm your email in order to activate your account.")
 
 		#Welcome Email
+		sender_email = config('SENDER_EMAIL')
+		sender_password = config('SENDER_PASSWORD')
+		receiver_email = myuser.email
 
-		olApp = win32.Dispatch('Outlook.Application',pythoncom.CoInitialize())
-		olNS = olApp.GetNameSpace('MAPI')
-
-		mail_item = olApp.createItem(0)
-
-		mail_item.Subject = "Welcome to Big Ballz League"
-		mail_item.BodyFormat = 1
-
-		mail_item.Body = "Hello player !! \n \n" + "Welcome to The Chosen Fantasy Games!! \n \n We have also sent you a confirmation email, please confirm your email address in order to activate your account! \n\n Thank You, \n League Commissioner"
-		mail_item.Sender = "commissioner@bigballzdfsl.com"
-		mail_item.To = myuser.email
-
-		mail_item.Display()
-		mail_item.Save()
-		mail_item.Send()
-
-		#Email Address Confirmation Email
-
-		mail_item1 = olApp.createItem(0)
+		smtp_server = config('SMTP_SERVER')
+		smtp_port = config('SMTP_PORT')
 
 		current_site = get_current_site(request)
-		mail_item1.Subject = "Confirm your email for The Chosen Fantasy Games!"
-		mail_item1.BodyFormat = 1
-		mail_item1.Body = render_to_string('authentication/email_confirmation.html',{
+
+		message = MIMEMultipart()
+		message['From'] = sender_email
+		message['To'] = receiver_email
+		message['Subject'] = "Your Confirmation Email"
+		body = render_to_string('authentication/email_confirmation.html',{
 			'domain' : current_site.domain,
 			'uid' : urlsafe_base64_encode(force_bytes(myuser.pk)),
 			'token' : generate_token.make_token(myuser),
 			})
-		mail_item1.Sender = "commissioner@bigballzdfsl.com"
-		mail_item1.To = myuser.email
-		mail_item1.Save()
-		mail_item1.Send()
+		message.attach(MIMEText(body, "plain"))
+		text = message.as_string()
+		try:
+			# Connect to the SMTP server
+			server = smtplib.SMTP(smtp_server, smtp_port)
+			server.starttls()  # Secure the connection
+			server.login(sender_email, sender_password)
+			# Send the email
+			server.sendmail(sender_email, receiver_email, text)
+			print("Email sent successfully!")
+		except Exception as e:
+			print(f"Failed to send email: {e}")
+		finally:
+			server.quit()
+
 
 		return redirect('signin')
 
@@ -189,31 +193,41 @@ def forgotPassEmail(request):
 		if User.objects.filter(email=email).exists():
 
 			myuser = User.objects.get(email = email)
+			sender_email = config('SENDER_EMAIL')
+			sender_password = config('SENDER_PASSWORD')
+			receiver_email = myuser.email
 
-			olApp = win32.Dispatch('Outlook.Application',pythoncom.CoInitialize())
-			olNS = olApp.GetNameSpace('MAPI')
-
-			mail_item1 = olApp.createItem(0)
+			smtp_server = config('SMTP_SERVER')
+			smtp_port = config('SMTP_PORT')
 
 			current_site = get_current_site(request)
 
-			mail_item1.Subject = "Confirm your email for The Big Ballz Leage!"
-			mail_item1.BodyFormat = 1
-			mail_item1.Body = render_to_string('authentication/email_change.html',{
+			message = MIMEMultipart()
+			message['From'] = sender_email
+			message['To'] = receiver_email
+			message['Subject'] = "Change Your Email for The Chosen"
+			body = render_to_string('authentication/email_change.html',{
 				'domain' : current_site.domain,
 				'uid' : urlsafe_base64_encode(force_bytes(myuser.pk)),
 				'token' : generate_token.make_token(myuser),
 				})
+			message.attach(MIMEText(body, "plain"))
+			text = message.as_string()
+			try:
+				# Connect to the SMTP server
+				server = smtplib.SMTP(smtp_server, smtp_port)
+				server.starttls()  # Secure the connection
+				server.login(sender_email, sender_password)
+				# Send the email
+				server.sendmail(sender_email, receiver_email, text)
+				messages.success(request,"We sent password change instructions over email.")
+				return redirect('forgotPassEmail')
+			except Exception as e:
+				print(f"Failed to send email: {e}")
+				messages.error(request,"There was a problem sending you an email.")
+			finally:
+				server.quit()
 
-			mail_item1.Sender = "commissioner@bigballzdfsl.com"
-			mail_item1.To = email
-
-			mail_item1.Display()
-			mail_item1.Save()
-			mail_item1.Send()
-
-			messages.success(request,"We sent password change instructions over email")
-			return redirect('forgotPassEmail')
 		else:
 			messages.error(request,"Please provide a valid email")
 
