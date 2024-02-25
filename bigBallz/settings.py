@@ -158,7 +158,10 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
-
-APPEND_SLASH = False
-
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+
+try:
+    from local_settings import *
+except ImportError:
+    pass
+
