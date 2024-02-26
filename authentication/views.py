@@ -87,16 +87,11 @@ def signup(request):
 		"""
 		username = email
 		myuser = User.objects.create_user(username, email, password1)
-		myuser.is_active = False
-
-		myuser.save()
-
-		messages.success(request, "Your Account has been successfully created!  We have sent you a confirmation email, please confirm your email in order to activate your account.")
 
 		#Welcome Email
 		sender_email = config('SENDER_EMAIL')
 		sender_password = config('SENDER_PASSWORD')
-		receiver_email = myuser.email
+		receiver_email = email
 
 		smtp_server = config('SMTP_SERVER')
 		smtp_port = config('SMTP_PORT')
@@ -122,8 +117,13 @@ def signup(request):
 			# Send the email
 			server.sendmail(sender_email, receiver_email, text)
 			print("Email sent successfully!")
+			myuser.is_active = False
+
+			myuser.save()
+			messages.success(request, "Your Account has been successfully created!  We have sent you a confirmation email, please confirm your email in order to activate your account.")
 		except Exception as e:
 			print(f"Failed to send email: {e}")
+			messages.error(request, "There was a problem sending your confirmation email.  Please try again.")
 		finally:
 			server.quit()
 
