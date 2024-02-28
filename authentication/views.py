@@ -201,7 +201,7 @@ def forgotPassEmail(request):
 			message = MIMEMultipart()
 			message['From'] = sender_email
 			message['To'] = receiver_email
-			message['Subject'] = "Change Your Email for The Chosen"
+			message['Subject'] = "Change Your Password for The Chosen"
 			body = render_to_string('authentication/email_change.html',{
 				'domain' : current_site.domain,
 				'uid' : urlsafe_base64_encode(force_bytes(myuser.pk)),
