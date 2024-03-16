@@ -116,17 +116,34 @@
         color: red;
         font-weight: bold;
       }
+      .text-white {
+        color: white;
+        font-weight: bold;
+      }
       @keyframes pulse {
         0% { transform: scale(1); }
         50% { transform: scale(1.1); }
         100% { transform: scale(1); }
       }
-
+      
       .pot-value {
         display: inline-block;
-        color: #35CF32;
+        color: #EBE108;
       font-size: 1.3em;
       }
+      /*
+      .pot-value {
+        color: gold; 
+        font-size: 24px;
+        font-weight: bold;
+        background: -webkit-linear-gradient(90deg, #ffd700 20%, #f8d64e 40%, #ffd700 60%);
+        background: linear-gradient(90deg, #ffd700 20%, #f8d64e 40%, #ffd700 60%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent; 
+        animation: glitter 2s infinite linear;
+      }
+      */
 
     </style>
 
@@ -163,11 +180,11 @@
 
       <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
         <div class="col">
-          <div class="card shadow-sm">
+          <div class="card shadow-sm" style="background-color: #444444;">
             <img src="{% static 'football.png' %}" class="card-img-top" alt="Description of Image" style="width: auto; height: 500px;" class="img-fluid" />
             <div class="card-body">
-              <h2 class="text-center"><span class="pot-value">Pot: ${{ pot }}</span></h2>
-              <p class="card-text">
+              <h1 class="text-center"><span class="pot-value">💰${{ pot }}</span></h1>
+              <p class="card-text text-white">
               1) Pick two players to score a touchdown every week.<br>
               2) If ONE OR BOTH score a touchdown, you move onto the next week.  <br>
               3) If NEITHER score a touchdown, you are out!  <br>
@@ -192,10 +209,10 @@
           </div>
         </div>
         <div class="col">
-          <div class="card shadow-sm">
+          <div class="card shadow-sm" style="background-color: #444444;">
             <img src="{% static 'baseball.png' %}" class="card-img-top" alt="Description of Image" style="width: auto; height: 500px;" class="img-fluid" />
-            <div class="card-body">
-              <p class="card-text">
+            <div class="card-body text-white">
+              <p class="card-text"> 
               1) Pick two players to get a hit every day. <br>
               2) If ONE OR BOTH get a hit, you move onto the next day.  <br>
               3) If NEITHER get a hit, you are out!  <br>
@@ -204,13 +221,14 @@
                 <div class="d-flex justify-content-center">
                 <a href="#" class="btn btn-primary btn-lg my-2 w-50">Join</a>
             </div>
+            <p class="text-center mb-3 text-red">Coming Soon</p>
               </div>
           </div>
         </div>
         <div class="col">
-          <div class="card shadow-sm">
+          <div class="card shadow-sm" style="background-color: #444444;">
             <img src="{% static 'basketball.png' %}" class="card-img-top" alt="Description of Image" style="width: auto; height: 500px;" class="img-fluid" />
-            <div class="card-body">
+            <div class="card-body text-white">
               <p class="card-text">
               1) Pick two players to make a 3-pointer every day.  <br>
               2) If ONE OR BOTH score a 3-pointer, you move onto the next day.  <br>
@@ -220,6 +238,7 @@
               <div class="d-flex justify-content-center">
                 <a href="#" class="btn btn-primary btn-lg my-2 w-50">Join</a>
             </div>
+            <p class="text-center mb-3 text-red">Coming Soon</p>
             </div>
           </div>
         </div>
