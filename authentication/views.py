@@ -296,6 +296,14 @@ def teamcount(request):
 			return redirect('checking')
 	return render(request,'authentication/teamcount.html')
 
+#@login_required
+def payment(request):
+	STRIPE_SECRET_KEY = config('STRIPE_SECRET_KEY')
+	STRIPE_PUBLIC_KEY = config('STRIPE_PUBLIC_KEY')
+	return render(request,'authentication/payment.html',{'STRIPE_PUBLIC_KEY' : STRIPE_PUBLIC_KEY })
+
+
+
 @login_required
 def leaderboard(request):
 	player_counts1 = Pick.objects.filter(isin=True).values('pick1').annotate(count=Count('pick1')).order_by('-count')

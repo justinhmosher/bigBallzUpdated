@@ -125,16 +125,6 @@
 
     
   </head>
-<div class="text-center">
-{% for message in messages %}
-<div class="alert alert-{{ message.tags }} alert-dismissible fade show d-inline-block" role="alert">
-<strong>Message:</strong> {{ message }}
-<button type="button" class="close" data-dismiss="alert" aria-label="Close">
-<span aria-hidden="true">&times;</span>
-</button>
-</div>
-{% endfor %}
-</div>
   <body>
      <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -194,7 +184,16 @@
 
 
 <main>
-
+<div class="text-center">
+{% for message in messages %}
+<div class="alert alert-{{ message.tags }} alert-dismissible fade show d-inline-block" role="alert">
+<strong>Message:</strong> {{ message }}
+<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+<span aria-hidden="true">&times;</span>
+</button>
+</div>
+{% endfor %}
+</div>
 
   <section class="py-5 text-center container">
     <div class="row py-lg-5">
@@ -206,12 +205,7 @@
             <img src="{% static 'logo.png' %}" alt="logo" style="width: auto; height: 400px;" class="img-fluid above-confetti"/>
         </a>
 </div>
-<!--
-<main class ="px-5 main-content">
-     <a href="tournaments" class="btn btn-primary btn-lg my-2 w-50">Sign In</a>
-    <p>Don't have an account? <a href="signup">Sign up!</a></p>
-</main>
---->
+
  <p class="lead">Step into a realm of fantasy sports where only the elite prevail. Compete in our season-long tournaments, using key stats to advance. Are you the chosen one to rise above the rest?</p>
 <a href="signin" class="btn btn-primary btn-lg my-2 w-50 above-confetti">Sign In</a>
 <div class="d-flex justify-content-center">
@@ -223,76 +217,6 @@
       </div>
     </div>
   </section>
-<!--
-
-<div class="confetti" style="top: 15%; left: 25%; "></div>
-<div class="confetti" style="top: 25%; left: 55%;"></div>
-<div class="confetti" style="top: 35%; left: 85%; "></div>
-<div class="confetti" style="top: 45%; left: 15%; "></div>
-<div class="confetti" style="top: 55%; left: 45%; "></div>
-<div class="confetti" style="top: 65%; left: 75%;"></div>
-<div class="confetti" style="top: 75%; left: 5%; "></div>
-<div class="confetti" style="top: 85%; left: 35%;"></div>
-<div class="confetti" style="top: 95%; left: 65%;"></div>
-<div class="confetti" style="top: 10%; left: 40%;"></div>
-<div class="confetti" style="top: 20%; left: 60%;"></div>
-<div class="confetti" style="top: 30%; left: 80%; "></div>
-<div class="confetti" style="top: 40%; left: 20%;"></div>
-<div class="confetti" style="top: 50%; left: 40%;"></div>
-<div class="confetti" style="top: 60%; left: 60%;"></div>
-<div class="confetti" style="top: 70%; left: 80%;"></div>
-<div class="confetti" style="top: 80%; left: 30%;"></div>
-<div class="confetti" style="top: 90%; left: 70%;"></div>
-<div class="confetti" style="top: 15%; left: 25%;"></div>
-<div class="confetti" style="top: 25%; left: 55%;"></div>
-<div class="confetti" style="top: 35%; left: 85%;"></div>
-<div class="confetti" style="top: 45%; left: 15%;"></div>
-<div class="confetti" style="top: 55%; left: 45%;"></div>
-<div class="confetti" style="top: 65%; left: 75%;"></div>
-<div class="confetti" style="top: 75%; left: 5%;"></div>
-<div class="confetti" style="top: 85%; left: 35%;"></div>
-<div class="confetti" style="top: 95%; left: 65%;"></div>
-<div class="confetti" style="top: 10%; left: 70%;"></div>
-<div class="confetti" style="top: 20%; left: 40%;"></div>
-<div class="confetti" style="top: 30%; left: 10%;"></div>
-<div class="confetti" style="top: 40%; left: 80%;"></div>
-<div class="confetti" style="top: 50%; left: 50%;"></div>
-<div class="confetti" style="top: 60%; left: 20%;"></div>
-<div class="confetti" style="top: 70%; left: 90%;"></div>
-<div class="confetti" style="top: 80%; left: 60%;"></div>
-<div class="confetti" style="top: 90%; left: 30%;"></div>
-<div class="confetti" style="top: 5%; left: 85%;"></div>
-<div class="confetti" style="top: 15%; left: 75%;"></div>
-<div class="confetti" style="top: 25%; left: 45%;"></div>
-<div class="confetti" style="top: 35%; left: 5%;"></div>
-<div class="confetti" style="top: 45%; left: 85%;"></div>
-<div class="confetti" style="top: 55%; left: 55%;"></div>
-<div class="confetti" style="top: 65%; left: 25%;"></div>
-<div class="confetti" style="top: 75%; left: 95%;"></div>
-<div class="confetti" style="top: 85%; left: 65%;"></div>
-<div class="confetti" style="top: 95%; left: 35%;"></div>
-<div class="confetti" style="top: 10%; left: 90%;"></div>
-<div class="confetti" style="top: 18%; left: 81%;"></div>
-<div class="confetti" style="top: 21%; left: 54%;"></div>
-<div class="confetti" style="top: 24%; left: 27%;"></div>
-<div class="confetti" style="top: 27%; left: 90%;"></div>
-<div class="confetti" style="top: 30%; left: 63%;"></div>
-<div class="confetti" style="top: 33%; left: 36%;"></div>
-<div class="confetti" style="top: 36%; left: 9%; "></div>
-<div class="confetti" style="top: 39%; left: 72%;"></div>
-<div class="confetti" style="top: 42%; left: 45%;"></div>
-<div class="confetti" style="top: 45%; left: 18%; "></div>
-<div class="confetti" style="top: 48%; left: 81%;"></div>
-<div class="confetti" style="top: 51%; left: 54%;"></div>
-<div class="confetti" style="top: 54%; left: 27%;"></div>
-<div class="confetti" style="top: 57%; left: 90%;"></div>
-<div class="confetti" style="top: 60%; left: 63%;"></div>
-<div class="confetti" style="top: 63%; left: 36%;"></div>
-<div class="confetti" style="top: 66%; left: 9%;"></div>
-<div class="confetti" style="top: 69%; left: 72%;"></div>
-<div class="confetti" style="top: 72%; left: 45%;"></div>
-<div class="confetti" style="top: 75%; left: 18%; "></div>
---->
 
  
 <script src="/docs/5.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>

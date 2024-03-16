@@ -1,0 +1,17 @@
+<!-- templates/payment_form.html -->
+
+<form action="{% url 'payment' %}" method="post">
+  {% csrf_token %}
+  <div id="card-element">
+    <!-- Stripe's card element will go here -->
+  </div>
+  <button type="submit">Submit Payment</button>
+</form>
+
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+  var stripe = Stripe('{{ STRIPE_PUBLIC_KEY }}');
+  var elements = stripe.elements();
+  var card = elements.create('card');
+  card.mount('#card-element');
+</script>
