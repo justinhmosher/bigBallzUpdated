@@ -69,17 +69,11 @@ def signup(request):
 			user_state = location_data.get('region_name')
 			print(user_state)
 
-			disallowed_states = ['California']
+			disallowed_states = []
 
 			if user_state in disallowed_states:
 				messages.error(request,"You are in a disallowed state.")
 				return redirect('home')
-			else:
-				username = email
-				myuser = User.objects.create_user(username, email, password1)
-				myuser.is_active = False
-
-				myuser.save()
 
 		else:
 			messages.error(request,"Failed to register location data")
