@@ -57,7 +57,7 @@ def signup(request):
 			return redirect('signup')
 
 		#Finding users location
-		"""
+
 		user_ip_address = request.META.get('HTTP_X_FORWARDED_FOR') or request.META.get('REMOTE_ADDR')
 
 		access_key = config('API_KEY')
@@ -84,7 +84,7 @@ def signup(request):
 		else:
 			messages.error(request,"Failed to register location data")
 			return redirect('home')
-		"""
+
 		username = email
 		myuser = User.objects.create_user(username, email, password1)
 

@@ -56,6 +56,11 @@ class NFLPlayer(models.Model):
     def __str__(self):
         return f"{self.name}"
 
+class BaseballPlayer(models.Model):
+    name = models.CharField(max_length=100,default = "player name")
+    def __str__(self):
+        return f"{self.name}"
+
 class Game(models.Model):
     sport = models.CharField(max_length=100,default = "type a sport")
     startDate = models.DateField(default=date.today)
@@ -64,3 +69,5 @@ class Game(models.Model):
     week = models.IntegerField(default = 1)
     def __str__(self):
         return f"{self.sport}"
+
+
