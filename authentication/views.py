@@ -18,7 +18,7 @@ from decouple import config
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from .forms import PlayerSearchForm, Pickform, Pick1Form, CreateTeam
-from .models import Pick,Paid,NFLPlayer,Game,PastPick,BitcoinPayment
+from .models import Pick,Paid,NFLPlayer,Game,PastPick
 from django.db.models import Count,F,ExpressionWrapper,fields
 from datetime import datetime
 from itertools import chain
@@ -26,7 +26,6 @@ from collections import defaultdict
 from django.utils import timezone
 import json
 from block_io import BlockIo
-from .models import BitcoinPayment
 import logging
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
@@ -365,7 +364,7 @@ def payment(request):
 		} 
 
 	return render(request, 'authentication/payment.html', context)
-"""
+
 @csrf_exempt  # Disable CSRF protection for this endpoint
 @require_POST
 def coinbase_webhook(request):
@@ -378,7 +377,7 @@ def coinbase_webhook(request):
 	else:
 		messages.error('Payment was not received')
 		return redirect('payment')
-"""
+
 @login_required
 def leaderboard(request):
 	player_counts1 = Pick.objects.filter(isin=True).values('pick1').annotate(count=Count('pick1')).order_by('-count')
