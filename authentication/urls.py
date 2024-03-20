@@ -23,5 +23,5 @@ urlpatterns = [
     path('teamcount',views.teamcount,name='teamcount'),
     path('tournaments',views.tournaments,name='tournaments'),
     path('payment',views.payment,name='payment'),
-    path('webhooks/coinbase/', views.coinbase_webhook, name='coinbase_webhook'),
+    #path('webhooks/coinbase/', views.coinbase_webhook, name='coinbase_webhook'),
 ]+static(settings.MEDIA_URL,document_root = settings.MEDIA_ROOT)

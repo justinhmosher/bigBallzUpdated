@@ -365,7 +365,7 @@ def payment(request):
 		} 
 
 	return render(request, 'authentication/payment.html', context)
-
+"""
 @csrf_exempt  # Disable CSRF protection for this endpoint
 @require_POST
 def coinbase_webhook(request):
@@ -378,7 +378,7 @@ def coinbase_webhook(request):
 	else:
 		messages.error('Payment was not received')
 		return redirect('payment')
-
+"""
 @login_required
 def leaderboard(request):
 	player_counts1 = Pick.objects.filter(isin=True).values('pick1').annotate(count=Count('pick1')).order_by('-count')
