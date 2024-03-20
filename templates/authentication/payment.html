@@ -1,17 +1,83 @@
-<!-- templates/payment_form.html -->
-
-<form action="{% url 'payment' %}" method="post">
-  {% csrf_token %}
-  <div id="card-element">
-    <!-- Stripe's card element will go here -->
-  </div>
-  <button type="submit">Submit Payment</button>
-</form>
-
-<script src="https://js.stripe.com/v3/"></script>
-<script>
-  var stripe = Stripe('{{ STRIPE_PUBLIC_KEY }}');
-  var elements = stripe.elements();
-  var card = elements.create('card');
-  card.mount('#card-element');
-</script>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete Your Payment</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f4f7f6;
+            font-family: 'Arial', sans-serif;
+        }
+        .payment-container {
+            width: 100%;
+            max-width: 500px;
+            padding: 25px;
+            background-color: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,.1);
+        }
+        .icon-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .icon-container i {
+            font-size: 70px;
+            color: #0056b3;
+        }
+    </style>
+</head>
+<div class="text-center">
+{% for message in messages %}
+<div class="alert alert-{{ message.tags }} alert-dismissible fade show d-inline-block" role="alert">
+<strong>Message:</strong> {{ message }}
+<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+<span aria-hidden="true">&times;</span>
+</button>
+</div>
+{% endfor %}
+</div>
+<body>
+    <div class="container payment-container">
+        <div class="icon-container">
+            <i class="fas fa-users"></i>
+        </div>
+        <h2 class="text-center mb-4">Team Payment</h2>
+        <form method="post" action="{% url 'payment' %}">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="teamCount" class="form-label">Number of Teams:</label>
+                <select class="form-select" id="teamCount" name="teamCount" onchange="updateTotal()">
+                    <option value="1" selected>1</option>
+                    <!-- Generating options dynamically -->
+                    <script>
+                        for (let i = 2; i <= 20; i++) {
+                            document.write(`<option value="${i}">${i}</option>`);
+                        }
+                    </script>
+                </select>
+            </div>
+            <div class="mb-3 text-center">
+                <p>Total Amount: $<span id="totalAmount">50</span>.00</p>
+            </div>
+            <div class="d-grid">
+                <button type="submit" class="btn btn-primary">Confirm Payment</button>
+            </div>
+        </form>
+    </div>
+    <script>
+        function updateTotal() {
+            const teamCount = document.getElementById('teamCount').value;
+            const totalAmount = teamCount * 50;
+            document.getElementById('totalAmount').innerText = totalAmount;
+        }
+    </script>
+</body>
+</html>

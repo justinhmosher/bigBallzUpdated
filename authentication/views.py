@@ -18,14 +18,18 @@ from decouple import config
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from .forms import PlayerSearchForm, Pickform, Pick1Form, CreateTeam
-from .models import Pick,Paid,NFLPlayer,Game,PastPick
+from .models import Pick,Paid,NFLPlayer,Game,PastPick,BitcoinPayment
 from django.db.models import Count,F,ExpressionWrapper,fields
 from datetime import datetime
 from itertools import chain
 from collections import defaultdict
 from django.utils import timezone
 import json
-
+from block_io import BlockIo
+from .models import BitcoinPayment
+import logging
+from django.views.decorators.http import require_POST
+from django.views.decorators.csrf import csrf_exempt
 
 
 
@@ -296,13 +300,84 @@ def teamcount(request):
 			return redirect('checking')
 	return render(request,'authentication/teamcount.html')
 
-#@login_required
+
+
+
+logger = logging.getLogger(__name__)
+
 def payment(request):
-	STRIPE_SECRET_KEY = config('STRIPE_SECRET_KEY')
-	STRIPE_PUBLIC_KEY = config('STRIPE_PUBLIC_KEY')
-	return render(request,'authentication/payment.html',{'STRIPE_PUBLIC_KEY' : STRIPE_PUBLIC_KEY })
 
+	if request.method == 'POST':
+		try:
+			team_count = int(request.POST.get('teamCount', 1))
+		except ValueError:
+			team_count = 1
 
+		total_amount = team_count * 50  # $50 per team
+		
+		coin_api = config('COIN_BASE_API_KEY')
+		url = "https://api.commerce.coinbase.com/charges"
+
+		headers = {
+			"X-CC-Api-Key": coin_api,
+			'X-CC-Version': "2022-03-22",
+			'Content-Type': "application/json"
+			}
+		data = {
+			'name': 'Team Payment',
+			'description': f'Payment for {team_count} team(s)',
+			'local_price': {
+				'amount': str(total_amount),
+				'currency': 'USD'
+			},
+			'pricing_type': 'fixed_price'
+		}
+		response = requests.post(url, json=data, headers=headers)
+
+		if response.ok:
+			charge_info = response.json()['data']
+			info = Paid.objects.get(username = request.user.username)
+			info.numteams = team_count
+			info.save()
+			return redirect(charge_info['hosted_url'])  # Redirect the user to Coinbase payment page
+		else:
+			logger.error(f"Failed to create Coinbase charge: {response.text}")
+			# Consider adding a user-friendly message or redirect in case of failure.
+			return HttpResponse("There was an issue processing your payment. Please try again.", status=500)
+		if payment_successful:
+			
+			return redirect(checking)
+		else:
+			# Handle payment failure case
+			context = {
+				'team_count': 1,
+				'total_amount': 50,
+			} 
+			return render(request, 'authentication/payment.html', context)
+
+	else:
+		team_count = 1
+		total_amount = 50
+
+	context = {
+		'team_count': team_count,
+		'total_amount': total_amount,
+		} 
+
+	return render(request, 'authentication/payment.html', context)
+
+@csrf_exempt  # Disable CSRF protection for this endpoint
+@require_POST
+def coinbase_webhook(request):
+	payload = json.loads(request.body)
+	if payload['event']['type'] == 'charge:confirmed':
+		info = Paid.objects.get(username = request.user.username)
+		info.paid_status == True
+		info.save()
+		return redirect('checking')
+	else:
+		messages.error('Payment was not received')
+		return redirect('payment')
 
 @login_required
 def leaderboard(request):
@@ -331,6 +406,7 @@ def tournaments(request):
 	pot = game.pot
 
 	return render(request,'authentication/tournaments.html',{'days':days_until_start,"pot":pot})
+
 
 @login_required
 def game(request):
@@ -490,11 +566,12 @@ def checking(request):
 		return render(request,'authentication/picking.html')
 	elif paid.paid_status == False and (start_date <= current_day < end_date) and datetime.now().weekday() not in [1,2]:
 		return redirect('playerboard')
-	elif paid.paid_status == False and paid.numteams == 0:
-		return redirect('teamcount')
+	#elif paid.paid_status == False and paid.numteams == 0:
+	#return redirect('teamcount')
 	elif paid.paid_status == False:
-		amount = paid.numteams * 50
-		return render(request,'authentication/pay.html',{'num':paid.numteams,'amount':amount})
+		#amount = paid.numteams * 50
+		#return render(request,'authentication/pay.html',{'num':paid.numteams,'amount':amount})
+		return redirect('payment')
 	elif (paid.paid_status == True) and not (start_date <= current_day < end_date):
 		return render(request,'authentication/waiting.html',{'start_date':start_date})
 	else:

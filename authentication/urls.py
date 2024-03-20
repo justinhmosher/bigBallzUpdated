@@ -7,7 +7,6 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('',views.home,name="home"),
-    #path('signup',RedirectView.as_view(pattern_name='signup', permanent=True)),
     path('signup',views.signup,name="signup"),
     path('signin',views.signin,name="signin"),
     path('signout',views.signout,name="signout"),
@@ -23,5 +22,6 @@ urlpatterns = [
     path('passreset/<uidb64>/<token>',views.passreset,name='passreset'),
     path('teamcount',views.teamcount,name='teamcount'),
     path('tournaments',views.tournaments,name='tournaments'),
-    path('payment',views.payment,name='payment')
+    path('payment',views.payment,name='payment'),
+    path('webhooks/coinbase/', views.coinbase_webhook, name='coinbase_webhook'),
 ]+static(settings.MEDIA_URL,document_root = settings.MEDIA_ROOT)
