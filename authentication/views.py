@@ -25,7 +25,6 @@ from itertools import chain
 from collections import defaultdict
 from django.utils import timezone
 import json
-from block_io import BlockIo
 import logging
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
