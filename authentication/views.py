@@ -18,7 +18,7 @@ from decouple import config
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from .forms import PlayerSearchForm, Pickform, Pick1Form, CreateTeam
-from .models import Pick,Paid,NFLPlayer,Game,PastPick
+from .models import Pick,Paid,NFLPlayer,Game,PastPick,PromoCode,PromoUser
 from django.db.models import Count,F,ExpressionWrapper,fields
 from datetime import datetime
 from itertools import chain
@@ -43,12 +43,14 @@ def search(request):
 		return render(request, "authentication/search.html")
 
 def signup(request):
+
 	
 	if request.method == "POST":
 
 		email = request.POST.get('email')
 		password1 = request.POST.get('password1')
 		password2 = request.POST.get('password2')
+		promocode = request.POST.get('promoCode','').strip()
 
 		if User.objects.filter(email = email):
 			messages.error(request, "Email already registered!  Please try another.")
@@ -56,6 +58,13 @@ def signup(request):
 
 		if password1 != password2:
 			messages.error(request,"Passwors didn't match!")
+			return redirect('signup')
+
+		if not promocode:
+			promocode = "0000"
+
+		if promocode != "0000" and not PromoCode.objects.filter(code = promocode).exists():
+			messages.error(request, "Please enter a valid promocode")
 			return redirect('signup')
 
 		#Finding users location
@@ -112,10 +121,13 @@ def signup(request):
 			server.login(sender_email, sender_password)
 			# Send the email
 			server.sendmail(sender_email, receiver_email, text)
-			print("Email sent successfully!")
 			myuser.is_active = False
 
 			myuser.save()
+
+			codeuser = PromoUser(username = email,code = promocode)
+			codeuser.save()
+
 			messages.success(request, "Your Account has been successfully created!  We have sent you a confirmation email, please confirm your email in order to activate your account.")
 		except Exception as e:
 			print(f"Failed to send email: {e}")
@@ -257,6 +269,12 @@ def activate(request, uidb64, token):
 	if myuser is not None and generate_token.check_token(myuser,token):
 		myuser.is_active = True
 		myuser.save()
+		try:
+			promouser = PromoUser.objects.get(username = myuser.username)
+			promouser.active = True
+			promouser.save()
+		except ObjectDoesNotExist:
+			pass
 		login(request, myuser)
 		return redirect('signin')
 	else:
@@ -396,6 +414,7 @@ def leaderboard(request):
 
 	return render(request,'authentication/leaderboard.html',{'player_counts':sorted_player_counts,'total_in':total_in, 'user_data':user_data})
 
+@login_required
 def tournaments(request):
 	game = Game.objects.get(sport = "Football")
 	start_date = game.startDate

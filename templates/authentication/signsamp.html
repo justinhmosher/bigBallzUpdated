@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fantasy Sports League</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    {% load static %}
+    <style>
+        body {
+            background-color: #f8f9fa;
+            color: #333;
+        }
+        .hero-section {
+            background-image:url('{% static "authentication/images/logo.png" %}'); /* Add your hero image */
+            background-size: 70%;
+            background-position: center;
+            padding: 300px 0;
+            background-repeat: no-repeat;
+            color: #fff;
+        }
+        .game img {
+            width: 100%;
+            border-top-left-radius: .5rem;
+            border-top-right-radius: .5rem;
+            transition: transform .2s; /* Animation */
+        }
+        .game:hover img {
+            transform: scale(1.05); /* Animation */
+        }
+        .card {
+            margin-bottom: 40px;
+            transition: box-shadow .3s ease-in-out; /* Animation */
+        }
+        .card:hover {
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.2);
+        }
+        .card-title {
+            color: #007bff;
+        }
+        .testimonial {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            transition: background-color .3s; /* Animation */
+        }
+        .testimonial:hover {
+            background-color: #f0f0f0;
+        }
+        .btn-custom {
+            background-color: #007bff; /* Custom color */
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            transition: background-color .3s, transform .3s; /* Animation */
+        }
+        .btn-custom:hover {
+            background-color: #0056b3;
+            transform: translateY(-2px);
+        }
+        @media (max-width: 768px) {
+            .hero-section {
+                background-image: url('{% static "authentication/images/logo.png" %}'); /* Optional: A different, more mobile-friendly image */
+                background-size: contain; /* Adjust as needed, 'contain' or a specific pixel value might work better */
+                padding: 250px 20px; /* Reduce padding on smaller screens */
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="hero-section text-center">
+</div>
+<div class="d-flex justify-content-center">
+    <a href="signin" class="btn btn-primary btn-lg my-2" style="width: 200px;">Sign In</a> <!-- Custom width set directly -->
+</div>
+<div class="d-flex justify-content-center">
+  <p class="above-confetti">Don't have an account? <a href="signup">Sign up!</a></p>
+</div>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card game">
+                <img src="{% static 'Football_new.png' %}"alt="Game 1 Image" style="width: auto; height: 300px;"> <!-- Add your image -->
+                <div class="card-body">
+                    <h2 class="card-title">Game 1: Touchdown Duel</h2>
+                    <p class="card-text">Battle for the end zone glory! Pick two players to score weekly touchdowns. Survive each week to claim victory!</p>
+                </div>
+            </div>
+        </div>
+                <div class="col-md-4">
+            <div class="card game">
+                <img src="{% static 'baseball_new.png' %}" alt="Game 1 Image"> <!-- Add your image -->
+                <div class="card-body">
+                    <h2 class="card-title">Game 1: Touchdown Duel</h2>
+                    <p class="card-text">Battle for the end zone glory! Pick two players to score weekly touchdowns. Survive each week to claim victory!</p>
+                </div>
+            </div>
+        </div>
+                <div class="col-md-4">
+            <div class="card game">
+                <img src="path_to_game_1_image.jpg" alt="Game 1 Image"> <!-- Add your image -->
+                <div class="card-body">
+                    <h2 class="card-title">Game 1: Touchdown Duel</h2>
+                    <p class="card-text">Battle for the end zone glory! Pick two players to score weekly touchdowns. Survive each week to claim victory!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Repeat for other games with their respective images -->
+
+    </div>
+
+    <hr>
+
+    <h2 class="text-center mb-4">Testimonials</h2>
+
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="testimonial">
+                <p>"I love playing fantasy sports on this website! The games are exciting, and the competition is fierce. Highly recommended!"</p>
+                <p class="text-end"><em>- John D.</em></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap JS and dependencies -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"></script>
+</body>
+</html>

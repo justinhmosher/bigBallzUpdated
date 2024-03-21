@@ -45,7 +45,7 @@
       border-radius: 10px; /* Rounded corners */
       /*padding: 20px;  Add padding inside the container */
       width: 400px; /* Set the desired width */
-      height: 500px; /* Set the desired height */
+      height: 550px; /* Set the desired height */
       margin: auto; /* Center the container horizontally */
     }
     .alert-container {
@@ -89,15 +89,19 @@
 {% csrf_token %}  
   <div class="mb-3">
     <label class="form-label">Email address</label>
-    <input type="email" class="form-control custom-width" id="email" name="email" aria-describedby="emailHelp">
+    <input type="email" class="form-control custom-width" id="email" name="email" aria-describedby="emailHelp" required>
   </div>
   <div class="mb-3">
     <label class="form-label">Password</label>
-    <input type="password" class="form-control custom-width" id="password1" name = "password1" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" title="Must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters">
+    <input type="password" class="form-control custom-width" id="password1" name = "password1" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" title="Must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters" required>
   </div>
     <div class="mb-3">
     <label class="form-label">Confirm Your Password</label>
-    <input type="password" class="form-control custom-width" id="password2" name = "password2">
+    <input type="password" class="form-control custom-width" id="password2" name = "password2" required> 
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Promo Code (Optional)</label>
+    <input type="text" class="form-control custom-width" id="promoCode" name="promoCode" placeholder="Enter promo code">
   </div>
   <button type="submit" class="btn btn-primary btn-submit">Submit</button>
 </form>

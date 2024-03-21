@@ -70,4 +70,18 @@ class Game(models.Model):
     def __str__(self):
         return f"{self.sport}"
 
+class PromoCode(models.Model):
+    name = models.CharField(max_length=100,default = "name of influencer")
+    code = models.CharField(max_length=100,default = "Code")
+    def __str__(self):
+        return f"{self.name}"
+
+class PromoUser(models.Model):
+    username = models.CharField(max_length = 100, default = "username")
+    code = models.CharField(max_length=100,default = "Code")
+    active = models.BooleanField(default = False)
+    def __str__(self):
+        return f"{self.username}"
+
+
 
