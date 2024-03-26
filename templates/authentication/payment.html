@@ -7,7 +7,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <style>
-        body {
+        /*body {
             display: flex;
             justify-content: center;
             align-items: center;
@@ -15,6 +15,9 @@
             margin: 0;
             background-color: #f4f7f6;
             font-family: 'Arial', sans-serif;
+        }*/
+        .center-container{
+            padding-top: 200px;
         }
         .payment-container {
             width: 100%;
@@ -34,17 +37,20 @@
         }
     </style>
 </head>
-<div class="text-center">
-{% for message in messages %}
-<div class="alert alert-{{ message.tags }} alert-dismissible fade show d-inline-block" role="alert">
-<strong>Message:</strong> {{ message }}
-<button type="button" class="close" data-dismiss="alert" aria-label="Close">
-<span aria-hidden="true">&times;</span>
-</button>
-</div>
-{% endfor %}
-</div>
 <body>
+<div class="text-center">
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show d-inline-block" role="alert">
+        <strong>Message:</strong> {{ message }}
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    {% endfor %}
+</div>
+
+
+    <div class="center-container">
     <div class="container payment-container">
         <div class="icon-container">
             <i class="fas fa-users"></i>
@@ -68,9 +74,10 @@
                 <p>Total Amount: $<span id="totalAmount">50</span>.00</p>
             </div>
             <div class="d-grid">
-                <button type="submit" class="btn btn-primary">Confirm Payment</button>
+                <button type="submit" class="btn btn-primary">Confirm</button>
             </div>
         </form>
+    </div>
     </div>
     <script>
         function updateTotal() {
@@ -79,5 +86,6 @@
             document.getElementById('totalAmount').innerText = totalAmount;
         }
     </script>
+
 </body>
 </html>

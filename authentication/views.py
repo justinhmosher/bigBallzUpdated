@@ -80,7 +80,7 @@ def signup(request):
 			user_state = location_data.get('region_name')
 			print(user_state)
 
-			disallowed_states = []
+			disallowed_states = ['California']
 
 			if user_state in disallowed_states:
 				messages.error(request,"You are in a disallowed state.")
@@ -321,6 +321,7 @@ def teamcount(request):
 
 logger = logging.getLogger(__name__)
 
+@login_required
 def payment(request):
 
 	if request.method == 'POST':
@@ -330,7 +331,7 @@ def payment(request):
 			team_count = 1
 
 		total_amount = team_count * 50  # $50 per team
-		
+		"""
 		coin_api = config('COIN_BASE_API_KEY')
 		url = "https://api.commerce.coinbase.com/charges"
 
@@ -370,6 +371,11 @@ def payment(request):
 				'total_amount': 50,
 			} 
 			return render(request, 'authentication/payment.html', context)
+		"""
+		info = Paid.objects.get(username = request.user.username)
+		info.numteams = team_count
+		info.save()
+		messages.success(request,"Please contact (805)377-6155 or email commissioner@thechosenfg.com for payment options")
 
 	else:
 		team_count = 1
