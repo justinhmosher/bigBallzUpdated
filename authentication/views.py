@@ -547,6 +547,11 @@ def game_search(username,playerdata):
 	for pick in user_pick_data:
 		past_picks = PastPick.objects.filter(username = username,teamnumber = pick.teamnumber)
 		scorers = []
+		for past in past_picks:
+			if past.pick1 != "N/A":
+				scorers.append(past.pick1)
+			elif past.pick2 != "N/A":
+				scorers.append(past.pick2)
 		try:
 			player_data_pick2 = NFLPlayer.objects.get(name=pick.pick2)
 			if player_data_pick2.team_name == playerdata.team_name:
@@ -609,7 +614,7 @@ def checking(request):
 				if i.isin == True:
 					count_ins +=1
 			if count_ins >= 1:
-				if current_day in [1,2] and count > 1 and week != 23:
+				if current_day not in [1,2] and count > 1 and week != 23:
 					return redirect('game')
 				elif count == 1 or week == 23:
 					winners_list = Pick.objects.filter(isin=True)

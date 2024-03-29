@@ -120,6 +120,28 @@
           position: relative; /* z-index only works on positioned elements (not static) */
           z-index: 1; /* Higher than the confetti's z-index */
         }
+        .footer {
+          background-color: #ffffff; /* Light gray background; adjust as needed */
+          padding: 20px 0; /* Padding above and below the text */
+          position: relative;
+          bottom: 0;
+          width: 100%;
+          }
+
+        .footer p {
+          margin: 0; /* Removes default paragraph margin */
+          color: #333; /* Dark text color; adjust as needed */
+          }
+
+        .footer a {
+           color: #007bff; /* Link color; adjust as needed */
+          }
+
+        .container {
+         width: 80%;
+          margin: auto; /* Centers the content */
+        }
+
 
     </style>
 
@@ -222,4 +244,9 @@
 <script src="/docs/5.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
 
     </body>
+<footer class="footer text-center">
+    <div class="container text-center">
+        <p><a href="/" >Terms and Conditions</a>   <a href="">Privacy Policy</a></p>
+    </div>
+</footer>
 </html>
