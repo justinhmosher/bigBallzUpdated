@@ -43,6 +43,7 @@ class Paid(models.Model):
     username = models.CharField(max_length = 100, default = "username")
     paid_status = models.BooleanField(default = False)
     numteams = models.IntegerField(default = 0)
+    price = models.IntegerField(default = 0)
     def __str__(self):
         return f"{self.username}"
 

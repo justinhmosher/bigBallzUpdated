@@ -35,6 +35,10 @@
             font-size: 70px;
             color: #0056b3;
         }
+        .original-price {
+        text-decoration: line-through;
+        color: red;
+        }
     </style>
 </head>
 <body>
@@ -70,22 +74,70 @@
                     </script>
                 </select>
             </div>
-            <div class="mb-3 text-center">
-                <p>Total Amount: $<span id="totalAmount">50</span>.00</p>
-            </div>
+{% csrf_token %}  
+  <div class="mb-3">
+    <label class="form-label">Enter Promo Code</label>
+    <input type="charset" class="form-control custom-width" id="code" name = "code">
+  </div>
+<div class="mb-3 text-center">
+    <p>
+        {% if promo %}
+            <span class="original-price">$62.50</span>
+        {% endif %}
+        Total Amount: <span id="totalAmount"></span>
+    </p>
+</div>
+
+
             <div class="d-grid">
                 <button type="submit" class="btn btn-primary">Confirm</button>
             </div>
         </form>
     </div>
     </div>
-    <script>
-        function updateTotal() {
-            const teamCount = document.getElementById('teamCount').value;
-            const totalAmount = teamCount * 50;
-            document.getElementById('totalAmount').innerText = totalAmount;
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const isPromoApplied = {% if promo %}true{% else %}false{% endif %}; // This value should be dynamically set based on backend logic
+    const promoPricePerTeam = 50;
+    const regularPricePerTeam = 62.5;
+    
+    // Function to update pricing information
+    function updateTotal() {
+        const teamCount = parseInt(document.getElementById('teamCount').value);
+        const totalRegularAmount = teamCount * regularPricePerTeam;
+        const totalDiscountedAmount = isPromoApplied ? teamCount * promoPricePerTeam : totalRegularAmount;
+        const savings = totalRegularAmount - totalDiscountedAmount;
+        
+        // Update the display for the total regular amount and total discounted amount
+        document.getElementById('totalAmount').innerText = `$${totalDiscountedAmount.toFixed(2)}`;
+        
+        // Update the original price text to reflect the total regular amount
+        if (isPromoApplied) {
+            document.querySelector('.original-price').innerText = `$${totalRegularAmount.toFixed(2)}`;
+            document.getElementById('savings').innerText = `You save: $${savings.toFixed(2)}`;
+        } else {
+            document.querySelector('.original-price').style.display = 'none'; // Hide if no promo
         }
-    </script>
+    }
+
+    // Optionally, create a savings element if it does not exist in the HTML
+    if (isPromoApplied && !document.getElementById('savings')) {
+        let savingsElement = document.createElement('p');
+        savingsElement.setAttribute('id', 'savings');
+        document.querySelector('.mb-3.text-center').appendChild(savingsElement);
+    }
+
+    // Event listener for when the team count changes
+    document.getElementById('teamCount').addEventListener('change', updateTotal);
+
+    // Initial call to set the correct amounts
+    updateTotal();
+});
+</script>
+
+
+
 
 </body>
 </html>

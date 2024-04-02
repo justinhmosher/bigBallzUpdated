@@ -323,68 +323,52 @@ logger = logging.getLogger(__name__)
 
 @login_required
 def payment(request):
+	user = PromoUser.objects.get(username = request.user.username)
+	code = user.code
+	codeuser = False
+	if code != "0000":
+		codeuser = True
 
 	if request.method == 'POST':
+		promocode = request.POST.get('code',"").strip()
+		if not promocode:
+			promocode = "0000"
+
+		if promocode != "0000" and not PromoCode.objects.filter(code = promocode).exists():
+			messages.error(request, "Please enter a valid promocode")
+			return redirect('payment')
+
+		promouser = PromoUser.objects.get(username = request.user.username)
+		promouser.code = promocode
+		promouser.save()
+		if promocode != "0000":
+			codeuser = True
 		try:
 			team_count = int(request.POST.get('teamCount', 1))
 		except ValueError:
 			team_count = 1
-
-		total_amount = team_count * 50  # $50 per team
-		"""
-		coin_api = config('COIN_BASE_API_KEY')
-		url = "https://api.commerce.coinbase.com/charges"
-
-		headers = {
-			"X-CC-Api-Key": coin_api,
-			'X-CC-Version': "2022-03-22",
-			'Content-Type': "application/json"
-			}
-		data = {
-			'name': 'Team Payment',
-			'description': f'Payment for {team_count} team(s)',
-			'local_price': {
-				'amount': str(total_amount),
-				'currency': 'USD'
-			},
-			'pricing_type': 'fixed_price'
-		}
-		response = requests.post(url, json=data, headers=headers)
-
-		if response.ok:
-			charge_info = response.json()['data']
-			info = Paid.objects.get(username = request.user.username)
-			info.numteams = team_count
-			info.save()
-			return redirect(charge_info['hosted_url'])  # Redirect the user to Coinbase payment page
+		if promocode != "0000":
+			total_amount = team_count * 50
 		else:
-			logger.error(f"Failed to create Coinbase charge: {response.text}")
-			# Consider adding a user-friendly message or redirect in case of failure.
-			return HttpResponse("There was an issue processing your payment. Please try again.", status=500)
-		if payment_successful:
-			
-			return redirect(checking)
-		else:
-			# Handle payment failure case
-			context = {
-				'team_count': 1,
-				'total_amount': 50,
-			} 
-			return render(request, 'authentication/payment.html', context)
-		"""
+			total_amount = team_count * 62.5  # $50 per team
+		print(total_amount)
 		info = Paid.objects.get(username = request.user.username)
 		info.numteams = team_count
+		info.price = total_amount
 		info.save()
 		messages.success(request,"Please contact (805)377-6155 or email commissioner@thechosenfg.com for payment options")
+		
 
 	else:
 		team_count = 1
-		total_amount = 50
+		total_amount = 62.5
 
 	context = {
 		'team_count': team_count,
 		'total_amount': total_amount,
+		'promo':codeuser
 		} 
+	print(context)
 
 	return render(request, 'authentication/payment.html', context)
 
@@ -614,7 +598,7 @@ def checking(request):
 				if i.isin == True:
 					count_ins +=1
 			if count_ins >= 1:
-				if current_day not in [1,2] and count > 1 and week != 23:
+				if current_day in [1,2] and count > 1 and week != 23:
 					return redirect('game')
 				elif count == 1 or week == 23:
 					winners_list = Pick.objects.filter(isin=True)
