@@ -36,6 +36,11 @@ from django.core.exceptions import ObjectDoesNotExist
 def home(request):
 	return render(request, "authentication/homepage.html")
 
+def terms(request):
+	return render(request,"authentication/terms.html")
+def privacy(request):
+	return render(request,"authentication/privacy.html")
+
 def search(request):
 	if request.method == "POST":
 		search = request.POST.get('searched')
