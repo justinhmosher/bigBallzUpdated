@@ -1,5 +1,5 @@
 from django.shortcuts import redirect, render, get_object_or_404
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
@@ -363,8 +363,13 @@ def payment(request):
 		info.numteams = team_count
 		info.price = total_amount
 		info.save()
-		messages.success(request,"Please contact (805)377-6155 or email commissioner@thechosenfg.com for payment options")
-		
+		username = request.user.username
+		note = f"username: {username}"
+
+		venmo_url = f"https://venmo.com/thechosenfantasy?txn=pay&amount={total_amount}&note={note}"
+
+		return HttpResponseRedirect(venmo_url)
+		#messages.success(request,"Please contact (805)377-6155 or email commissioner@thechosenfg.com for payment options")
 
 	else:
 		team_count = 1
