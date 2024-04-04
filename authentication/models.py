@@ -66,7 +66,7 @@ class Game(models.Model):
     sport = models.CharField(max_length=100,default = "type a sport")
     startDate = models.DateField(default=date.today)
     endDate = models.DateField(default=date.today)
-    pot = models.IntegerField(default=1000)
+    pot = models.CharField(max_length=100, default="1000")
     week = models.IntegerField(default = 1)
     def __str__(self):
         return f"{self.sport}"
