@@ -365,7 +365,7 @@ def payment(request):
 		username = request.user.username
 		note = f"Payment for The Chosen Fantasy Sports - For User: {username}"
 
-		venmo_url = f"https://venmo.com/thechosenfantasy?txn=pay&amount={total_amount}&note="
+		venmo_url = f"https://venmo.com/thechosenfantasy?txn=pay&amount={total_amount}&note={username}"
 
 		return HttpResponseRedirect(venmo_url)
 		#messages.success(request,"Please contact (805)377-6155 or email commissioner@thechosenfg.com for payment options")
