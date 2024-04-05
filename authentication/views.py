@@ -85,9 +85,8 @@ def signup(request):
 		if response.status_code==200:
 			location_data = response.json()
 			user_state = location_data.get('region_name')
-			print(user_state)
 
-			disallowed_states = ['California']
+			disallowed_states = ['']
 
 			if user_state in disallowed_states:
 				messages.error(request,"You are in a disallowed state.")
@@ -357,14 +356,14 @@ def payment(request):
 		if promocode != "0000":
 			total_amount = team_count * 50
 		else:
-			total_amount = team_count * 62.5  # $50 per team
+			total_amount = team_count * 60  # $50 per team
 		print(total_amount)
 		info = Paid.objects.get(username = request.user.username)
 		info.numteams = team_count
 		info.price = total_amount
 		info.save()
 		username = request.user.username
-		note = f"username: {username}"
+		note = f"Payment for The Chosen Fantasy Sports - For User: {username}"
 
 		venmo_url = f"https://venmo.com/thechosenfantasy?txn=pay&amount={total_amount}&note={note}"
 
@@ -373,7 +372,7 @@ def payment(request):
 
 	else:
 		team_count = 1
-		total_amount = 62.5
+		total_amount = 60
 
 	context = {
 		'team_count': team_count,

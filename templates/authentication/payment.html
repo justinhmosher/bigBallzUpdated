@@ -96,7 +96,7 @@
 <div class="mb-3 text-center">
     <p>
         {% if promo %}
-            <span class="original-price">$62.50</span>
+            <span class="original-price">$60.00</span>
         {% endif %}
         Total Amount: <span id="totalAmount"></span>
     </p>
@@ -114,7 +114,7 @@
 document.addEventListener('DOMContentLoaded', function() {
     const isPromoApplied = {% if promo %}true{% else %}false{% endif %}; // This value should be dynamically set based on backend logic
     const promoPricePerTeam = 50;
-    const regularPricePerTeam = 62.5;
+    const regularPricePerTeam = 60;
     
     // Function to update pricing information
     function updateTotal() {
