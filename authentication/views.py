@@ -41,6 +41,9 @@ def terms(request):
 def privacy(request):
 	return render(request,"authentication/privacy.html")
 
+def confirm_email(request, email):
+	return render(request, "authentication/confirm_email.html",{"email":email})
+
 def search(request):
 	if request.method == "POST":
 		search = request.POST.get('searched')
@@ -134,7 +137,9 @@ def signup(request):
 			codeuser = PromoUser(username = email,code = promocode)
 			codeuser.save()
 
-			messages.success(request, "Your Account has been successfully created!  We have sent you a confirmation email, please confirm your email in order to activate your account.")
+			return redirect(confirm_email,email = email)
+
+			#messages.success(request, "Your Account has been successfully created!  We have sent you a confirmation email, please confirm your email in order to activate your account.")
 		except Exception as e:
 			print(f"Failed to send email: {e}")
 			messages.error(request, "There was a problem sending your confirmation email.  Please try again.")
