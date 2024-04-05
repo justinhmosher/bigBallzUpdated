@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <head>
     <meta charset="UTF-8">
     <title>Sign Up Success</title>
@@ -16,14 +15,11 @@
   <div class="modal-dialog modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLongTitle">Please check your EMAIL AND JUNK MAIL to confirm your account.
-        Email: {{ email }}</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
+        <h5 class="modal-title" id="exampleModalLongTitle">Please check your EMAIL AND JUNK MAIL to confirm your account. Email: {{ email }}</h5>
+        <!-- Removed the button for closing modal -->
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <!-- Optionally, remove the close button here as well if you want to force action other than closing. -->
       </div>
     </div>
   </div>
@@ -31,10 +27,14 @@
 
 <script>
 $(document).ready(function(){
-    // Show the modal on page load
-    $('#signupSuccessModal').modal('show');
+    // Initialize the modal with options to prevent closing it.
+    $('#signupSuccessModal').modal({
+        backdrop: 'static', // Prevent closing by clicking outside.
+        keyboard: false     // Prevent closing by pressing the Escape key.
+    });
 });
 </script>
 
 </body>
 </html>
+
