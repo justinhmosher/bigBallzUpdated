@@ -368,7 +368,7 @@ def payment(request):
 		info.price = total_amount
 		info.save()
 		username = request.user.username
-		note = f"Entry"
+		note = f"Entry-for-{username}"
 
 		venmo_url = f"https://venmo.com/thechosenfantasy?txn=pay&amount={total_amount}&note={note}"
 
