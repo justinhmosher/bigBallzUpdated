@@ -430,6 +430,29 @@ def tournaments(request):
 
 	return render(request,'authentication/tournaments.html',{'days':days_until_start,"pot":pot})
 
+def location(request):
+	user_ip_address = request.META.get('HTTP_X_FORWARDED_FOR') or request.META.get('REMOTE_ADDR')
+
+	access_key = config('API_KEY')
+	ipstack_url = f'http://api.ipstack.com/{user_ip_address}?access_key={access_key}'
+	response = requests.get(ipstack_url)
+		
+	if response.status_code==200:
+		location_data = response.json()
+		user_state = location_data.get('region_name')
+
+		disallowed_states = ['Washington','Idaho','Nevada','Montana','Wyoming','Colorado','Iowa','Missouri','Tenessee','Mississippi','Louisiana','Alabama','Florida','Michigan','Ohio','West Virginia','Pensylvania','Maryland','Deleware','New Jersey','Conneticut','Ney York','Maine','New Hampshire','Massachusetts']
+
+		if user_state in disallowed_states:
+			messages.error(request,"You are in a disallowed state.")
+			return redirect('tournaments')
+
+	else:
+		messages.error(request,"Failed to register location data")
+		return redirect('home')
+
+	return redirect('checking')
+
 
 @login_required
 def game(request):
