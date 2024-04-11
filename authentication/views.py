@@ -449,7 +449,7 @@ def location(request):
 
 	else:
 		messages.error(request,"Failed to register location data")
-		return redirect('home')
+		return redirect('tournaments')
 
 	return redirect('checking')
 
