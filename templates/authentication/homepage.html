@@ -31,11 +31,14 @@
 <link rel="icon" href="/docs/5.3/assets/img/favicons/favicon.ico">
 <meta name="theme-color" content="#712cf9">
 --->
-<link rel="icon" type="image/svg+xml" href="{% static 'Favicon.svg' %}">
+<link rel="icon" type="image/svg+xml" href="{% static 'Favicon-new.svg' %}">
 
 
 
     <style>
+      body{
+        background-color: #000000;
+      }
       .bd-placeholder-img {
         font-size: 1.125rem;
         text-anchor: middle;
@@ -125,7 +128,7 @@
           z-index: 1; /* Higher than the confetti's z-index */
         }
         .footer {
-          background-color: #ffffff; /* Light gray background; adjust as needed */
+          background-color: #000000; /* Light gray background; adjust as needed */
           padding: 100px 0; /* Padding above and below the text */
           position: relative;
           bottom: 0;
@@ -138,7 +141,7 @@
           }
 
         .footer a {
-           color: #007bff; /* Link color; adjust as needed */
+           color: #ffffff; /* Link color; adjust as needed */
           }
 
         .container {
@@ -241,14 +244,14 @@
 
 <div class="text-center">
         <a href="/">
-            <img src="{% static 'logo-new.svg' %}" alt="logo" style="width: 400px; height: auto;" class="img-fluid animated-logo"/>
+            <img src="{% static 'Homepage-new.svg' %}" alt="logo" style="width: 400px; height: auto;" class="img-fluid animated-logo"/>
         </a>
 </div>
 
- <p class="lead">Enter the fantasy sports arena: Season-long battles, key stats, one champion. Are you The Chosen?</p>
+ <p class="lead text-white">Enter the fantasy sports arena: Season-long battles, key stats, one champion. Are you The Chosen?</p>
 <a href="signin" class="btn btn-primary btn-lg my-2 w-50 above-confetti">Sign In</a>
 <div class="d-flex justify-content-center">
-  <p class="above-confetti">Don't have an account? <a href="signup">Sign up!</a></p>
+  <p class="above-confetti text-white">Don't have an account? <a href="signup">Sign up!</a></p>
 </div>
 
 
