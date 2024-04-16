@@ -432,6 +432,8 @@ def tournaments(request):
 	return render(request,'authentication/tournaments.html',{'days':days_until_start,"pot":pot})
 
 def location(request):
+	messages.error(request,"We are experiencing technical difficulties")
+	return redirect("tournaments")
 	user_ip_address = request.META.get('HTTP_X_FORWARDED_FOR') or request.META.get('REMOTE_ADDR')
 
 	access_key = config('API_KEY')
