@@ -309,7 +309,14 @@ def playerboard(request):
 	
 	total_in = Pick.objects.filter(isin = True).count()
 
-	return render(request,'authentication/playerboard.html',{'player_counts':sorted_player_counts,'total_in':total_in})
+	if total_in > 20:
+		total_users = Pick.objects.count()
+		count = (total_in/total_users)*100
+	else:
+		count = total_in
+
+
+	return render(request,'authentication/playerboard.html',{'player_counts':sorted_player_counts,'count':count,'total_in':total_in})
 
 @login_required
 def teamcount(request):
@@ -416,10 +423,16 @@ def leaderboard(request):
 	sorted_player_counts = sorted(player_counts.items(), key=lambda x: x[1], reverse=True)
 	
 	total_in = Pick.objects.filter(isin = True).count()
+	
+	if total_in > 20:
+		total_users = Pick.objects.count()
+		count = (total_in/total_users)*100
+	else:
+		count = total_in
 
 	user_data = Pick.objects.filter(username = request.user.username, isin = True)
 
-	return render(request,'authentication/leaderboard.html',{'player_counts':sorted_player_counts,'total_in':total_in, 'user_data':user_data})
+	return render(request,'authentication/leaderboard.html',{'player_counts':sorted_player_counts,'total_in':total_in,'count':count,'user_data':user_data})
 
 @login_required
 def tournaments(request):
@@ -432,8 +445,8 @@ def tournaments(request):
 	return render(request,'authentication/tournaments.html',{'days':days_until_start,"pot":pot})
 
 def location(request):
-	messages.error(request,"We are experiencing technical difficulties")
-	return redirect("tournaments")
+	#messages.error(request,"We are experiencing technical difficulties")
+	#return redirect("tournaments")
 	user_ip_address = request.META.get('HTTP_X_FORWARDED_FOR') or request.META.get('REMOTE_ADDR')
 
 	access_key = config('API_KEY')
@@ -446,12 +459,11 @@ def location(request):
 
 		disallowed_states = ['Washington','Idaho','Nevada','Montana','Wyoming','Colorado','Iowa','Missouri','Tenessee','Mississippi','Louisiana','Alabama','Florida','Michigan','Ohio','West Virginia','Pensylvania','Maryland','Deleware','New Jersey','Conneticut','Ney York','Maine','New Hampshire','Massachusetts']
 
-		#allowed_states = ['California','Oregon','Alaska','Arizona','Utah','New Mexico','Texas','Oklahoma','Arkansas','Kansas','Nebraska','South Dakota','North Dekota','Minnesota','Wisconsin','Illinois','Indiana','Kentucky','Virginia','North Carolina','South Carolina','Georgia','Vermont','Rhode Island']
+		allowed_states = [None,'California','Oregon','Alaska','Arizona','Utah','New Mexico','Texas','Oklahoma','Arkansas','Kansas','Nebraska','South Dakota','North Dekota','Minnesota','Wisconsin','Illinois','Indiana','Kentucky','Virginia','North Carolina','South Carolina','Georgia','Vermont','Rhode Island']
 
-		if user_state in disallowed_states:
+		if user_state not in allowed_states:
 			messages.error(request,"You are in a disallowed state.")
 			return redirect('tournaments')
-			
 
 	else:
 		messages.error(request,"Failed to register location data")
