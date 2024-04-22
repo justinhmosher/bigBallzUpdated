@@ -31,7 +31,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.core.exceptions import ObjectDoesNotExist
 
 
-
+def testing(request):
+	return render(request,'authentication/testing.html')
 
 def home(request):
 	return render(request, "authentication/homepage.html")
@@ -522,11 +523,21 @@ def game(request):
 		except json.JSONDecodeError:
 			messages.error(request, "Invalid change pick data.")
 
+	game = Game.objects.get(sport = "Football")
+	start = game.startDate
+	current_day = timezone.now().date()
+	if current_day <= start:
+		has_started = False
+	else:
+		has_started = True
+
+
 	return render(request, 'authentication/game.html', 
 		{'player_data': player_data, 
-		'user_pick_data' : user_pick_data
+		'user_pick_data' : user_pick_data,
+		'has_started' : has_started,
+		'start':start
 		})
-
 
 def game_search(username,playerdata):
 	user_pick_data = Pick.objects.filter(username = username,isin = True).order_by('teamnumber')
@@ -635,14 +646,11 @@ def checking(request):
 		return render(request,'authentication/picking.html')
 	elif paid.paid_status == False and (start_date <= current_day < end_date) and datetime.now().weekday() not in [1,2]:
 		return redirect('playerboard')
-	#elif paid.paid_status == False and paid.numteams == 0:
-	#return redirect('teamcount')
 	elif paid.paid_status == False:
-		#amount = paid.numteams * 50
-		#return render(request,'authentication/pay.html',{'num':paid.numteams,'amount':amount})
 		return redirect('payment')
 	elif (paid.paid_status == True) and not (start_date <= current_day < end_date):
-		return render(request,'authentication/waiting.html',{'start_date':start_date})
+		#return render(request,'authentication/waiting.html',{'start_date':start_date})
+		return redirect('game')
 	else:
 		username = request.user.username
 		current_day = datetime.now().weekday()

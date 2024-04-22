@@ -168,6 +168,12 @@
         <img src="{% static 'home.png' %}" alt="logo" class="image-boarder">
         </a>
     </div>
+<br>
+{% if has_started == False %}
+<h2 class="text-center"> Game starts: {{ start }}</h2>
+{% else %}
+<h2 class="text-center"> Selection ends on 11:59pm EST</h2>
+{% endif %}
 
   <section class="py-5 text-center container">
     <div class="row py-lg-5">
@@ -270,4 +276,7 @@
 <script src="/docs/5.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
 
     </body>
+<footer>
+    <span id="siteseal"><script async type="text/javascript" src="https://seal.godaddy.com/getSeal?sealID=IvUWLrHoAhEyfoTCF71whgUmlfqktvy48uuIDDmd3KWazEiUTPLD8PwMOOfY"></script></span>
+</footer>
 </html>
