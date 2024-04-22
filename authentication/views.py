@@ -446,8 +446,6 @@ def tournaments(request):
 	return render(request,'authentication/tournaments.html',{'days':days_until_start,"pot":pot})
 
 def location(request):
-	#messages.error(request,"We are experiencing technical difficulties")
-	#return redirect("tournaments")
 	user_ip_address = request.META.get('HTTP_X_FORWARDED_FOR') or request.META.get('REMOTE_ADDR')
 
 	access_key = config('API_KEY')
@@ -457,12 +455,19 @@ def location(request):
 	if response.status_code==200:
 		location_data = response.json()
 		user_state = location_data.get('region_name')
+		#is_proxy = location_data['security'].get('is_proxy', False)
+		security_data = location_data.get('security', {})
+		is_proxy = security_data.get('is_proxy', False)
+		print(is_proxy)
 
 		disallowed_states = ['Washington','Idaho','Nevada','Montana','Wyoming','Colorado','Iowa','Missouri','Tenessee','Mississippi','Louisiana','Alabama','Florida','Michigan','Ohio','West Virginia','Pensylvania','Maryland','Deleware','New Jersey','Conneticut','Ney York','Maine','New Hampshire','Massachusetts']
 
 		allowed_states = [None,'California','Oregon','Alaska','Arizona','Utah','New Mexico','Texas','Oklahoma','Arkansas','Kansas','Nebraska','South Dakota','North Dekota','Minnesota','Wisconsin','Illinois','Indiana','Kentucky','Virginia','North Carolina','South Carolina','Georgia','Vermont','Rhode Island']
 
-		if user_state not in allowed_states:
+		if user_state in allowed_states and not is_proxy:
+			return redirect('checking')
+
+		else:
 			messages.error(request,"You are in a disallowed state.")
 			return redirect('tournaments')
 
@@ -470,8 +475,31 @@ def location(request):
 		messages.error(request,"Failed to register location data")
 		return redirect('tournaments')
 
-	return redirect('checking')
+"""
+def location(request):
+    user_ip_address = request.META.get('HTTP_X_FORWARDED_FOR') or request.META.get('REMOTE_ADDR')
+    access_key = config(FOCSEC_API_KEY)  # Ensure this is added to your settings.py and loaded securely
+    focsec_url = f"https://api.focsec.com/v1/ip/{user_ip_address}?api_key={access_key}"
+    response = requests.get(focsec_url)
 
+    if response.status_code == 200:
+        location_data = response.json()
+        user_country = location_data.get('region_name')  # Make sure this key matches the one used in Focsec's JSON response
+
+        disallowed_states = ['Washington', 'Idaho', 'Nevada', 'Montana', 'Wyoming', 'Colorado', 'Iowa', 'Missouri',
+                             'Tennessee', 'Mississippi', 'Louisiana', 'Alabama', 'Florida', 'Michigan', 'Ohio',
+                             'West Virginia', 'Pennsylvania', 'Maryland', 'Delaware', 'New Jersey', 'Connecticut',
+                             'New York', 'Maine', 'New Hampshire', 'Massachusetts']
+
+        if user_state in disallowed_states:
+            messages.error(request, "You are in a disallowed state.")
+            return redirect('tournaments')
+    else:
+        messages.error(request, "Failed to register location data")
+        return redirect('tournaments')
+
+    return redirect('checking')
+"""
 
 @login_required
 def game(request):
