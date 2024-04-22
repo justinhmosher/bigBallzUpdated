@@ -649,7 +649,10 @@ def checking(request):
 	elif paid.paid_status == False:
 		return redirect('payment')
 	elif (paid.paid_status == True) and not (start_date <= current_day < end_date):
-		#return render(request,'authentication/waiting.html',{'start_date':start_date})
+		username = request.user.username
+		current_day = datetime.now().weekday()
+		if not Pick.objects.filter(username = username).exists():
+			return redirect('teamname')
 		return redirect('game')
 	else:
 		username = request.user.username
