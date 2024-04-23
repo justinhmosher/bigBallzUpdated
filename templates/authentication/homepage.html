@@ -51,6 +51,10 @@
         .bd-placeholder-img-lg {
           font-size: 3.5rem;
         }
+            .map-container {
+        width: 100%; /* Takes full width on smaller screens */
+        height: auto; /* Adjusts height accordingly */
+    }
       }
 
       .b-example-divider {
@@ -199,9 +203,58 @@
     width: 100%; /* This will make the SVG resize within the container */
     height: auto; /* This will maintain the aspect ratio of the SVG */
   }
+.map-container {
+    width: 100%; /* Make the width responsive */
+    height: auto; /* Keeps the aspect ratio */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    max-width: 600px; /* Maximum width of the container */
+}
+
+/* Add a media query for smaller screens */
+@media (max-width: 600px) {
+    .map-container {
+        width: 100%; /* Takes full width on smaller screens */
+        height: auto; /* Adjusts height accordingly */
+    }
+}
+
+  }
   .animated-logo {
     animation: floatAnimation 3s ease-in-out infinite;
   }
+.map-container {
+    position: relative; /* Establish a positioning context */
+    width: 100%; /* Full width of its parent */
+    max-width: 800px; /* Maximum width */
+    margin: 0 auto; /* Centering block-level elements */
+    overflow: hidden; /* Prevent overflow */
+    /* Set a specific height if needed, or remove it to let the content define the height */
+}
+
+/* SVG specific styles */
+.map-container svg {
+    display: block; /* Remove inline-block alignments */
+    width: 100%; /* Responsive width */
+    max-height: 100vh; /* Maximum height to be full viewport height, or set a fixed height */
+    margin: auto; /* Center the SVG within the flex container */
+}
+
+/* If the SVG has its own flex properties, reset them */
+.map-container svg * {
+    align-items: inherit;
+    justify-content: inherit;
+}
+.map-title {
+    margin-left: 10%; /* Adjust this value to move the text more to the left */
+    /* Additional styling */
+    font-size: 1.5em; /* Adjust the font size as necessary */
+    /* If you're using Bootstrap and it's setting text-align to center,
+       you'll need to override it */
+    text-align: left; /* Aligns the text to the left */
+}
+
 
 
     </style>
@@ -322,6 +375,17 @@
     <img src="{% static 'Iphone.svg' %}" alt="SVG Image">
   </div>
 </div>
+
+<br>
+<br>
+<br>
+<h2 class="map-title text-white">Eligible States:</h2>
+<div class="map-container">
+        <img src="{% static 'Allowed-States.svg' %}" alt="Map of Allowed States" style="width:100%; height:auto;">
+</div>
+
+
+
  
 <script src="/docs/5.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
 

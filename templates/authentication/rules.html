@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Chosen Rules</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .map-container {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+        .map-title {
+            margin-left: 10%;
+            font-size: 1.5em;
+            color: white;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    
+    <h1>The Chosen Rules</h1>
+    <h2>Team Composition</h2>
+    <p>Team: Consists of two NFL players (running back, wide receiver, or tight end) on separate NFL rosters.</p>
+    <ul>
+        <li>Each team costs $60 to buy.</li>
+        <li>You can buy a minimum of 1 team and a maximum of 20 teams.</li>
+    </ul>
+    <h2>Definitions</h2>
+    <p>User: A person who signs up for The Chosen and purchases 1 or more teams.</p>
+    
+    <h2>Rules</h2>
+    <ol>
+        <li>The game starts on Tuesday, week 1 of the NFL season.</li>
+        <li>On that Tuesday, you select two players per team to score a touchdown and one or more offensive yards.</li>
+        <li>If one or both players score a touchdown and one or more offensive yards, then that team moves onto the following week.</li>
+        <li>If both players DO NOT score a touchdown, then that team is eliminated.
+            <ul>
+                <li>You may choose/change player selections at any time Tuesday and Wednesday.</li>
+                <li>Starting Thursday, you may no longer choose/change players.</li>
+            </ul>
+        </li>
+        <li>Steps 1-4 are repeated until the Super Bowl.</li>
+        <li>If a player scores a touchdown and one or more offensive yards for a team at any point in the season, you may no longer select that player to score FOR THAT TEAM ONLY.
+            <ul>
+                <li>You may still select that player to a touchdown for a different team.</li>
+            </ul>
+        </li>
+        <li>The user with the last team remaining wins the pot!</li>
+        <li>If there are multiple teams in after the Super Bowl, then the pot is split amongst the users proportional to how many surviving teams they have.</li>
+    </ol>
+    
+    <h2>Example</h2>
+    <p>
+        A user paid $250 for 5 teams. It is now week 7 of the NFL season and the user has 2 teams remaining, and the user selects the following players to score a touchdown and one or more offensive yards:
+        <br>Team 1 = Travis Kelce or Tyreek Hill
+        <br>Team 2 = Austin Eckler or Mike Evans
+        <br>If Travis Kelce, Mike Evans, and Tyreek Hill score a touchdown and one or more offensive yards that week, then both teams stay alive!
+    </p>
+    <h2>Going Forward</h2>
+    <p>
+        Team 1 will no longer be able to select Travis Kelce, nor Tyreek Hill for the remainder of the season, and team 2 will no longer be able to select Mike Evans for the remainder of the season. However, team 2 may still be able to pick Travis Kelce and Tyreek Hill (assuming they haven’t already scored a TD for Team 2), and likewise with Mike Evans on team 1.
+    </p>
+</body>
+</html>

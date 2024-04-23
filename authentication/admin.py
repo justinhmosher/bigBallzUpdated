@@ -3,9 +3,12 @@ from .models import Pick,Paid,NFLPlayer,Game,PastPick,Scorer,BaseballPlayer,Prom
 
 # Register your models here.
 
+class NFLPlayerAdmin(admin.ModelAdmin):
+    search_fields = ['name','team_name']
+
 admin.site.register(Pick)
 admin.site.register(Paid)
-admin.site.register(NFLPlayer)
+admin.site.register(NFLPlayer, NFLPlayerAdmin)
 admin.site.register(Game)
 admin.site.register(PastPick)
 admin.site.register(Scorer)
