@@ -30,7 +30,7 @@ class Command(BaseCommand):
         'LAC': '#0080C6',
         'LAR':'#003594',
         'MIA':'#008E97',
-        'MIN':'#E31837',
+        'MIN': '#4F2683' ,
         'NE':'#002244',
         'NO':'#D3BC8D',
         'NYG':'#0B2265',
@@ -59,7 +59,7 @@ class Command(BaseCommand):
             # Save data to the Book model
             for player_data in data:
                 # Adjust the fields based on the actual structure of the API response
-                if (player_data['CurrentTeam'] is not None) and ((player_data['Position'] == "RB") or (player_data['Position'] == "WR") or (player_data['Position'] == "TE")):
+                if (player_data['CurrentTeam'] is not None) and ((player_data['Position'] == "RB") or (player_data['Position'] == "WR") or (player_data['Position'] == "TE") or (player_data['Position'] == "QB")):
                     first_name=player_data['FirstName']  # Replace with the actual field in the API response
                     last_name=player_data['LastName']
                     player_name = first_name + " " + last_name 
