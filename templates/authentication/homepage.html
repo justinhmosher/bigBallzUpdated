@@ -130,11 +130,11 @@
     color: #fff; /* Adjust the text color as needed */
   }
   .feature-icon {
-    width: 80px; /* Adjust size as needed */
+    width: 100px; /* Adjust size as needed */
     height: auto;
   }
   .feature-title {
-    font-size: 24px; /* Adjust the font size as needed */
+    font-size: 18px; /* Adjust the font size as needed */
     margin-top: 10px;
 
   }
@@ -187,6 +187,7 @@
     }
   }
   .layout-container {
+    margin-top: 20px;
     display: flex;
     justify-content: center;
     align-items: center; /* This will vertically center the content */
@@ -375,11 +376,11 @@
 
 <div class="features-container">
   <div class="feature">
-    <img src="{% static 'Coin.svg' %}" alt="Cash Payouts" class="feature-icon">
+    <img src="{% static 'Cash.svg' %}" alt="Cash Payouts" class="feature-icon">
     <div class="feature-title">Chance to Win $10,000 Pot!</div>
   </div>
   <div class="feature">
-    <img src="{% static 'Sword.svg' %}" alt="Secure" class="feature-icon">
+    <img src="{% static 'Duel.svg' %}" alt="Secure" class="feature-icon">
     <div class="feature-title">Battle Against Others!</div>
   </div>
   <div class="feature">
@@ -392,11 +393,11 @@
 
 <div class="button-container">
 <div style="text-align: center; margin-top: 20px;"> <!-- Centers the buttons and adds space above -->
-  <button onclick="switchMap('{% static 'Rules-NFL.svg' %}')" style="background: linear-gradient(145deg, #6db3f2, #1e69de); border: none; color: white; padding: 10px 20px; border-radius: 5px; box-shadow: 3px 3px 10px rgba(0,0,0,0.2); cursor: pointer; margin: 5px; transition: transform 0.2s, box-shadow 0.2s;">BIG TD TOURNAMENT</button>
+  <button onclick="switchMap('{% static 'Rules-NFL.svg' %}')" style="background: linear-gradient(145deg, #6db3f2, #1e69de); border: none; color: white; padding: 10px 20px; border-radius: 5px; box-shadow: 3px 3px 10px rgba(0,0,0,0.2); cursor: pointer; margin: 5px; transition: transform 0.2s, box-shadow 0.2s;">NFL - BIG TD TOURNAMENT</button>
   
-  <button onclick="switchMap('{% static 'Rules-MLB.svg' %}')" style="background: linear-gradient(145deg, #f2994a, #f2c94c); border: none; color: white; padding: 10px 20px; border-radius: 5px; box-shadow: 3px 3px 10px rgba(0,0,0,0.2); cursor: pointer; margin: 5px; transition: transform 0.2s, box-shadow 0.2s;">BEAT THE STREAK</button>
+  <button onclick="switchMap('{% static 'Rules-MLB.svg' %}')" style="background: linear-gradient(145deg, #f2994a, #f2c94c); border: none; color: white; padding: 10px 20px; border-radius: 5px; box-shadow: 3px 3px 10px rgba(0,0,0,0.2); cursor: pointer; margin: 5px; transition: transform 0.2s, box-shadow 0.2s;">MLB - BEAT THE STREAK</button>
   
-  <button onclick="switchMap('{% static 'Rules-NBA.svg' %}')" style="background: linear-gradient(145deg, #56ab2f, #a8e063); border: none; color: white; padding: 10px 20px; border-radius: 5px; box-shadow: 3px 3px 10px rgba(0,0,0,0.2); cursor: pointer; margin: 5px; transition: transform 0.2s, box-shadow 0.2s;">THREE POINT CONTEST</button>
+  <button onclick="switchMap('{% static 'Rules-NBA.svg' %}')" style="background: linear-gradient(145deg, #56ab2f, #a8e063); border: none; color: white; padding: 10px 20px; border-radius: 5px; box-shadow: 3px 3px 10px rgba(0,0,0,0.2); cursor: pointer; margin: 5px; transition: transform 0.2s, box-shadow 0.2s;">NBA - THREE POINT CONTEST</button>
   <!-- Add more buttons if needed -->
 </div>
 
@@ -406,6 +407,7 @@
 <img id="map-image" class="map-image" src="{% static 'Rules-NFL.svg' %}" alt="Interactive Map">
 
 <div class="layout-container">
+
   <div class="svg-container">
     <img src="{% static 'Iphone.svg' %}" alt="SVG Image">
   </div>
