@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from datetime import date
+from django.utils import timezone
 #from Pillow import ImageTk, Image
 
 class Pick(models.Model):
@@ -83,6 +84,22 @@ class PromoUser(models.Model):
     username = models.CharField(max_length = 100, default = "username")
     code = models.CharField(max_length=100,default = "Code")
     active = models.BooleanField(default = False)
+    def __str__(self):
+        return f"{self.username}"
+
+class OfAge(models.Model):
+    username = models.CharField(max_length = 100, default = "username")
+    status = models.BooleanField(default = False)
+    def __str__(self):
+        return f"{self.username}"
+
+class UserVerification(models.Model):
+    username = models.CharField(max_length = 100, default = "username")
+    first_name = models.CharField(max_length=100,default = "first name")
+    last_name = models.CharField(max_length=100, default = 'last name')
+    dob = models.DateTimeField(default=timezone.now)
+    verification_status = models.CharField(max_length=20, blank=True)
+    uuid = models.CharField(max_length=100, blank=True)
     def __str__(self):
         return f"{self.username}"
 

@@ -18,7 +18,7 @@ from decouple import config
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from .forms import PlayerSearchForm, Pickform, Pick1Form, CreateTeam
-from .models import Pick,Paid,NFLPlayer,Game,PastPick,PromoCode,PromoUser
+from .models import Pick,Paid,NFLPlayer,Game,PastPick,PromoCode,PromoUser,OfAge,UserVerification
 from django.db.models import Count,F,ExpressionWrapper,fields
 from datetime import datetime
 from itertools import chain
@@ -80,29 +80,6 @@ def signup(request):
 			messages.error(request, "Please enter a valid promocode")
 			return redirect('signup')
 
-		#Finding users location
-		"""
-		user_ip_address = request.META.get('HTTP_X_FORWARDED_FOR') or request.META.get('REMOTE_ADDR')
-
-		access_key = config('API_KEY')
-		ipstack_url = f'http://api.ipstack.com/{user_ip_address}?access_key={access_key}'
-		response = requests.get(ipstack_url)
-		
-		if response.status_code==200:
-			location_data = response.json()
-			user_state = location_data.get('region_name')
-
-			disallowed_states = ['']
-
-			if user_state in disallowed_states:
-				messages.error(request,"You are in a disallowed state.")
-				return redirect('home')
-
-		else:
-			messages.error(request,"Failed to register location data")
-			return redirect('home')
-		"""
-
 		username = email
 		myuser = User.objects.create_user(username, email, password1)
 
@@ -140,6 +117,10 @@ def signup(request):
 
 			codeuser = PromoUser(username = email,code = promocode)
 			codeuser.save()
+			compliance = OfAge(username = email)
+			compliance.save()
+			new_user = Paid(username = email)
+			new_user.save()
 
 			return redirect(confirm_email,email = email)
 
@@ -373,7 +354,6 @@ def payment(request):
 			total_amount = team_count * 50
 		else:
 			total_amount = team_count * 60  # $50 per team
-		print(total_amount)
 		info = Paid.objects.get(username = request.user.username)
 		info.numteams = team_count
 		info.price = total_amount
@@ -447,7 +427,12 @@ def tournaments(request):
 
 	return render(request,'authentication/tournaments.html',{'days':days_until_start,"pot":pot})
 
+@login_required
 def location(request):
+	username = request.user.username
+	if username != "justinhmosher@gmail.com":
+		messages.error(request,"We are currently updating the site!")
+		return redirect('tournaments')
 	user_ip_address = request.META.get('HTTP_X_FORWARDED_FOR') or request.META.get('REMOTE_ADDR')
 
 	access_key = config('API_KEY')
@@ -461,21 +446,80 @@ def location(request):
 		security_data = location_data.get('security', {})
 		is_proxy = security_data.get('is_proxy', False)
 		print(is_proxy)
+		print(user_state)
 
 		disallowed_states = ['Washington','Idaho','Nevada','Montana','Wyoming','Colorado','Iowa','Missouri','Tenessee','Mississippi','Louisiana','Alabama','Florida','Michigan','Ohio','West Virginia','Pensylvania','Maryland','Deleware','New Jersey','Conneticut','Ney York','Maine','New Hampshire','Massachusetts']
 
 		allowed_states = [None,'California','Oregon','Alaska','Arizona','Utah','New Mexico','Texas','Oklahoma','Arkansas','Kansas','Nebraska','South Dakota','North Dekota','Minnesota','Wisconsin','Illinois','Indiana','Kentucky','Virginia','North Carolina','South Carolina','Georgia','Vermont','Rhode Island']
 
-		if user_state in allowed_states and not is_proxy:
-			return redirect('checking')
+		paid = Paid.objects.get(username = username)
+		compliance = OfAge.objects.get(username = username)
 
+		if user_state in allowed_states and not is_proxy and paid.paid_status == True:
+			return redirect('checking')
+		elif user_state in allowed_states and not is_proxy and compliance.status == False:
+			age_api_key = config('AGE_API')
+			return render(request,'authentication/agechecking.html',{'api':age_api_key})
+		elif user_state in allowed_states and not is_proxy and compliance.status == True:
+			return redirect('checking')
 		else:
 			messages.error(request,"You are in a disallowed state.")
 			return redirect('tournaments')
-
 	else:
 		messages.error(request,"Failed to register location data")
 		return redirect('tournaments')
+
+@login_required
+@csrf_exempt  # Use cautiously, ensure your site is protected against CSRF attacks
+def submitverification(request):
+	if request.method == 'POST':
+		username = request.user.username
+		compliance = OfAge.objects.get(username=username)
+		# Prepare data for the AgeChecker API
+		data = {
+		 	'key': config('AGE_API'),
+		 	'secret': config('AGE_API_SECRET'),
+		 		'data': {
+		 		'username': username,
+		 		'first_name': request.POST.get('first_name'),
+		 		'last_name': request.POST.get('last_name'),
+		 		'dob': request.POST.get('dob'),
+		 		},
+		 	'options': {
+		 		'min_age': 21
+		 		}
+		 }
+		 # Call the AgeChecker API
+		response = requests.post('https://api.agechecker.net/v1/create', json=data)
+		response_data = response.json()
+		print(response)
+		print(response_data)
+
+		# Check if the API call was successful
+		if response.status_code == 200 and 'uuid' in response_data:
+			verification_status = response_data.get('status', '')
+			uuid = response_data['uuid']
+			# Save verification details in the database
+			verification = UserVerification(
+				username=username,
+				first_name=request.POST.get('first_name'),
+				last_name=request.POST.get('last_name'),
+				dob = request.POST.get('dob'),
+				verification_status=response_data['status'],
+				uuid=response_data['uuid']
+			)
+			verification.save()
+
+			if verification_status in ['accepted', 'verified']:
+				compliance.status = True
+				compliance.save()
+				return JsonResponse({'verified': True, 'message': "Fully verified.", 'uuid': uuid})
+			else:
+				return JsonResponse({'verified': False, 'message': "Further verification needed.", 'uuid': uuid, 'status': verification_status})
+	else:
+		# If not a POST request, render the form page
+		return render(request, 'authentication/agechecking.html', {'api': config('AGE_API')})
+
 
 @login_required
 def game(request):

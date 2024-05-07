@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Pick,Paid,NFLPlayer,Game,PastPick,Scorer,BaseballPlayer,PromoCode,PromoUser
+from .models import Pick,Paid,NFLPlayer,Game,PastPick,Scorer,BaseballPlayer,PromoCode,PromoUser,OfAge,UserVerification
 
 # Register your models here.
 
@@ -15,3 +15,5 @@ admin.site.register(Scorer)
 admin.site.register(BaseballPlayer)
 admin.site.register(PromoCode)
 admin.site.register(PromoUser)
+admin.site.register(OfAge)
+admin.site.register(UserVerification)

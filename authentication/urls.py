@@ -29,5 +29,6 @@ urlpatterns = [
     path('confirm_email/<str:email>/',views.confirm_email,name='confirm_email'),
     path('webhooks/coinbase/', views.coinbase_webhook, name='coinbase_webhook'),
     path('testing',views.testing,name='testing'),
-    path('rules',views.rules,name="rules")
+    path('rules',views.rules,name="rules"),
+    path('submitverification',views.submitverification,name = 'submitverification')
 ]+static(settings.MEDIA_URL,document_root = settings.MEDIA_ROOT)
