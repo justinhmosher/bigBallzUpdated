@@ -476,8 +476,8 @@ def submitverification(request):
 	compliance = OfAge.objects.get(username=username)
 	# Prepare data for the AgeChecker API
 	headers = {
-		 'key': config('AGE_API'),
-		 'secret': config('AGE_API_SECRET'),
+		 "X-AgeChecker-Secret": config('AGE_API_SECRET'),
+		 "X-AgeChecker-Key": config('AGE_API'),
 		 }
 	# Call the AgeChecker API
 	response = requests.get('https://api.agechecker.net/v1/latest', headers=headers)
