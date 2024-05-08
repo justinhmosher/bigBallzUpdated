@@ -499,7 +499,7 @@ def submitverification(request):
 			return redirect('checking')
 
 	# If not a POST request, render the form page
-	return rendirect('checking')
+	return redirect('checking')
 
 
 @login_required
