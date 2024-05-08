@@ -184,7 +184,7 @@
         document.cookie = name + "=" + (value || "") + expires + "; path=/";
     }
 
-    (function(w, d) {
+    function(w, d) {
         if (getCookie("ac_custom_verified")) return;
         var config = {
             mode: "manual",
@@ -196,6 +196,7 @@
                 setCookie("ac_custom_verified", true);
             }
         };
+
     </script>
 </body>
 </html>
