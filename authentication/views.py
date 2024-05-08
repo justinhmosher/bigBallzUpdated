@@ -472,36 +472,35 @@ def location(request):
 @login_required
 @csrf_exempt  # Use cautiously, ensure your site is protected against CSRF attacks
 def submitverification(request):
-	if request.method == 'POST':
-		username = request.user.username
-		compliance = OfAge.objects.get(username=username)
-		# Prepare data for the AgeChecker API
-		headers = {
-		 	'key': config('AGE_API'),
-		 	'secret': config('AGE_API_SECRET'),
-		 	}
-		 # Call the AgeChecker API
-		response = requests.post('https://api.agechecker.net/v1/latest', headers=headers)
+	username = request.user.username
+	compliance = OfAge.objects.get(username=username)
+	# Prepare data for the AgeChecker API
+	headers = {
+		 'key': config('AGE_API'),
+		 'secret': config('AGE_API_SECRET'),
+		 }
+	# Call the AgeChecker API
+	response = requests.post('https://api.agechecker.net/v1/latest', headers=headers)
+	response_data = response.json()
+
+	# Check if the API call was successful
+	if response.status_code == 200:
 		response_data = response.json()
+		verification_status = response_data['status']
+		uuid = response_data['uuid']
+		# Save verification details in the database
 
-		# Check if the API call was successful
-		if response.status_code == 200:
-			response_data = response.json()
-			verification_status = response_data['status']
-			uuid = response_data['uuid']
-			# Save verification details in the database
+		if verification_status in ['accepted', 'verified']:
+			compliance.old = True
+			compliance.save()
+			return redirect('checking')
+		else:
+			compliance.young = True
+			compliance.save()
+			return redirect('checking')
 
-			if verification_status in ['accepted', 'verified']:
-				compliance.old = True
-				compliance.save()
-				return redirect('checking')
-			else:
-				compliance.young = True
-				compliance.save()
-				return redirect('checking')
-	else:
-		# If not a POST request, render the form page
-		return render(request, 'authentication/agechecking.html', {'api': config('AGE_API')})
+	# If not a POST request, render the form page
+	return render(request, 'authentication/agechecking.html', {'api': config('AGE_API')})
 
 
 @login_required
