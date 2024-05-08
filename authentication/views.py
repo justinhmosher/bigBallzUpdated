@@ -492,12 +492,10 @@ def submitverification(request):
 		 # Call the AgeChecker API
 		response = requests.post('https://api.agechecker.net/v1/create', json=data)
 		response_data = response.json()
-		print(response)
-		print(response_data)
 
 		# Check if the API call was successful
 		if response.status_code == 200 and 'uuid' in response_data:
-			verification_status = response_data.get('status', '')
+			verification_status = response_data.get('status','')
 			uuid = response_data['uuid']
 			# Save verification details in the database
 			verification = UserVerification(
@@ -513,9 +511,10 @@ def submitverification(request):
 			if verification_status in ['accepted', 'verified']:
 				compliance.status = True
 				compliance.save()
-				return JsonResponse({'verified': True, 'message': "Fully verified.", 'uuid': uuid})
+				return redirect('checking')
 			else:
-				return JsonResponse({'verified': False, 'message': "Further verification needed.", 'uuid': uuid, 'status': verification_status})
+				messages.error(request,"Too Young")
+				return redirect('tournaments')
 	else:
 		# If not a POST request, render the form page
 		return render(request, 'authentication/agechecking.html', {'api': config('AGE_API')})
