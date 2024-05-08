@@ -429,6 +429,7 @@ def tournaments(request):
 
 @login_required
 def location(request):
+	username = request.user.username
 	user_ip_address = request.META.get('HTTP_X_FORWARDED_FOR') or request.META.get('REMOTE_ADDR')
 
 	access_key = config('API_KEY')
