@@ -166,18 +166,19 @@
         document.cookie = name + "=" + (value || "") + expires + "; path=/";
     }
 
-    function(w, d) {
-        if (getCookie("ac_custom_verified")) return;
-        var config = {
-            mode: "manual",
-            key: "{{ api }}",
-            onready: function() {
-                AgeCheckerAPI.show();
-            },
-            onclosed: function() {
-                setCookie("ac_custom_verified", true);
-            }
-        }};
+(function(w, d) {
+    if (getCookie("ac_custom_verified")) return;
+    var config = {
+        mode: "manual",
+        key: "{{ api }}",
+        onready: function() {
+            AgeCheckerAPI.show();
+        },
+        onclosed: function() {
+            setCookie("ac_custom_verified", true);
+        }
+    }; // Assuming you need to set this to make the AgeChecker work
+    })(window, document);
 
     </script>
 </body>
