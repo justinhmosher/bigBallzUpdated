@@ -481,7 +481,6 @@ def submitverification(request):
 		 }
 	# Call the AgeChecker API
 	response = requests.post('https://api.agechecker.net/v1/latest', headers=headers)
-	response_data = response.json()
 
 	# Check if the API call was successful
 	if response.status_code == 200:
@@ -500,7 +499,7 @@ def submitverification(request):
 			return redirect('checking')
 
 	# If not a POST request, render the form page
-	#return render(request, 'authentication/agechecking.html', {'api': config('AGE_API')})
+	return rendirect('checking')
 
 
 @login_required
