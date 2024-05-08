@@ -457,10 +457,10 @@ def location(request):
 
 		if user_state in allowed_states and not is_proxy and paid.paid_status == True:
 			return redirect('checking')
-		elif user_state in allowed_states and not is_proxy and compliance.status == False:
+		elif user_state in allowed_states and not is_proxy and compliance.old == False:
 			age_api_key = config('AGE_API')
 			return render(request,'authentication/agechecking.html',{'api':age_api_key})
-		elif user_state in allowed_states and not is_proxy and compliance.status == True:
+		elif user_state in allowed_states and not is_proxy and compliance.old == True:
 			return redirect('checking')
 		else:
 			messages.error(request,"You are in a disallowed state.")
@@ -476,45 +476,29 @@ def submitverification(request):
 		username = request.user.username
 		compliance = OfAge.objects.get(username=username)
 		# Prepare data for the AgeChecker API
-		data = {
+		headers = {
 		 	'key': config('AGE_API'),
 		 	'secret': config('AGE_API_SECRET'),
-		 		'data': {
-		 		'username': username,
-		 		'first_name': request.POST.get('first_name'),
-		 		'last_name': request.POST.get('last_name'),
-		 		'dob': request.POST.get('dob'),
-		 		},
-		 	'options': {
-		 		'min_age': 21
-		 		}
-		 }
+		 	}
 		 # Call the AgeChecker API
-		response = requests.post('https://api.agechecker.net/v1/create', json=data)
+		response = requests.post('https://api.agechecker.net/v1/latest', headers=headers)
 		response_data = response.json()
 
 		# Check if the API call was successful
-		if response.status_code == 200 and 'uuid' in response_data:
-			verification_status = response_data.get('status','')
+		if response.status_code == 200:
+			response_data = response.json()
+			verification_status = response_data['status']
 			uuid = response_data['uuid']
 			# Save verification details in the database
-			verification = UserVerification(
-				username=username,
-				first_name=request.POST.get('first_name'),
-				last_name=request.POST.get('last_name'),
-				dob = request.POST.get('dob'),
-				verification_status=response_data['status'],
-				uuid=response_data['uuid']
-			)
-			verification.save()
 
 			if verification_status in ['accepted', 'verified']:
-				compliance.status = True
+				compliance.old = True
 				compliance.save()
 				return redirect('checking')
 			else:
-				messages.error(request,"Too Young")
-				return redirect('tournaments')
+				compliance.young = True
+				compliance.save()
+				return redirect('checking')
 	else:
 		# If not a POST request, render the form page
 		return render(request, 'authentication/agechecking.html', {'api': config('AGE_API')})

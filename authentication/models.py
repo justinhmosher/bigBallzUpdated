@@ -89,7 +89,8 @@ class PromoUser(models.Model):
 
 class OfAge(models.Model):
     username = models.CharField(max_length = 100, default = "username")
-    status = models.BooleanField(default = False)
+    old = models.BooleanField(default = False)
+    young = models.BooleanField(default = False)
     def __str__(self):
         return f"{self.username}"
 

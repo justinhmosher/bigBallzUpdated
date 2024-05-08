@@ -150,6 +150,7 @@
 </div>
 
     <script>
+/*
     function getCookie(name) {
         var value = "; " + document.cookie;
         var parts = value.split("; " + name + "=");
@@ -165,9 +166,8 @@
         }
         document.cookie = name + "=" + (value || "") + expires + "; path=/";
     }
-
+*/
 (function(w, d) {
-    if (getCookie("ac_custom_verified")) return;
     var config = {
         mode: "manual",
         key: "{{ api }}",
@@ -175,9 +175,10 @@
             AgeCheckerAPI.show();
         },
         onclosed: function() {
-            setCookie("ac_custom_verified", true);
+            window.location.href = '/submitverification?status=verified';
         }
     }; // Assuming you need to set this to make the AgeChecker work
+    w.AgeCheckerConfig = config;
     })(window, document);
 
     </script>
