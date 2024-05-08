@@ -500,7 +500,7 @@ def submitverification(request):
 			return redirect('checking')
 
 	# If not a POST request, render the form page
-	return render(request, 'authentication/agechecking.html', {'api': config('AGE_API')})
+	#return render(request, 'authentication/agechecking.html', {'api': config('AGE_API')})
 
 
 @login_required
