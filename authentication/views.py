@@ -480,7 +480,7 @@ def submitverification(request):
 		 'secret': config('AGE_API_SECRET'),
 		 }
 	# Call the AgeChecker API
-	response = requests.post('https://api.agechecker.net/v1/latest', headers=headers)
+	response = requests.get('https://api.agechecker.net/v1/latest', headers=headers)
 
 	# Check if the API call was successful
 	if response.status_code == 200:
