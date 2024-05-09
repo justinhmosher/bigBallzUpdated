@@ -353,7 +353,7 @@ def payment(request):
 		if promocode != "0000":
 			total_amount = team_count * 50
 		else:
-			total_amount = team_count * 60  # $50 per team
+			total_amount = team_count * 100  # $50 per team
 		info = Paid.objects.get(username = request.user.username)
 		info.numteams = team_count
 		info.price = total_amount
@@ -368,7 +368,7 @@ def payment(request):
 
 	else:
 		team_count = 1
-		total_amount = 60
+		total_amount = 100
 
 	context = {
 		'team_count': team_count,
