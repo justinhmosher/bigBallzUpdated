@@ -29,6 +29,7 @@ import logging
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
 from django.core.exceptions import ObjectDoesNotExist
+from email.utils import formataddr
 
 
 def testing(request):
@@ -336,11 +337,11 @@ def payment(request):
 		promocode = request.POST.get('code',"").strip()
 		if not promocode:
 			promocode = "0000"
-
+		"""
 		if promocode != "0000" and not PromoCode.objects.filter(code = promocode).exists():
 			messages.error(request, "Please enter a valid promocode")
 			return redirect('payment')
-
+		"""
 		promouser = PromoUser.objects.get(username = request.user.username)
 		promouser.code = promocode
 		promouser.save()
@@ -353,7 +354,7 @@ def payment(request):
 		if promocode != "0000":
 			total_amount = team_count * 50
 		else:
-			total_amount = team_count * 100  # $50 per team
+			total_amount = team_count * 50  # $50 per team
 		info = Paid.objects.get(username = request.user.username)
 		info.numteams = team_count
 		info.price = total_amount
