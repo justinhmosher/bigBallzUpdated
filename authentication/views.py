@@ -46,6 +46,9 @@ def rules(request):
 	return render(request,'authentication/rules.html')
 
 def confirm_email(request, email):
+	user = User.objects.get(username = email)
+	if request.method == "POST":
+		create_email(request, myuser = user)
 	return render(request, "authentication/confirm_email.html",{"email":email})
 
 def search(request):
@@ -96,7 +99,7 @@ def signup(request):
 
 		num = create_email(request, myuser)
 		if num == 1:
-			return redirect('confirm_email',email)
+			return redirect('confirm_email',email = email)
 		else:
 			messages.error(request, "There was a problem sending your confirmation email.  Please try again.")
 			return redirect('signup')
@@ -125,7 +128,7 @@ def create_email(request, myuser):
 		'uid' : urlsafe_base64_encode(force_bytes(myuser.pk)),
 		'token' : generate_token.make_token(myuser),
 			})
-	message.attach(MIMEText(body, "plain"))
+	message.attach(MIMEText(body, "html"))
 	text = message.as_string()
 	try:
 		server = smtplib.SMTP(smtp_server, smtp_port)
