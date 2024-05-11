@@ -211,12 +211,16 @@ def forgotPassEmail(request):
 
 		if User.objects.filter(email=email).exists():
 			myuser = User.objects.get(email = email)
-			num = create_forgot_email(request, myuser = myuser)
-			if num == 1:
-				return redirect('confirm_forgot_email',email = email)
-			else:
-				messages.error(request, "There was a problem sending your confirmation email.  Please try again.")
+			if myuser.is_active == False:
+				messages.error(request,'Please Sign Up again!')
 				return redirect('signup')
+			else:
+				num = create_forgot_email(request, myuser = myuser)
+				if num == 1:
+					return redirect('confirm_forgot_email',email = email)
+				else:
+					messages.error(request, "There was a problem sending your confirmation email.  Please try again.")
+					return redirect('signup')
 
 		else:
 			messages.error(request, "Email does not exist")
@@ -275,7 +279,6 @@ def passreset(request, uidb64, token):
 			pass1 = request.POST.get('password1')
 			pass2 = request.POST.get('password2')
 			if pass1 == pass2:
-				print("hello")
 				myuser.set_password(pass1)
 				myuser.save()
 				return redirect('signin')
@@ -369,11 +372,6 @@ def payment(request):
 		promocode = request.POST.get('code',"").strip()
 		if not promocode:
 			promocode = "0000"
-		"""
-		if promocode != "0000" and not PromoCode.objects.filter(code = promocode).exists():
-			messages.error(request, "Please enter a valid promocode")
-			return redirect('payment')
-		"""
 		promouser = PromoUser.objects.get(username = request.user.username)
 		promouser.code = promocode
 		promouser.save()
