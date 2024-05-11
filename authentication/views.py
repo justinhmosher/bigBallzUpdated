@@ -111,6 +111,7 @@ def signup(request):
 def create_email(request, myuser):
 
 	sender_email = config('SENDER_EMAIL')
+	sender_name = "The Chosen Fantasy Games"
 	sender_password = config('SENDER_PASSWORD')
 	receiver_email = myuser.username
 
@@ -120,7 +121,7 @@ def create_email(request, myuser):
 	current_site = get_current_site(request)
 
 	message = MIMEMultipart()
-	message['From'] = sender_email
+	message['From'] = f"{sender_name} <{sender_email}>"
 	message['To'] = receiver_email
 	message['Subject'] = "Your Confirmation Email"
 	body = render_to_string('authentication/email_confirmation.html',{
@@ -146,7 +147,6 @@ def create_email(request, myuser):
 		server.quit()
 
 	return 1
-
 
 
 @login_required
@@ -199,52 +199,69 @@ def signout(request):
 	messages.success(request, "Logged Out Successfully")
 	return redirect('home')
 
+def confirm_forgot_email(request, email):
+	user = User.objects.get(username = email)
+	if request.method == "POST":
+		create_forgot_email(request, myuser = user)
+	return render(request, "authentication/confirm_forgot_email.html",{"email":email})
+
 def forgotPassEmail(request):
 	if request.method == "POST":
 		email = request.POST.get('email')
 
 		if User.objects.filter(email=email).exists():
-
 			myuser = User.objects.get(email = email)
-			sender_email = config('SENDER_EMAIL')
-			sender_password = config('SENDER_PASSWORD')
-			receiver_email = myuser.email
-
-			smtp_server = config('SMTP_SERVER')
-			smtp_port = config('SMTP_PORT')
-
-			current_site = get_current_site(request)
-
-			message = MIMEMultipart()
-			message['From'] = sender_email
-			message['To'] = receiver_email
-			message['Subject'] = "Change Your Password for The Chosen"
-			body = render_to_string('authentication/email_change.html',{
-				'domain' : current_site.domain,
-				'uid' : urlsafe_base64_encode(force_bytes(myuser.pk)),
-				'token' : generate_token.make_token(myuser),
-				})
-			message.attach(MIMEText(body, "plain"))
-			text = message.as_string()
-			try:
-				# Connect to the SMTP server
-				server = smtplib.SMTP(smtp_server, smtp_port)
-				server.starttls()  # Secure the connection
-				server.login(sender_email, sender_password)
-				# Send the email
-				server.sendmail(sender_email, receiver_email, text)
-				messages.success(request,"We sent password change instructions over email.")
-				return redirect('forgotPassEmail')
-			except Exception as e:
-				print(f"Failed to send email: {e}")
-				messages.error(request,"There was a problem sending you an email.")
-			finally:
-				server.quit()
+			num = create_forgot_email(request, myuser = myuser)
+			if num == 1:
+				return redirect('confirm_forgot_email',email = email)
+			else:
+				messages.error(request, "There was a problem sending your confirmation email.  Please try again.")
+				return redirect('signup')
 
 		else:
-			messages.error(request,"Please provide a valid email")
+			messages.error(request, "Email does not exist")
+			return redirect('forgotPassEmail')
 
 	return render(request,'authentication/forgotPassEmail.html')
+
+def create_forgot_email(request, myuser):
+
+	sender_email = config('SENDER_EMAIL')
+	sender_name = "The Chosen Fantasy Games"
+	sender_password = config('SENDER_PASSWORD')
+	receiver_email = myuser.username
+
+	smtp_server = config('SMTP_SERVER')
+	smtp_port = config('SMTP_PORT')
+
+	current_site = get_current_site(request)
+
+	message = MIMEMultipart()
+	message['From'] = f"{sender_name} <{sender_email}>"
+	message['To'] = receiver_email
+	message['Subject'] = "Change Your Password for The Chosen"
+	body = render_to_string('authentication/email_change.html',{
+		'domain' : current_site.domain,
+		'uid' : urlsafe_base64_encode(force_bytes(myuser.pk)),
+		'token' : generate_token.make_token(myuser),
+		})
+	message.attach(MIMEText(body, "html"))
+	text = message.as_string()
+	try:
+		server = smtplib.SMTP(smtp_server, smtp_port)
+		server.starttls()  # Secure the connection
+		server.login(sender_email, sender_password)
+		server.sendmail(sender_email, receiver_email, text)
+	except Exception as e:
+		print(f"Failed to send email: {e}")
+		messages.error(request, "There was a problem sending your email.  Please try again.")
+		return 2
+		#redirect('signup')
+	finally:
+		server.quit()
+
+	return 1
+
 
 def passreset(request, uidb64, token):
 	try:
@@ -258,12 +275,12 @@ def passreset(request, uidb64, token):
 			pass1 = request.POST.get('password1')
 			pass2 = request.POST.get('password2')
 			if pass1 == pass2:
+				print("hello")
 				myuser.set_password(pass1)
 				myuser.save()
-
 				return redirect('signin')
 			else:
-				messages.error("Passwors do not match")
+				messages.error(request,"Passwords do not match")
 				return redirect('passreset',uidb64=uidb64,token=token)
 	return render(request,'authentication/passreset.html',{'uidb64':uidb64,'token':token})
 

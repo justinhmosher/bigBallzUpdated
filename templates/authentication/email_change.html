@@ -1,8 +1,31 @@
-{% autoescape off %}I see you forgot your password!
-
-To change your password please click this link!
-
-Confirmation Link: http://{{ domain }}{% url 'passreset' uidb64=uid token=token %}
-
-
-{% endautoescape %}
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f4f4f4; }
+        .container { background-color: #ffffff; width: 100%; max-width: 600px; margin: auto; padding: 20px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        .header { background: #FFDE59; padding: 10px 20px; color: #ffffff; text-align: center; }
+        .content { padding: 20px; text-align: center; line-height: 1.6; }
+        .footer { background-color: #eeeeee; color: #777777; text-align: center; padding: 10px 20px; font-size: 12px; }
+        .button { background-color: #0084ff; color: #ffffff; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block; margin: 20px 0; }
+        .text-white{
+        	color: #000000;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>The Chosen Fantasy Games!</h1>
+        </div>
+        <div class="content">
+            <p>Please confirm your email by clicking the following link:</p>
+            <a href="http://{{ domain }}{% url 'passreset' uidb64=uid token=token %}" class="button text-white">Confirm Email</a>
+        </div>
+        <div class="footer">
+            <p>Thank you for joining us!</p>
+            <p>If you have any questions, please contact <a href="mailto:support@thechosenfg.com">commissioner@thechosenfg.com</a>.</p>
+        </div>
+    </div>
+</body>
+</html>
