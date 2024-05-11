@@ -65,10 +65,7 @@ def signup(request):
 		password1 = request.POST.get('password1')
 		password2 = request.POST.get('password2')
 		promocode = request.POST.get('promoCode','').strip()
-
-		if User.objects.filter(email = email):
-			messages.error(request, "Email already registered!  Please try another.")
-			return redirect('signup')
+		username = email
 
 		if password1 != password2:
 			messages.error(request,"Passwors didn't match!")
@@ -81,61 +78,73 @@ def signup(request):
 			messages.error(request, "Please enter a valid promocode")
 			return redirect('signup')
 
-		username = email
-		myuser = User.objects.create_user(username, email, password1)
-
-		#Welcome Email
-		sender_email = config('SENDER_EMAIL')
-		sender_password = config('SENDER_PASSWORD')
-		receiver_email = email
-
-		smtp_server = config('SMTP_SERVER')
-		smtp_port = config('SMTP_PORT')
-
-		current_site = get_current_site(request)
-
-		message = MIMEMultipart()
-		message['From'] = sender_email
-		message['To'] = receiver_email
-		message['Subject'] = "Your Confirmation Email"
-		body = render_to_string('authentication/email_confirmation.html',{
-			'domain' : current_site.domain,
-			'uid' : urlsafe_base64_encode(force_bytes(myuser.pk)),
-			'token' : generate_token.make_token(myuser),
-			})
-		message.attach(MIMEText(body, "plain"))
-		text = message.as_string()
-		try:
-			# Connect to the SMTP server
-			server = smtplib.SMTP(smtp_server, smtp_port)
-			server.starttls()  # Secure the connection
-			server.login(sender_email, sender_password)
-			# Send the email
-			server.sendmail(sender_email, receiver_email, text)
+		myuser = User.objects.filter(email=email).first()
+		if myuser:
+			if myuser.is_active:
+				messages.error(request, "Email already registered with an active account! Please try another.")
+				return redirect('signup')
+			else:
+				myuser.username = username
+				myuser.email = email
+				myuser.set_password(password1)
+				myuser.is_active = False
+				myuser.save()
+		else:
+			myuser = User.objects.create_user(username, email, password1)
 			myuser.is_active = False
-
 			myuser.save()
 
-			codeuser = PromoUser(username = email,code = promocode)
-			codeuser.save()
-			compliance = OfAge(username = email)
-			compliance.save()
-			new_user = Paid(username = email)
-			new_user.save()
-
-			return redirect(confirm_email,email = email)
-
-			#messages.success(request, "Your Account has been successfully created!  We have sent you a confirmation email, please confirm your email in order to activate your account.")
-		except Exception as e:
-			print(f"Failed to send email: {e}")
+		num = create_email(request, myuser)
+		if num == 1:
+			return redirect('confirm_email',email)
+		else:
 			messages.error(request, "There was a problem sending your confirmation email.  Please try again.")
-		finally:
-			server.quit()
+			return redirect('signup')
 
 
-		return redirect('signin')
 
 	return render(request,"authentication/signup.html")
+
+def create_email(request, myuser):
+
+	sender_email = config('SENDER_EMAIL')
+	sender_password = config('SENDER_PASSWORD')
+	receiver_email = myuser.username
+
+	smtp_server = config('SMTP_SERVER')
+	smtp_port = config('SMTP_PORT')
+
+	current_site = get_current_site(request)
+
+	message = MIMEMultipart()
+	message['From'] = sender_email
+	message['To'] = receiver_email
+	message['Subject'] = "Your Confirmation Email"
+	body = render_to_string('authentication/email_confirmation.html',{
+		'domain' : current_site.domain,
+		'uid' : urlsafe_base64_encode(force_bytes(myuser.pk)),
+		'token' : generate_token.make_token(myuser),
+			})
+	message.attach(MIMEText(body, "plain"))
+	text = message.as_string()
+	try:
+		server = smtplib.SMTP(smtp_server, smtp_port)
+		server.starttls()  # Secure the connection
+		server.login(sender_email, sender_password)
+		# Send the email
+		server.sendmail(sender_email, receiver_email, text)
+		#redirect('confirm_email',email = receiver_email)
+	except Exception as e:
+		print(f"Failed to send email: {e}")
+		messages.error(request, "There was a problem sending your confirmation email.  Please try again.")
+		return 2
+		#redirect('signup')
+	finally:
+		server.quit()
+
+	return 1
+
+
 
 @login_required
 def teamname(request):
@@ -267,9 +276,12 @@ def activate(request, uidb64, token):
 		myuser.is_active = True
 		myuser.save()
 		try:
-			promouser = PromoUser.objects.get(username = myuser.username)
-			promouser.active = True
-			promouser.save()
+			codeuser = PromoUser(username = myuser.username,code = "0000")
+			codeuser.save()
+			compliance = OfAge(username = myuser.username)
+			compliance.save()
+			new_user = Paid(username = myuser.username)
+			new_user.save()
 		except ObjectDoesNotExist:
 			pass
 		login(request, myuser)
