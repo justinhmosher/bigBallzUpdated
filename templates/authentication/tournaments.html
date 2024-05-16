@@ -111,6 +111,11 @@
         color: #35CF32; /* This is a bright green color */
         font-weight: bold; /* Makes the text bolder */
       }
+        .btn-green {
+            background-color: #3FFF58;
+            border-color: #3FFF58;
+            color: white;
+        }
 
       .text-red {
         color: red;
@@ -207,12 +212,16 @@
               3) If NEITHER score a touchdown, you are out!  <br>
               4) Repeated selections ARE NOT allowed. <br>
               5) Last man standing wins the pot!</p>
+              <p class="text-center text-white">Eligible picks: RB, TE, WR, QB <br>
+              *QB must score a running touchdown.  Throwing touchdowns will not count.</p>
 <div class="d-flex flex-column justify-content-center">
   <div style="text-align: center;">
   <a href="rules" target="_blank">Rules</a>
 </div>
   <br>
-    <a href="location" class="btn btn-primary btn-lg mx-auto w-50 text-center">{% if days <= 0 %}Play{% else %}Join{% endif %}</a>
+        <a href="location" id="actionButton" class="btn btn-primary btn-lg mx-auto w-50 text-center">
+        {% if days <= 0 or play == True %}Play{% else %}Join{% endif %}
+    </a>
           <p class="text-center mb-3 {% if days <= 0 %}text-green{% else %}text-red{% endif %}">
         {% if days <= 0 %}
             Game has started!
@@ -269,6 +278,15 @@
   </div>
 
 </main>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            var button = document.getElementById("actionButton");
+            if (button.innerHTML.trim() === "Play") {
+                button.classList.remove("btn-primary");
+                button.classList.add("btn-green");
+            }
+        });
+    </script>
 
 <script src="/docs/5.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
 

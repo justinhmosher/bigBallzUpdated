@@ -450,13 +450,16 @@ def leaderboard(request):
 
 @login_required
 def tournaments(request):
+	user = Paid.objects.get(username = request.user.username)
+	play = user.paid_status
+	print(play)
 	game = Game.objects.get(sport = "Football")
 	start_date = game.startDate
 	today = datetime.now().date()
 	days_until_start = (start_date - today).days
 	pot = game.pot
 
-	return render(request,'authentication/tournaments.html',{'days':days_until_start,"pot":pot})
+	return render(request,'authentication/tournaments.html',{'days':days_until_start,"pot":pot,"play":play})
 
 @login_required
 def location(request):
