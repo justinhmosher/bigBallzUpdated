@@ -111,6 +111,7 @@ class Blog(models.Model):
     body = models.TextField(default="Body")
     author = models.CharField(max_length=100, default="Author")
     date = models.DateField(default=date.today)
+    updated_at = models.DateTimeField(auto_now=True) 
     summary = models.CharField(max_length=255, default="Summary", blank=True)
     image = models.ImageField(upload_to='blog_images/', null=True, blank=True)
     tags = models.CharField(max_length=100, blank=True)
