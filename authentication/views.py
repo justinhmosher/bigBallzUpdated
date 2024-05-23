@@ -18,7 +18,7 @@ from decouple import config
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from .forms import PlayerSearchForm, Pickform, Pick1Form, CreateTeam
-from .models import Pick,Paid,NFLPlayer,Game,PastPick,PromoCode,PromoUser,OfAge,UserVerification
+from .models import Pick,Paid,NFLPlayer,Game,PastPick,PromoCode,PromoUser,OfAge,UserVerification,Blog
 from django.db.models import Count,F,ExpressionWrapper,fields
 from datetime import datetime
 from itertools import chain
@@ -37,6 +37,17 @@ def testing(request):
 
 def home(request):
 	return render(request, "authentication/homepage.html")
+
+def blog_detail(request,slug):
+	#blog_post = get_object_or_404(Blog, slug=slug).order_by('-date')
+	blog_post = get_object_or_404(Blog, slug=slug)
+	tags = blog_post.tags.split(',') if blog_post.tags else []
+	return render(request, "authentication/blog_detail.html",{'blog_post': blog_post, 'tags': tags})
+
+def media_page(request):
+	blog_posts = Blog.objects.filter(is_published=True).order_by('-date')
+	return render(request, "authentication/media.html", {'blog_posts': blog_posts})
+
 
 def terms(request):
 	return render(request,"authentication/terms.html")

@@ -1,152 +1,186 @@
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<style type="text/css">
-    .custom-width {
-      width: 300px; /* Adjust the width as desired */
-    }
-    .custom-padding {
-      padding-left: 50px;
-      box-sizing: border-box; /* Adjust the left padding as desired */
-    }
-    /* Custom CSS */
-    .custom-input {
-      padding-left: 10px; /* Adjust the padding as desired */
-      padding-right: 10px; /* Adjust the padding as desired */
-    }
-    /* Custom CSS */
-    .outer-padding {
-      padding-left: 50px; /* Adjust the padding-left as desired */
-      padding-right: 20px; /* Adjust the padding-right as desired */
-      padding-top: 50px;
-    }
-    .center-container {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh; /* Set height to 100% of the viewport height for vertical centering */
-      padding-bottom: 100vh;
-    }
-    /* Custom CSS */
-    .btn-submit-container {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-       /* Set the height of the container */
-    }
-
-    .btn-submit {
-      display: block;
-      margin: auto; /* No margin on top and bottom, 0 on left and right */
-      width: 200px; /* Set the desired width */ /* Set the desired width */
-    }
-    .form-container {
-      background-color: #f0f0f0; /* Grey background color */
-      border-radius: 10px; /* Rounded corners */
-      /*padding: 20px;  Add padding inside the container */
-      width: 400px; /* Set the desired width */
-      height: 590px; /* Set the desired height */
-      margin: auto; /* Center the container horizontally */
-    }
-    .alert-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh; /* Set the height to the viewport height for vertical centering */
-    }
-    .sign-up-text{
-     align-items: center;
-    }
-    .footer {
-        padding: 0px 0; /* Adjust the padding as needed */
-        margin-top: 0px; /* You can adjust or remove this as needed */
+<!doctype html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Sign up for The Chosen Fantasy Games and join the ultimate fantasy sports experience. Create your account to compete, win, and enjoy exclusive benefits.">
+    <meta name="keywords" content="fantasy sports, signup, create account, The Chosen Fantasy Games, win, compete, exclusive benefits">
+    <meta name="author" content="The Chosen Fantasy Games">
+    <title>Sign Up - The Chosen Fantasy Games</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+    <style type="text/css">
+        .custom-width {
+          width: 300px; /* Adjust the width as desired */
+        }
+        .custom-padding {
+          padding-left: 50px;
+          box-sizing: border-box; /* Adjust the left padding as desired */
+        }
+        .custom-input {
+          padding-left: 10px; /* Adjust the padding as desired */
+          padding-right: 10px; /* Adjust the padding as desired */
+        }
+        .outer-padding {
+          padding-left: 50px; /* Adjust the padding-left as desired */
+          padding-right: 20px; /* Adjust the padding-right as desired */
+          padding-top: 50px;
+        }
+        .center-container {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          height: 100vh; /* Set height to 100% of the viewport height for vertical centering */
+          padding-bottom: 100vh;
+        }
+        .btn-submit-container {
+          display: flex;
+          justify-content: center;
+          align-items: center;
         }
 
-    .footer p {
-      margin: 0; /* Removes default paragraph margin */
-      color: #333; /* Dark text color; adjust as needed */
-      }
+        .btn-submit {
+          display: block;
+          margin: auto; /* No margin on top and bottom, 0 on left and right */
+          width: 200px; /* Set the desired width */
+        }
+        .form-container {
+          background-color: #f0f0f0; /* Grey background color */
+          border-radius: 10px; /* Rounded corners */
+          width: 400px; /* Set the desired width */
+          height: 590px; /* Set the desired height */
+          margin: auto; /* Center the container horizontally */
+        }
+        .alert-container {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          height: 100vh; /* Set the height to the viewport height for vertical centering */
+        }
+        .sign-up-text {
+            align-items: center;
+        }
+        .footer {
+            padding: 0px 0; /* Adjust the padding as needed */
+            margin-top: 0px; /* You can adjust or remove this as needed */
+        }
+        .footer p {
+            margin: 0; /* Removes default paragraph margin */
+            color: #333; /* Dark text color; adjust as needed */
+        }
+        .footer a {
+            color: #007bff; /* Link color; adjust as needed */
+        }
+        .container {
+            width: 80%;
+            margin: auto; /* Centers the content */
+        }
+        .text-red {
+            color: red;
+        }
+        .navbar {
+            background-color: #212529; /* Dark background color */
+        }
+        .navbar-nav {
+            flex-direction: row;
+        }
+        .nav-link {
+            padding-right: 1rem !important;
+            padding-left: 1rem !important;
+            color: #ffffff !important; /* White text color */
+        }
+        .navbar-brand img {
+            width: 40px;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <header>
+      <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+          <a class="navbar-brand" href="/">
+            <img src="{% static 'Trophy-words-logo.svg' %}" alt="The Chosen Fantasy Games">
+          </a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
+            <ul class="navbar-nav">
+              <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+              <li class="nav-item"><a class="nav-link" href="signin">Sign In</a></li>
+              <li class="nav-item"><a class="nav-link" href="signup">Sign Up</a></li>
+              <li class="nav-item"><a class="nav-link" href="media-page">Media</a></li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+    </header>
 
-    .footer a {
-        color: #007bff; /* Link color; adjust as needed */
-      }
+    <main>
+        <div class="text-center">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show d-inline-block" role="alert">
+                    <strong>Message:</strong> {{ message }}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            {% endfor %}
+        </div>
 
-    .container {
-      width: 80%;
-      margin: auto; /* Centers the content */
-      }
-      .text-red {
-        color: red;
-        /*font-weight: bold;*/
-      }
-</style>
+        <div class="text-center">
+            <a href="/">
+                <img src="{% static 'words.png' %}" alt="logo" style="width: auto; height: 210px;" />
+            </a>
+        </div>
 
-<div class="text-center">
-{% for message in messages %}
-<div class="alert alert-{{ message.tags }} alert-dismissible fade show d-inline-block" role="alert">
-<strong>Message:</strong> {{ message }}
-<button type="button" class="close" data-dismiss="alert" aria-label="Close">
-<span aria-hidden="true">&times;</span>
-</button>
-</div>
-{% endfor %}
-</div>
+        <div style="padding-bottom: 80px;">
+            <div class="form-container">
+                <div class="outer-padding">
+                    <div class="text-center">
+                        <h2>Sign Up!</h2>
+                    </div>
+                    <form action="/signup" method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label" for="email">Email address</label>
+                            <input type="email" class="form-control custom-width" id="email" name="email" aria-describedby="emailHelp" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="password1">Password</label>
+                            <input type="password" class="form-control custom-width" id="password1" name="password1" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" title="Must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="password2">Confirm Your Password</label>
+                            <input type="password" class="form-control custom-width" id="password2" name="password2" required>
+                        </div>
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="termsCheckbox" name="termsCheckbox" required>
+                            <label class="form-check-label" for="termsCheckbox">
+                                I agree to the <a href="terms" target="_blank">Terms and Conditions</a>.
+                            </label>
+                        </div>
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="privacyCheckbox" name="privacyCheckbox" required>
+                            <label class="form-check-label" for="privacyCheckbox">
+                                I agree to the <a href="privacy" target="_blank">Privacy Policy</a>.
+                            </label>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-submit">Submit</button>
+                    </form>
+                    <p class="text-center mt-3">Already have an account? <a href="signin">Sign in!</a></p>
+                </div>
+            </div>
+        </div>
+    </main>
 
-{% load static %}
-
-<div class="text-center">
-        <a href="/">
-            <img src="{% static 'words.png' %}" alt="logo"  style="width: auto; height: 210px;" />
-        </a>
-</div>
-
-<div style="padding-bottom: 80px;">
-<div class="form-container">
-<div class="outer-padding">
-<div class="text-center">
-<h2>Sign Up!</h2>
-</div>
-<form action="/signup" method="post">
-{% csrf_token %}  
-  <div class="mb-3">
-    <label class="form-label">Email address</label>
-    <input type="email" class="form-control custom-width" id="email" name="email" aria-describedby="emailHelp" required>
-  </div>
-  <div class="mb-3">
-    <label class="form-label">Password</label>
-    <input type="password" class="form-control custom-width" id="password1" name = "password1" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" title="Must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters" required>
-  </div>
-    <div class="mb-3">
-    <label class="form-label">Confirm Your Password</label>
-    <input type="password" class="form-control custom-width" id="password2" name = "password2" required> 
-  </div>
-<!--
-  <div class="mb-3">
-    <label class="form-label">Promo Code (Optional)</label>
-    <input type="text" class="form-control custom-width" id="promoCode" name="promoCode" placeholder="Enter promo code">
-  </div>
---->
-  <div class="mb-3 form-check">
-  <input type="checkbox" class="form-check-input" id="termsCheckbox" name="termsCheckbox" required>
-  <label class="form-check-label" for="termsCheckbox">
-    I agree to the <a href="terms" target="_blank">Terms and Conditions</a>.
-  </label>
-</div>
-<div class="mb-3 form-check">
-  <input type="checkbox" class="form-check-input" id="termsCheckbox" name="termsCheckbox" required>
-  <label class="form-check-label" for="termsCheckbox">
-    I agree to the <a href="privacy" target="_blank">Privacy Policy</a>.
-  </label>
-</div>
-  <button type="submit" class="btn btn-primary btn-submit">Submit</button>
-</form>
-<p class="text-center mt-3">Already have an account? <a href="signin">Sign in!</a></p>
-</div>
-</div>
-</div>
-<footer class="footer text-center">
-    <div class="container text-center">
-        <p><a href="terms" >Terms and Conditions</a>   <a href="privacy">Privacy Policy</a>   <a href="mailto:commissioner@thechosenfg.com">Contact Us!</a>
-    </div>
-</footer>
+    <footer class="footer text-center">
+        <div class="container text-center">
+            <p><a href="terms">Terms and Conditions</a> | <a href="privacy">Privacy Policy</a> | <a href="mailto:commissioner@thechosenfg.com">Contact Us!</a></p>
+        </div>
+    </footer>
+</body>
+</html>

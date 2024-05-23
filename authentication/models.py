@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from datetime import date
 from django.utils import timezone
+from django.utils.text import slugify
 #from Pillow import ImageTk, Image
 
 class Pick(models.Model):
@@ -103,6 +104,23 @@ class UserVerification(models.Model):
     uuid = models.CharField(max_length=100, blank=True)
     def __str__(self):
         return f"{self.username}"
+
+class Blog(models.Model):
+    title = models.CharField(max_length=100, default="Title")
+    slug = models.SlugField(max_length=100, unique=True, blank=True)
+    body = models.TextField(default="Body")
+    author = models.CharField(max_length=100, default="Author")
+    date = models.DateField(default=date.today)
+    summary = models.CharField(max_length=255, default="Summary", blank=True)
+    image = models.ImageField(upload_to='blog_images/', null=True, blank=True)
+    tags = models.CharField(max_length=100, blank=True)
+    is_published = models.BooleanField(default=False)
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.title)
+        super(Blog, self).save(*args, **kwargs)
+    def __str__(self):
+        return self.title
 
 
 
