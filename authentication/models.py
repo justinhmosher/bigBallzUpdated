@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from datetime import date
 from django.utils import timezone
 from django.utils.text import slugify
+from django.urls import reverse
 #from Pillow import ImageTk, Image
 
 class Pick(models.Model):
@@ -122,6 +123,8 @@ class Blog(models.Model):
         super(Blog, self).save(*args, **kwargs)
     def __str__(self):
         return self.title
+    def get_absolute_url(self):
+        return reverse('blog_detail', kwargs={'slug': self.slug})
 
 
 
