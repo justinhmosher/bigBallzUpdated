@@ -30,13 +30,18 @@ from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
 from django.core.exceptions import ObjectDoesNotExist
 from email.utils import formataddr
+from django.db.models import Sum
 
 
 def testing(request):
 	return render(request,'authentication/testing.html')
 
 def home(request):
-	return render(request, "authentication/homepage.html")
+	total_numteams = Paid.objects.filter(paid_status=True).aggregate(Sum('numteams'))['numteams__sum']
+	# Ensure total_numteams is not None if there are no records
+	if total_numteams is None:
+		total_numteams = 0
+	return render(request, "authentication/homepage.html",{'total': 250 - total_numteams})
 
 def blog_detail(request,slug):
 	#blog_post = get_object_or_404(Blog, slug=slug).order_by('-date')
