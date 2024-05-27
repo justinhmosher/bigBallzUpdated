@@ -41,7 +41,7 @@ def home(request):
 	# Ensure total_numteams is not None if there are no records
 	if total_numteams is None:
 		total_numteams = 0
-	return render(request, "authentication/homepage.html",{'total': 250 - total_numteams})
+	return render(request, "authentication/homepage.html",{'total': 200 - total_numteams})
 
 def blog_detail(request,slug):
 	#blog_post = get_object_or_404(Blog, slug=slug).order_by('-date')
