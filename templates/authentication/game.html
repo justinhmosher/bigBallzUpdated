@@ -128,6 +128,38 @@
       height: 400px; /* Set the desired height */
       margin: auto; /* Center the container horizontally */
     }
+       .navbar {
+        background-color: #212529; /* Dark background color */
+      }
+      .navbar-nav {
+        flex-direction: row;
+      }
+      .nav-link {
+        padding-right: 1rem !important;
+        padding-left: 1rem !important;
+        color: #ffffff !important; /* White text color */
+      }
+      .navbar-brand img {
+        width: 40px;
+        height: auto;
+      }
+      .nav-scroller {
+        position: relative;
+        z-index: 2;
+        height: 2.75rem;
+        overflow-y: hidden;
+      }
+
+      .nav-scroller .nav {
+        display: flex;
+        flex-wrap: nowrap;
+        padding-bottom: 1rem;
+        margin-top: -1px;
+        overflow-x: auto;
+        text-align: center;
+        white-space: nowrap;
+        -webkit-overflow-scrolling: touch;
+      }
     </style>
 
     
@@ -148,6 +180,25 @@
         <path d="M8 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0zm0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13zm8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5zM3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8zm10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 1 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0zm-9.193 9.193a.5.5 0 0 1 0 .707L3.05 13.657a.5.5 0 0 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0zm9.193 2.121a.5.5 0 0 1-.707 0l-1.414-1.414a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707zM4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 1 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .708z"/>
       </symbol>
     </svg>
+    <header>
+      <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+          <a class="navbar-brand" href="/">
+            <img src="{% static 'Trophy-words-logo.svg' %}" alt="The Chosen Fantasy Games">
+          </a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
+            <ul class="navbar-nav text-center">
+            <li class="nav-item"><a class="nav-link" href="{% url 'tournaments' %}">Tournaments</a></li>
+              <li class="nav-item"><a class="nav-link" href="{% url 'game' %}">Game</a></li>
+              <li class="nav-item"><a class="nav-link" href="{% url 'discord' %}">Chat</a></li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+    </header>
 
 <div class="text-center">
 {% for message in messages %}
@@ -161,13 +212,6 @@
 </div>
 <main>
 {% load static %}
-
-
-    <div class="top-left">
-        <a href="{% url 'tournaments' %}">
-        <img src="{% static 'home.png' %}" alt="logo" class="image-boarder">
-        </a>
-    </div>
 <br>
 {% if has_started == False %}
 <h2 class="text-center"> Game starts: {{ start }}</h2>

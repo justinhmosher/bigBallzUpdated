@@ -18,7 +18,7 @@ from decouple import config
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from .forms import PlayerSearchForm, Pickform, Pick1Form, CreateTeam
-from .models import Pick,Paid,NFLPlayer,Game,PastPick,PromoCode,PromoUser,OfAge,UserVerification,Blog
+from .models import Pick,Paid,NFLPlayer,Game,PastPick,PromoCode,PromoUser,OfAge,UserVerification,Blog,ChatMessage
 from django.db.models import Count,F,ExpressionWrapper,fields
 from datetime import datetime
 from itertools import chain
@@ -52,6 +52,36 @@ def blog_detail(request,slug):
 def media_page(request):
 	blog_posts = Blog.objects.filter(is_published=True).order_by('-date')
 	return render(request, "authentication/media.html", {'blog_posts': blog_posts})
+	
+@login_required
+def discord(request):
+	return render(request,"authentication/discord.html")
+	
+@login_required
+def room(request, room_name):
+	username = request.user.username
+	paids = Pick.objects.get(username=username,teamnumber=1)
+	team = paids.team_name
+	messages = ChatMessage.objects.filter(room_name=room_name).order_by('timestamp')
+	return render(request, 'authentication/room.html', {
+		'room_name': room_name,
+		'team':team,
+		'messages': messages
+	})
+
+@require_POST
+def like_message(request, message_id):
+    message = ChatMessage.objects.get(id=message_id)
+    message.likes += 1
+    message.save()
+    return JsonResponse({'likes': message.likes})
+
+@require_POST
+def dislike_message(request, message_id):
+    message = ChatMessage.objects.get(id=message_id)
+    message.dislikes += 1
+    message.save()
+    return JsonResponse({'dislikes': message.dislikes})
 
 
 def terms(request):

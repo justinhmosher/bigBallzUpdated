@@ -126,5 +126,15 @@ class Blog(models.Model):
     def get_absolute_url(self):
         return reverse('blog_detail', kwargs={'slug': self.slug})
 
+class ChatMessage(models.Model):
+    room_name = models.CharField(max_length=255)
+    message = models.TextField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+    team_name = models.CharField(max_length=100, default="Team")
+    likes = models.IntegerField(default=0,null = False)
+    dislikes = models.IntegerField(default=0, null = False)
+    def __str__(self):
+        return f"{self.room_name} - {self.message[:50]}"
+
 
 
