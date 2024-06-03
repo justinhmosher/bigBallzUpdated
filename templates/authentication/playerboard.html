@@ -46,15 +46,61 @@
         border: 2px solid black;
         border-radius: 10px;
      }
+            .navbar {
+        background-color: #212529; /* Dark background color */
+      }
+      .navbar-nav {
+        flex-direction: row;
+      }
+      .nav-link {
+        padding-right: 1rem !important;
+        padding-left: 1rem !important;
+        color: #ffffff !important; /* White text color */
+      }
+      .navbar-brand img {
+        width: 40px;
+        height: auto;
+      }
+      .nav-scroller {
+        position: relative;
+        z-index: 2;
+        height: 2.75rem;
+        overflow-y: hidden;
+      }
+
+      .nav-scroller .nav {
+        display: flex;
+        flex-wrap: nowrap;
+        padding-bottom: 1rem;
+        margin-top: -1px;
+        overflow-x: auto;
+        text-align: center;
+        white-space: nowrap;
+        -webkit-overflow-scrolling: touch;
+      }
 
 </style>
 {% load static %}
-
-    <div class="top-left">
-        <a href="{% url 'tournaments' %}">
-        <img src="{% static 'home.png' %}" alt="logo" class="image-boarder">
-        </a>
-    </div>
+<body>
+    <header>
+      <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+          <a class="navbar-brand" href="/">
+            <img src="{% static 'Trophy-words-logo.svg' %}" alt="The Chosen Fantasy Games">
+          </a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
+            <ul class="navbar-nav text-center">
+            <li class="nav-item"><a class="nav-link" href="{% url 'tournaments' %}">Tournaments</a></li>
+              <li class="nav-item"><a class="nav-link" href="{% url 'checking' %}">Game</a></li>
+              <li class="nav-item"><a class="nav-link" href="{% url 'discord' %}">Chat</a></li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+    </header>
 
 <br>
 <br>
@@ -93,4 +139,5 @@
 {% else %}
 <h4 class="text-center">Teams left: {{ total_in }}</h4>
 {% endif %}
+</body>
 

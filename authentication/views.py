@@ -531,8 +531,14 @@ def location(request):
 
 		paid = Paid.objects.get(username = username)
 		compliance = OfAge.objects.get(username = username)
+		current_day = timezone.now().date()
+		game = Game.objects.get(sport = "Football")
+		start_date = game.startDate
+		end_date = game.endDate
 
 		if user_state in allowed_states and not is_proxy and paid.paid_status == True:
+			return redirect('checking')
+		elif user_state in allowed_states and not is_proxy and paid.paid_status == False and (start_date <= current_day < end_date):
 			return redirect('checking')
 		elif user_state in allowed_states and not is_proxy and compliance.old == False:
 			age_api_key = config('AGE_API')
