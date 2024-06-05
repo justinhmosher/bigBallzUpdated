@@ -30,7 +30,7 @@ class Command(BaseCommand):
             message = MIMEMultipart()
             message['From'] = f"{sender_name} <{sender_email}>"
             message['To'] = receiver_email
-            message['Subject'] = "100 Days Out!"
+            message['Subject'] = "Referral Program"
             body = render_to_string('authentication/emarketing.html')
             message.attach(MIMEText(body, "html"))
             text = message.as_string()
