@@ -53,8 +53,7 @@ INSTALLED_APPS = [
     'authentication',
     'django.contrib.sitemaps',
     'channels',
-    'ckeditor',
-    'ckeditor_uploader'
+    'django_ckeditor_5',
 ]
 
 MIDDLEWARE = [
