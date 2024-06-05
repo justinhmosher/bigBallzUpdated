@@ -519,7 +519,7 @@ def location(request):
 	if response.status_code==200:
 		location_data = response.json()
 		user_state = location_data.get('region_name')
-		#is_proxy = location_data['security'].get('is_proxy', False)
+		#is_proxy = location_datcd a['security'].get('is_proxy', False)
 		security_data = location_data.get('security', {})
 		is_proxy = security_data.get('is_proxy', False)
 		print(is_proxy)
