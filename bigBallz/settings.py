@@ -69,15 +69,37 @@ MIDDLEWARE = [
 CKEDITOR_UPLOAD_PATH = "uploads/"
 
 CKEDITOR_5_CONFIGS = {
-    'default':
-        {
-            'toolbar': 'full',
-            'width': 'auto',
-            'extraPlugins': ','.join([
-                'codesnippet',
-            ]),
+    'default': {
+        'toolbar': {
+            'items': [
+                'heading', '|',
+                'bold', 'italic', 'link', 'bulletedList', 'numberedList', 'blockQuote', '|',
+                'undo', 'redo', '-', 'imageUpload', 'mediaEmbed', 'insertTable', 'tableColumn', 'tableRow', 'mergeTableCells', '|',
+                'outdent', 'indent', '|', 'codeBlock', 'htmlEmbed', '|', 'removeFormat', 'sourceEditing'
+            ],
+            'shouldNotGroupWhenFull': True
         },
+        'language': 'en',
+        'image': {
+            'toolbar': [
+                'imageTextAlternative', 'imageStyle:full', 'imageStyle:side'
+            ]
+        },
+        'table': {
+            'contentToolbar': [
+                'tableColumn', 'tableRow', 'mergeTableCells'
+            ]
+        },
+        'extraPlugins': ','.join([
+            'uploadimage',  # The upload image feature must be enabled
+            'codesnippet',
+            'mediaEmbed'
+        ]),
+        'height': 300,
+        'width': 'auto'
+    }
 }
+
 
 
 
