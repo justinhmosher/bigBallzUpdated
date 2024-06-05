@@ -1,7 +1,18 @@
 from django.contrib import admin
 from .models import Pick,Paid,NFLPlayer,Game,PastPick,Scorer,BaseballPlayer,PromoCode,PromoUser,OfAge,UserVerification, Blog, ChatMessage
+from django_ckeditor_5.widgets import CKEditor5Widget
+from django import forms
 
-# Register your models here.
+class BlogAdminForm(forms.ModelForm):
+    body = forms.CharField(widget=CKEditor5Widget(config_name='default'))
+
+    class Meta:
+        model = Blog
+        fields = '__all__'
+
+class BlogAdmin(admin.ModelAdmin):
+    form = BlogAdminForm
+
 
 class NFLPlayerAdmin(admin.ModelAdmin):
     search_fields = ['name','team_name']

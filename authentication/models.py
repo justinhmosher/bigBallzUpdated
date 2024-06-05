@@ -4,7 +4,7 @@ from datetime import date
 from django.utils import timezone
 from django.utils.text import slugify
 from django.urls import reverse
-from ckeditor_uploader.fields import RichTextUploadingField
+from django_ckeditor_5.fields import CKEditor5Field
 #from Pillow import ImageTk, Image
 
 class Pick(models.Model):
@@ -110,7 +110,7 @@ class UserVerification(models.Model):
 class Blog(models.Model):
     title = models.CharField(max_length=100, default="Title")
     slug = models.SlugField(max_length=100, unique=True, blank=True)
-    body = RichTextUploadingField(default="Body")
+    body = CKEditor5Field(default="Body")
     author = models.CharField(max_length=100, default="Author")
     date = models.DateField(default=date.today)
     updated_at = models.DateTimeField(auto_now=True) 

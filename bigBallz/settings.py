@@ -67,13 +67,18 @@ MIDDLEWARE = [
 ]
 
 CKEDITOR_UPLOAD_PATH = "uploads/"
+
 CKEDITOR_CONFIGS = {
-    'default': {
-        'toolbar': 'full',
-        'height': 300,
-        'width': '100%',
-    },
+    'default':
+        {
+            'toolbar': 'full',
+            'width': 'auto',
+            'extraPlugins': ','.join([
+                'codesnippet',
+            ]),
+        },
 }
+
 
 
 ASGI_APPLICATION = 'bigBallz.asgi.application'
