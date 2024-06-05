@@ -40,4 +40,5 @@ urlpatterns = [
     path('like_message/<int:message_id>/', views.like_message, name='like_message'),
     path('dislike_message/<int:message_id>/', views.dislike_message, name='dislike_message'),
     path('dicord', views.discord, name='discord'),
+    path('ckeditor5/', include('django_ckeditor_5.urls')),
 ]+static(settings.MEDIA_URL,document_root = settings.MEDIA_ROOT)
