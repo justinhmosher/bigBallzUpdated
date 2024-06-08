@@ -1,325 +1,206 @@
 <!doctype html>
 {% load static %}
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta property="og:url" content="https://www.thechosenfg.com" />
-<meta property="og:type" content="website" />
-<meta property="og:title" content="The Chosen Fantasy Games" />
-<meta property="og:description" content="Compete in the newest form of daily fantasy sports for a $10k jackpot!" />
-<meta property="og:image" content="{% static 'Sharing.png' %}" />
-<html lang="en" data-bs-theme="auto">
-  <head><script src="/docs/5.3/assets/js/color-modes.js"></script>
-
-    <meta charset="utf-8">
-    <meta name="generator" content="Hugo 0.118.2">
-    <title>The Chosen Fantasy Games</title>
+<html lang="en">
+<head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta property="og:url" content="https://www.thechosenfg.com" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="The Chosen Fantasy Games" />
+    <meta property="og:description" content="Compete in the newest form of daily fantasy sports for a $10k jackpot!" />
+    <meta property="og:image" content="{% static 'Sharing.png' %}" />
     <meta name="description" content="Join The Chosen Fantasy Sports League to compete in season-long tournaments. Rise above the rest and prove you're the elite in fantasy sports. Sign up now!">
     <link rel="canonical" href="https://thechosenfg.com/">
+    <title>The Chosen Fantasy Games</title>
 
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@docsearch/css@3">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
 
-<link href="/docs/5.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&display=swap" rel="stylesheet">
 
-
-<link rel="apple-touch-icon" href="{% static 'Simple.png' %}" sizes="180x180">
-<link rel="icon" href="{% static 'Simple.png' %}" sizes="32x32" type="image/png">
-<link rel="icon" href="{% static 'Simple.png' %}" sizes="16x16" type="image/png">
-<link rel="manifest" href="{% static 'Simple.png' %}">
-<link rel="mask-icon" href="{% static 'Simple.png' %}" color="#712cf9">
-<link rel="icon" href="{% static 'Simple.png' %}">
-<meta name="theme-color" content="#712cf9">
-
-<link rel="icon" type="image/svg+xml" href="{% static 'Trophy-logo.svg' %}">
-
-
-
+    <!-- Custom CSS -->
     <style>
-      body{
-        background-color: #000000;
-        text-align: center;
-      }
-      .bd-placeholder-img {
-        font-size: 1.125rem;
-        text-anchor: middle;
-        -webkit-user-select: none;
-        -moz-user-select: none;
-        user-select: none;
-      }
-
-      @media (min-width: 768px) {
-        .bd-placeholder-img-lg {
-          font-size: 3.5rem;
+        body {
+            background-color: #000000;
+            text-align: center;
         }
-            .map-container {
-        width: 100%; /* Takes full width on smaller screens */
-        height: auto; /* Adjusts height accordingly */
-    }
-      }
-
-      .b-example-divider {
-        width: 100%;
-        height: 3rem;
-        background-color: rgba(0, 0, 0, .1);
-        border: solid rgba(0, 0, 0, .15);
-        border-width: 1px 0;
-        box-shadow: inset 0 .5em 1.5em rgba(0, 0, 0, .1), inset 0 .125em .5em rgba(0, 0, 0, .15);
-      }
-
-      .b-example-vr {
-        flex-shrink: 0;
-        width: 1.5rem;
-        height: 100vh;
-      }
-
-      .bi {
-        vertical-align: -.125em;
-        fill: currentColor;
-      }
-
-      .nav-scroller {
-        position: relative;
-        z-index: 2;
-        height: 2.75rem;
-        overflow-y: hidden;
-      }
-
-      .nav-scroller .nav {
-        display: flex;
-        flex-wrap: nowrap;
-        padding-bottom: 1rem;
-        margin-top: -1px;
-        overflow-x: auto;
-        text-align: center;
-        white-space: nowrap;
-        -webkit-overflow-scrolling: touch;
-      }
-
-      .btn-bd-primary {
-        --bd-violet-bg: #712cf9;
-        --bd-violet-rgb: 112.520718, 44.062154, 249.437846;
-
-        --bs-btn-font-weight: 600;
-        --bs-btn-color: var(--bs-white);
-        --bs-btn-bg: var(--bd-violet-bg);
-        --bs-btn-border-color: var(--bd-violet-bg);
-        --bs-btn-hover-color: var(--bs-white);
-        --bs-btn-hover-bg: #6528e0;
-        --bs-btn-hover-border-color: #6528e0;
-        --bs-btn-focus-shadow-rgb: var(--bd-violet-rgb);
-        --bs-btn-active-color: var(--bs-btn-hover-color);
-        --bs-btn-active-bg: #5a23c8;
-        --bs-btn-active-border-color: #5a23c8;
-      }
-
-      .bd-mode-toggle {
-        z-index: 1500;
-      }
+        .navbar {
+            background-color: #212529; /* Dark background color */
+        }
+        .navbar-nav {
+            flex-direction: row;
+        }
+        .nav-link {
+            padding-right: 1rem !important;
+            padding-left: 1rem !important;
+            color: #ffffff !important; /* White text color */
+        }
+        .navbar-brand img {
+            width: 40px;
+            height: auto;
+        }
+        .logo-font {
+            font-family: 'Archivo Black', sans-serif;
+            color: #ffde59; /* Gold color */
+            font-weight: bold;
+            margin: 0;
+        }
+        .logo-text {
+            font-size: 2rem;
+        }
+        .logo-subtext {
+            font-size: 1.5rem;
+        }
+        .bd-placeholder-img {
+            font-size: 1.125rem;
+            text-anchor: middle;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            user-select: none;
+        }
+        .btn-bd-primary {
+            --bd-violet-bg: #712cf9;
+            --bd-violet-rgb: 112.520718, 44.062154, 249.437846;
+            --bs-btn-font-weight: 600;
+            --bs-btn-color: var(--bs-white);
+            --bs-btn-bg: var(--bd-violet-bg);
+            --bs-btn-border-color: var(--bd-violet-bg);
+            --bs-btn-hover-color: var(--bs-white);
+            --bs-btn-hover-bg: #6528e0;
+            --bs-btn-hover-border-color: #6528e0;
+            --bs-btn-focus-shadow-rgb: var(--bd-violet-rgb);
+            --bs-btn-active-color: var(--bs-btn-hover-color);
+            --bs-btn-active-bg: #5a23c8;
+            --bs-btn-active-border-color: #5a23c8;
+        }
+        .text-yellow {
+            color: #ffde59;
+        }
+        .layout-container {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center; /* This will vertically center the content */
+        }
+        .svg-container {
+            width: 400px; /* Adjust the width as necessary */
+            height: auto; /* Adjust the height as necessary, or remove it to keep the aspect ratio */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .svg-container img {
+            width: 100%; /* This will make the SVG resize within the container */
+            height: auto; /* This will maintain the aspect ratio of the SVG */
+        }
+        .map-container {
+            width: 100%; /* Make the width responsive */
+            height: auto; /* Keeps the aspect ratio */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            max-width: 600px; /* Maximum width of the container */
+        }
+        .map-title {
+            margin-left: 10%; /* Adjust this value to move the text more to the left */
+            font-size: 1.5em; /* Adjust the font size as necessary */
+            text-align: left; /* Aligns the text to the left */
+        }
+        .button-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .map-button {
+            padding: 10px 20px;
+            cursor: pointer;
+            margin-right: 5px;
+            background-color: #f0f0f0;
+            border: 1px solid #ddd;
+            display: inline-block;
+        }
+        .map-button:hover {
+            background-color: #e9e9e9;
+        }
+        .map-image {
+            max-width: 80%;
+            height: auto;
+        }
         .features-container {
-         display: flex;
-        justify-content: space-around;
-    align-items: center;
-    background-color: #000; /* You should adjust the background color as needed */
-    padding: 20px;
-  }
-  .feature {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    color: #fff; /* Adjust the text color as needed */
-  }
-  .feature-icon {
-    width: 100px; /* Adjust size as needed */
-    height: auto;
-  }
-  .feature-title {
-    font-size: 18px; /* Adjust the font size as needed */
-    margin-top: 10px;
-
-  }
-
-      .bd-mode-toggle .dropdown-menu .active .bi {
-        display: block !important;
-      }
-        .confetti {
-            z-index: -1;
-            width: 10px;
-            height: 10px;
-            background-color: #ffcc00; /* Confetti color */
-            position: absolute;
-
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            background-color: #000; /* You should adjust the background color as needed */
+            padding: 20px;
         }
-        .above-confetti {
-          position: relative; /* z-index only works on positioned elements (not static) */
-          z-index: 1; /* Higher than the confetti's z-index */
+        .feature {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #fff; /* Adjust the text color as needed */
+        }
+        .feature-icon {
+            width: 100px; /* Adjust size as needed */
+            height: auto;
+        }
+        .feature-title {
+            font-size: 18px; /* Adjust the font size as needed */
+            margin-top: 10px;
         }
         .footer {
-          background-color: #000000; /* Light gray background; adjust as needed */
-          padding: 100px 0; /* Padding above and below the text */
-          position: relative;
-          bottom: 0;
-          width: 100%;
-          }
-
+            background-color: #000000; /* Light gray background; adjust as needed */
+            padding: 100px 0; /* Padding above and below the text */
+            position: relative;
+            bottom: 0;
+            width: 100%;
+        }
         .footer p {
-          margin: 0; /* Removes default paragraph margin */
-          color: #333; /* Dark text color; adjust as needed */
-          }
-
+            margin: 0; /* Removes default paragraph margin */
+            color: #333; /* Dark text color; adjust as needed */
+        }
         .footer a {
-           color: #ffffff; /* Link color; adjust as needed */
-          }
-
-             .container {
-        margin: auto; /* Centers the content */
-      }
+            color: #ffffff; /* Link color; adjust as needed */
+        }
+        .animated-logo {
+            animation: floatAnimation 3s ease-in-out infinite;
+        }
         @keyframes floatAnimation {
-          0% {
-            transform: translatey(0px);
-          }
-          50% {
-            transform: translatey(-20px);
-          }
-          100% {
-          transform: translatey(0px);
-    }
-  }
-  .text-yellow {
-    color: #ffde59;
-  }
-  .layout-container {
-    margin-top: 20px;
-    display: flex;
-    justify-content: center;
-    align-items: center; /* This will vertically center the content */
-/* Use the full height of the viewport */
-  }
-  .svg-container {
-    /* Set the SVG size to be smaller and center it */
-    width: 400px; /* Adjust the width as necessary */
-    height: auto; /* Adjust the height as necessary, or remove it to keep the aspect ratio */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-  .svg-container img {
-    width: 100%; /* This will make the SVG resize within the container */
-    height: auto; /* This will maintain the aspect ratio of the SVG */
-  }
-.map-container {
-    width: 100%; /* Make the width responsive */
-    height: auto; /* Keeps the aspect ratio */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    max-width: 600px; /* Maximum width of the container */
-}
-
-/* Add a media query for smaller screens */
-@media (max-width: 600px) {
-    .map-container {
-        width: 100%; /* Takes full width on smaller screens */
-        height: auto; /* Adjusts height accordingly */
-    }
-}
-
-  }
-  .animated-logo {
-    animation: floatAnimation 3s ease-in-out infinite;
-  }
-.map-container {
-    position: relative; /* Establish a positioning context */
-    width: 100%; /* Full width of its parent */
-    max-width: 800px; /* Maximum width */
-    margin: 0 auto; /* Centering block-level elements */
-    overflow: hidden; /* Prevent overflow */
-    /* Set a specific height if needed, or remove it to let the content define the height */
-}
-
-/* SVG specific styles */
-.map-container svg {
-    display: block; /* Remove inline-block alignments */
-    width: 100%; /* Responsive width */
-    max-height: 100vh; /* Maximum height to be full viewport height, or set a fixed height */
-    margin: auto; /* Center the SVG within the flex container */
-}
-
-/* If the SVG has its own flex properties, reset them */
-.map-container svg * {
-    align-items: inherit;
-    justify-content: inherit;
-}
-.map-title {
-    margin-left: 10%; /* Adjust this value to move the text more to the left */
-    /* Additional styling */
-    font-size: 1.5em; /* Adjust the font size as necessary */
-    /* If you're using Bootstrap and it's setting text-align to center,
-       you'll need to override it */
-    text-align: left; /* Aligns the text to the left */
-}
-  .button-container {
-    text-align: center;
-    margin-bottom: 20px;
-  }
-  .map-button {
-    padding: 10px 20px;
-    cursor: pointer;
-    margin-right: 5px;
-    background-color: #f0f0f0;
-    border: 1px solid #ddd;
-    display: inline-block;
-  }
-  .map-button:hover {
-    background-color: #e9e9e9;
-  }
-  .map-image {
-    max-width: 80%;
-    height: auto;
-  }
-   .navbar {
-        background-color: #212529; /* Dark background color */
-      }
-      .navbar-nav {
-        flex-direction: row;
-      }
-      .nav-link {
-        padding-right: 1rem !important;
-        padding-left: 1rem !important;
-        color: #ffffff !important; /* White text color */
-      }
-      .navbar-brand img {
-        width: 40px;
-        height: auto;
-      }
-
-
-
-
+            0% {
+                transform: translatey(0px);
+            }
+            50% {
+                transform: translatey(-20px);
+            }
+            100% {
+                transform: translatey(0px);
+            }
+        }
     </style>
 
-    <header>
-      <nav class="navbar navbar-expand-lg navbar-dark">
-        <div class="container">
-          <a class="navbar-brand" href="/">
-            <img src="{% static 'Trophy-words-logo.svg' %}" alt="The Chosen Fantasy Games">
-          </a>
-          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-          </button>
-          <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
-            <ul class="navbar-nav text-center">
-              <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
-              <li class="nav-item"><a class="nav-link" href="signin">Sign In</a></li>
-              <li class="nav-item"><a class="nav-link" href="signup">Sign Up</a></li>
-              <li class="nav-item"><a class="nav-link" href="media-page">Media</a></li>
-            </ul>
-          </div>
-        </div>
-      </nav>
-    </header>
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous" defer></script>
+</head>
 <body>
+<header>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <img src="{% static 'Trophy-words-logo.svg' %}" alt="The Chosen Fantasy Games Logo">
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
+                <ul class="navbar-nav text-center">
+                    <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="signin">Sign In</a></li>
+                    <li class="nav-item"><a class="nav-link" href="signup">Sign Up</a></li>
+                    <li class="nav-item"><a class="nav-link" href="media-page">Media</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+</header>
 <div class="text-center">
 {% for message in messages %}
 <div class="alert alert-{{ message.tags }} alert-dismissible fade show d-inline-block" role="alert">
@@ -331,43 +212,37 @@
 {% endfor %}
 </div>
 
-
-
-  <section class="py-5 text-center container">
+<section class="py-5 text-center container">
     <div class="row py-lg-5">
-      <div class="col-lg-6 col-md-8 mx-auto">
-
-<div class="text-center">
-        <a href="/">
-            <img src="{% static 'Trophy-words-logo.svg' %}" alt="logo" style="width: 400px; height: auto;" class="img-fluid animated-logo"/>
-        </a>
-</div>
-
- <p class="lead text-white">Enter the fantasy sports arena: Season-long battles, key stats, one champion. Are you The Chosen?</p>
-<a href="signin" class="btn btn-primary btn-lg my-2 w-50 above-confetti">Sign In</a>
-<div class="d-flex justify-content-center">
-  <p class="above-confetti text-white">Don't have an account? <a href="signup">Sign up!</a></p>
-</div>
-
-
-
-      </div>
+        <div class="col-lg-6 col-md-8 mx-auto">
+            <div class="text-center">
+                <a href="/">
+                    <img src="{% static 'Simple.svg' %}" alt="The Chosen Fantasy Games Logo" style="width: 400px; height: auto;" class="img-fluid animated-logo"/>
+                </a>
+            </div>
+            <h2 class="text-center logo-font">THE CHOSEN FANTASY GAMES<br></h2>
+            <p class="lead text-white">Enter the fantasy sports arena: Season-long battles, key stats, one champion. Are you The Chosen?</p>
+            <a href="signin" class="btn btn-primary btn-lg my-2 w-50 above-confetti">Sign In</a>
+            <div class="d-flex justify-content-center">
+                <p class="above-confetti text-white">Don't have an account? <a href="signup">Sign up!</a></p>
+            </div>
+        </div>
     </div>
-  </section>
+</section>
 
 <div class="features-container">
-  <div class="feature">
-    <img src="{% static 'Cash.svg' %}" alt="Cash Payouts" class="feature-icon">
-    <div class="feature-title">Chance to Win $10,000 Pot!</div>
-  </div>
-  <div class="feature">
-    <img src="{% static 'Duel.svg' %}" alt="Secure" class="feature-icon">
-    <div class="feature-title">Battle Against Others!</div>
-  </div>
-  <div class="feature">
-    <img src="{% static 'Clock.svg' %}" alt="Support" class="feature-icon">
-    <div class="feature-title">Season Long Games!</div>
-  </div>
+    <div class="feature">
+        <img src="{% static 'Cash.svg' %}" alt="Cash Payouts" class="feature-icon">
+        <div class="feature-title">Chance to Win $10,000 Pot!</div>
+    </div>
+    <div class="feature">
+        <img src="{% static 'Duel.svg' %}" alt="Secure" class="feature-icon">
+        <div class="feature-title">Battle Against Others!</div>
+    </div>
+    <div class="feature">
+        <img src="{% static 'Clock.svg' %}" alt="Support" class="feature-icon">
+        <div class="feature-title">Season Long Games!</div>
+    </div>
 </div>
 
 <br>
@@ -375,57 +250,44 @@
 <br>
 <br>
 <h2 class="text-center text-yellow">{{ total }} of 200 SPOTS REMAINING FOR BIG TD TOURNAMENT!<br></h2>
-<h2 class="text-center text-yellow">DEADLINE TO REGISTER SPETEMBER 2ND, 2024<br></h2>
+<h2 class="text-center text-yellow">DEADLINE TO REGISTER SEPTEMBER 2ND, 2024<br></h2>
 <div class="button-container">
-<div style="text-align: center; margin-top: 20px;"> <!-- Centers the buttons and adds space above -->
-  <button onclick="switchMap('{% static 'Rules-NFLs.svg' %}')" style="background: linear-gradient(145deg, #6db3f2, #1e69de); border: none; color: white; padding: 10px 20px; border-radius: 5px; box-shadow: 3px 3px 10px rgba(0,0,0,0.2); cursor: pointer; margin: 5px; transition: transform 0.2s, box-shadow 0.2s;">NFL - BIG TD TOURNAMENT</button>
-  
-  <button onclick="switchMap('{% static 'Rules-MLB.svg' %}')" style="background: linear-gradient(145deg, #f2994a, #f2c94c); border: none; color: white; padding: 10px 20px; border-radius: 5px; box-shadow: 3px 3px 10px rgba(0,0,0,0.2); cursor: pointer; margin: 5px; transition: transform 0.2s, box-shadow 0.2s;">MLB - BEAT THE STREAK</button>
-  
-  <button onclick="switchMap('{% static 'Rules-NBA.svg' %}')" style="background: linear-gradient(145deg, #56ab2f, #a8e063); border: none; color: white; padding: 10px 20px; border-radius: 5px; box-shadow: 3px 3px 10px rgba(0,0,0,0.2); cursor: pointer; margin: 5px; transition: transform 0.2s, box-shadow 0.2s;">NBA - THREE POINT CONTEST</button>
-  <!-- Add more buttons if needed -->
-</div>
-
+    <div style="text-align: center; margin-top: 20px;"> <!-- Centers the buttons and adds space above -->
+        <button onclick="switchMap('{% static 'Rules-NFLs.svg' %}')" style="background: linear-gradient(145deg, #6db3f2, #1e69de); border: none; color: white; padding: 10px 20px; border-radius: 5px; box-shadow: 3px 3px 10px rgba(0,0,0,0.2); cursor: pointer; margin: 5px; transition: transform 0.2s, box-shadow 0.2s;">NFL - BIG TD TOURNAMENT</button>
+        <button onclick="switchMap('{% static 'Rules-MLB.svg' %}')" style="background: linear-gradient(145deg, #f2994a, #f2c94c); border: none; color: white; padding: 10px 20px; border-radius: 5px; box-shadow: 3px 3px 10px rgba(0,0,0,0.2); cursor: pointer; margin: 5px; transition: transform 0.2s, box-shadow 0.2s;">MLB - BEAT THE STREAK</button>
+        <button onclick="switchMap('{% static 'Rules-NBA.svg' %}')" style="background: linear-gradient(145deg, #56ab2f, #a8e063); border: none; color: white; padding: 10px 20px; border-radius: 5px; box-shadow: 3px 3px 10px rgba(0,0,0,0.2); cursor: pointer; margin: 5px; transition: transform 0.2s, box-shadow 0.2s;">NBA - THREE POINT CONTEST</button>
+        <!-- Add more buttons if needed -->
+    </div>
 </div>
 
 <!-- Container for the map image -->
 <img id="map-image" class="map-image" src="{% static 'Rules-NFLs.svg' %}" alt="Interactive Map">
 
 <div class="layout-container">
-
-  <div class="svg-container">
-    <img src="{% static 'Iphone.svg' %}" alt="SVG Image">
-  </div>
+    <div class="svg-container">
+        <img src="{% static 'Iphone.svg' %}" alt="SVG Image">
+    </div>
 </div>
 
 <br>
 <br>
 <br>
 <h2 class="map-title text-white">Eligible States:</h2>
-<div class="map-container">
-        <img src="{% static 'Updated-map.svg' %}" alt="Map of Allowed States" style="width:100%; height:auto;">
+<div style="display: flex; justify-content: center;">
+    <img src="{% static 'Updated-map.svg' %}" alt="Map of Allowed States" style="width: 100%; max-width: 600px; height: auto;">
 </div>
 
 
-
- 
-<script src="/docs/5.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous">
-</script>
-
-<script>
-
-  function switchMap(mapImagePath) {
-    document.getElementById('map-image').src = mapImagePath;
-  }
-</script>
-
-    </body>
-
 <footer class="footer text-center">
     <div class="container text-center">
-        <p><a href="terms" >Terms and Conditions</a>   <a href="privacy">Privacy Policy</a>  <a href="mailto:commissioner@thechosenfg.com">Contact Us!</a></p>
+        <p><a href="terms">Terms and Conditions</a> <a href="privacy">Privacy Policy</a> <a href="mailto:commissioner@thechosenfg.com">Contact Us!</a></p>
     </div>
 </footer>
 
-
+<script>
+    function switchMap(mapImagePath) {
+        document.getElementById('map-image').src = mapImagePath;
+    }
+</script>
+</body>
 </html>
