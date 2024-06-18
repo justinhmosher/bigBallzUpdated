@@ -18,7 +18,7 @@ from decouple import config
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from .forms import PlayerSearchForm, Pickform, Pick1Form, CreateTeam
-from .models import Pick,Paid,NFLPlayer,Game,PastPick,PromoCode,PromoUser,OfAge,UserVerification,Blog,ChatMessage
+from .models import Pick,Paid,NFLPlayer,Game,PastPick,PromoCode,PromoUser,OfAge,UserVerification,Blog,ChatMessage,Waitlist
 from django.db.models import Count,F,ExpressionWrapper,fields
 from datetime import datetime
 from itertools import chain
@@ -38,13 +38,11 @@ def testing(request):
 
 def home(request):
 	total_numteams = Paid.objects.filter(paid_status=True).aggregate(Sum('numteams'))['numteams__sum']
-	# Ensure total_numteams is not None if there are no records
 	if total_numteams is None:
 		total_numteams = 0
 	return render(request, "authentication/homepage.html",{'total': 200 - total_numteams})
 
 def blog_detail(request,slug):
-	#blog_post = get_object_or_404(Blog, slug=slug).order_by('-date')
 	blog_post = get_object_or_404(Blog, slug=slug)
 	tags = blog_post.tags.split(',') if blog_post.tags else []
 	return render(request, "authentication/blog_detail.html",{'blog_post': blog_post, 'tags': tags})
@@ -519,15 +517,12 @@ def location(request):
 	if response.status_code==200:
 		location_data = response.json()
 		user_state = location_data.get('region_name')
-		#is_proxy = location_datcd a['security'].get('is_proxy', False)
 		security_data = location_data.get('security', {})
 		is_proxy = security_data.get('is_proxy', False)
-		print(is_proxy)
-		print(user_state)
 
 		disallowed_states = ['Washington','Idaho','Nevada','Montana','Wyoming','Colorado','Iowa','Missouri','Tenessee','Mississippi','Louisiana','Alabama','Florida','Michigan','Ohio','West Virginia','Pensylvania','Maryland','Deleware','New Jersey','Conneticut','Ney York','Maine','New Hampshire','Massachusetts']
 
-		allowed_states = [None,'California','Oregon','Alaska','Arizona','Utah','New Mexico','Texas','Oklahoma','Arkansas','Kansas','Nebraska','South Dakota','North Dekota','Minnesota','Wisconsin','Illinois','Indiana','Kentucky','Virginia','North Carolina','South Carolina','Georgia','Vermont','Rhode Island']
+		allowed_states = [None,'None','California','Oregon','Alaska','Arizona','Utah','New Mexico','Texas','Oklahoma','Arkansas','Kansas','Nebraska','South Dakota','North Dekota','Minnesota','Wisconsin','Illinois','Indiana','Kentucky','Virginia','North Carolina','South Carolina','Georgia','Vermont','Rhode Island']
 
 		paid = Paid.objects.get(username = username)
 		compliance = OfAge.objects.get(username = username)
@@ -535,19 +530,44 @@ def location(request):
 		game = Game.objects.get(sport = "Football")
 		start_date = game.startDate
 		end_date = game.endDate
-
-		if user_state in allowed_states and not is_proxy and paid.paid_status == True:
-			return redirect('checking')
-		elif user_state in allowed_states and not is_proxy and paid.paid_status == False and (start_date <= current_day < end_date):
-			return redirect('checking')
-		elif user_state in allowed_states and not is_proxy and compliance.old == False:
-			age_api_key = config('AGE_API')
-			return render(request,'authentication/agechecking.html',{'api':age_api_key})
-		elif user_state in allowed_states and not is_proxy and compliance.old == True:
-			return redirect('checking')
+		total_numteams = Paid.objects.filter(paid_status=True).aggregate(Sum('numteams'))['numteams__sum']
+		if total_numteams is None:
+			total_numteams = 0
+		if not (user_state in allowed_states and not is_proxy):
+			if is_proxy:
+				messages.error(request,"You cannot use a VPN.")
+				return redirect('tournaments')
+			else:
+				print("hi")
+				messages.error(request,"You are in a disallowed state.")
+				return redirect('tournaments')
 		else:
-			messages.error(request,"You are in a disallowed state.")
-			return redirect('tournaments')
+			if (start_date <= current_day < end_date):
+				return redirect('checking')
+			else:
+				if paid.paid_status == True:
+					return redirect('checking')
+				else:
+					if total_numteams >= 200:
+						try:
+							Waitlist.objects.get(username = username)
+							messages.error(request,"You are already added to the waitlist")
+							return redirect('tournaments')
+						except Waitlist.DoesNotExist:
+							waiter = Waitlist(username = username)
+							waiter.save()
+							messages.error(request,"Max number of teams entered, we are adding you to a waitlist")
+							return redirect('tournaments')
+					else:
+						if compliance.old == False and compliance.young == False:
+							age_api_key = config('AGE_API')
+							return render(request,'authentication/agechecking.html',{'api':age_api_key})
+						elif compliance.young == True:
+							messages.error(request,"You are too young to participate")
+							return redirect("tournaments")
+						else:
+							return redirect('checking')
+
 	else:
 		messages.error(request,"Failed to register location data")
 		return redirect('tournaments')
@@ -579,7 +599,7 @@ def submitverification(request):
 		else:
 			compliance.young = True
 			compliance.save()
-			return redirect('checking')
+			return redirect('location')
 
 	# If not a POST request, render the form page
 	return redirect('checking')

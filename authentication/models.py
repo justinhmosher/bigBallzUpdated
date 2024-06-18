@@ -137,5 +137,10 @@ class ChatMessage(models.Model):
     def __str__(self):
         return f"{self.room_name} - {self.message[:50]}"
 
+class Waitlist(models.Model):
+    username = models.CharField(max_length = 100, default = "username")
+    def __str__(self):
+        return f"{self.username}"
+
 
 

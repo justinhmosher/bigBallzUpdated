@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Pick,Paid,NFLPlayer,Game,PastPick,Scorer,BaseballPlayer,PromoCode,PromoUser,OfAge,UserVerification, Blog, ChatMessage
+from .models import Pick,Paid,NFLPlayer,Game,PastPick,Scorer,BaseballPlayer,PromoCode,PromoUser,OfAge,UserVerification, Blog, ChatMessage, Waitlist
 from django_ckeditor_5.widgets import CKEditor5Widget
 from django import forms
 
@@ -30,3 +30,4 @@ admin.site.register(OfAge)
 admin.site.register(UserVerification)
 admin.site.register(Blog, BlogAdmin)
 admin.site.register(ChatMessage)
+admin.site.register(Waitlist)
