@@ -38,7 +38,7 @@
             <form method="post" action="{% url 'payment' %}">
                 {% csrf_token %}
                 <div class="mb-3">
-                    <label for="teamCount" class="form-label">Number of Teams:</label>
+                    <label for="teamCount" class="form-label">Number of Entries:</label>
                     <select class="form-select" id="teamCount" name="teamCount" onchange="updateTotal()">
                         <option value="1" selected>1</option>
                         <!-- Generating options dynamically -->
