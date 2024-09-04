@@ -496,7 +496,6 @@ def leaderboard(request):
 def tournaments(request):
 	user = Paid.objects.get(username = request.user.username)
 	play = user.paid_status
-	print(play)
 	game = Game.objects.get(sport = "Football")
 	start_date = game.startDate
 	today = timezone.now().date()
@@ -664,13 +663,16 @@ def game(request):
 		has_started = False
 	else:
 		has_started = True
+	team = Pick.objects.get(username = request.user.username, teamnumber = 1)
+	name = team.team_name
 
 
 	return render(request, 'authentication/game.html', 
 		{'player_data': player_data, 
 		'user_pick_data' : user_pick_data,
 		'has_started' : has_started,
-		'start':start
+		'start':start,
+		'team':name
 		})
 
 def game_search(username,playerdata):
