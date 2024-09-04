@@ -219,11 +219,6 @@
   <a href="rules" target="_blank">Rules</a>
 </div>
   <br>
-     {% if days >= 0 %}
-     <p class="text-center mb-3 text-red">
-            36 spots left!
-      </p>
-        {% endif %}
         <a href="location" id="actionButton" class="btn btn-primary btn-lg mx-auto w-50 text-center">
         {% if days <= 0 or play == True %}Play{% else %}Join{% endif %}
     </a>
