@@ -499,7 +499,7 @@ def tournaments(request):
 	print(play)
 	game = Game.objects.get(sport = "Football")
 	start_date = game.startDate
-	today = datetime.now().date()
+	today = timezone.now().date()
 	days_until_start = (start_date - today).days
 	pot = game.pot
 
@@ -782,21 +782,21 @@ def checking(request):
 	start_date = game.startDate
 	end_date = game.endDate
 	week = game.week
-	if paid.paid_status == False and (start_date <= current_day < end_date) and datetime.now().weekday() in [1,2]:
+	if paid.paid_status == False and (start_date <= current_day < end_date) and timezone.now().weekday() in [1,2]:
 		return render(request,'authentication/picking.html')
-	elif paid.paid_status == False and (start_date <= current_day < end_date) and datetime.now().weekday() not in [1,2]:
+	elif paid.paid_status == False and (start_date <= current_day < end_date) and timezone.now().weekday() not in [1,2]:
 		return redirect('playerboard')
 	elif paid.paid_status == False:
 		return redirect('payment')
-	elif (paid.paid_status == True) and not (start_date < current_day < end_date):
+	elif (paid.paid_status == True) and not (start_date <= current_day < end_date):
 		username = request.user.username
-		current_day = datetime.now().weekday()
+		current_day = timezone.now().weekday()
 		if not Pick.objects.filter(username = username).exists():
 			return redirect('teamname')
 		return redirect('game')
 	else:
 		username = request.user.username
-		current_day = datetime.now().weekday()
+		current_day = timezone.now().weekday()
 		if not Pick.objects.filter(username = username).exists():
 			return redirect('teamname')
 		else:
