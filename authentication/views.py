@@ -808,7 +808,7 @@ def checking(request):
 				if i.isin == True:
 					count_ins +=1
 			if count_ins >= 1:
-				if current_day in [1,2] and count > 1 and week != 23:
+				if current_day not in [1,2] and count > 1 and week != 23:
 					return redirect('game')
 				elif count == 1 or week == 23:
 					winners_list = Pick.objects.filter(isin=True)
