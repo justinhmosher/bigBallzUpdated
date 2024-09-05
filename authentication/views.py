@@ -31,6 +31,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.core.exceptions import ObjectDoesNotExist
 from email.utils import formataddr
 from django.db.models import Sum
+import pytz
 
 
 def testing(request):
@@ -774,53 +775,68 @@ def game_search(username,playerdata):
 
 @login_required
 def checking(request):
-	if not Paid.objects.filter(username = request.user.username).exists():
-		new_user = Paid(username = request.user.username)
-		new_user.save()
-	paid = Paid.objects.get(username = request.user.username)
-	count = Pick.objects.filter(isin=True).count()
-	current_day = timezone.now().date()
-	game = Game.objects.get(sport = "Football")
-	start_date = game.startDate
-	end_date = game.endDate
-	week = game.week
-	if paid.paid_status == False and (start_date <= current_day < end_date) and timezone.now().weekday() in [1,2]:
-		return render(request,'authentication/picking.html')
-	elif paid.paid_status == False and (start_date <= current_day < end_date) and timezone.now().weekday() not in [1,2]:
-		return redirect('playerboard')
-	elif paid.paid_status == False:
-		return redirect('payment')
-	elif (paid.paid_status == True) and not (start_date <= current_day < end_date):
-		username = request.user.username
-		current_day = timezone.now().weekday()
-		if not Pick.objects.filter(username = username).exists():
-			return redirect('teamname')
-		return redirect('game')
-	else:
-		username = request.user.username
-		current_day = timezone.now().weekday()
-		if not Pick.objects.filter(username = username).exists():
-			return redirect('teamname')
-		else:
-			user_data = Pick.objects.filter(username = username)
-			count_ins = 0
-			for i in user_data:
-				if i.isin == True:
-					count_ins +=1
-			if count_ins >= 1:
-				if current_day not in [1,2] and count > 1 and week != 23:
-					return redirect('game')
-				elif count == 1 or week == 23:
-					winners_list = Pick.objects.filter(isin=True)
-					winners = []
-					for win in winners_list:
-						if win.team_name not in winners:
-							winners.append(win.team_name)
-					return render(request,'authentication/win.html',{'winners':winners})
-				else:
-					return redirect('leaderboard')
-			else:
-				if current_day in [1,2]:
-					return render(request,'authentication/picking.html')
-				else:
-					return redirect('playerboard')
+    if not Paid.objects.filter(username=request.user.username).exists():
+        new_user = Paid(username=request.user.username)
+        new_user.save()
+        
+    paid = Paid.objects.get(username=request.user.username)
+    count = Pick.objects.filter(isin=True).count()
+    
+    # Define the PST timezone
+    pst = pytz.timezone('America/Los_Angeles')
+
+    # Get the current time in PST
+    current_pst_time = timezone.now().astimezone(pst)
+    current_day_pst = current_pst_time.weekday()  # This gives the day of the week (int)
+
+    # Get the current date in PST for comparison with start and end dates
+    current_date_pst = current_pst_time.date()
+    
+    game = Game.objects.get(sport="Football")
+    start_date = game.startDate
+    end_date = game.endDate
+    week = game.week
+    
+    # Check if the current date is within the game's start and end dates
+    if paid.paid_status == False and (start_date <= current_date_pst < end_date) and current_day_pst in [1, 2]:
+        return render(request, 'authentication/picking.html')
+    
+    elif paid.paid_status == False and (start_date <= current_date_pst < end_date) and current_day_pst not in [1, 2]:
+        return redirect('playerboard')
+    
+    elif paid.paid_status == False:
+        return redirect('payment')
+    
+    elif (paid.paid_status == True) and not (start_date <= current_date_pst < end_date):
+        username = request.user.username
+        if not Pick.objects.filter(username=username).exists():
+            return redirect('teamname')
+        return redirect('game')
+    
+    else:
+        username = request.user.username
+        if not Pick.objects.filter(username=username).exists():
+            return redirect('teamname')
+        else:
+            user_data = Pick.objects.filter(username=username)
+            count_ins = 0
+            for i in user_data:
+                if i.isin:
+                    count_ins += 1
+            if count_ins >= 1:
+                if current_day_pst in [1, 2] and count > 1 and week != 18:
+                    return redirect('game')
+                elif count == 1 or week == 23:
+                    winners_list = Pick.objects.filter(isin=True)
+                    winners = []
+                    for win in winners_list:
+                        if win.team_name not in winners:
+                            winners.append(win.team_name)
+                    return render(request, 'authentication/win.html', {'winners': winners})
+                else:
+                    return redirect('leaderboard')
+            else:
+                if current_day_pst in [1, 2]:
+                    return render(request, 'authentication/picking.html')
+                else:
+                    return redirect('playerboard')
