@@ -686,8 +686,11 @@ def game_search(username,playerdata):
 				scorers.append(past.pick1)
 			elif past.pick2 != "N/A":
 				scorers.append(past.pick2)
+		print(pick.pick1)
 		if pick.pick1 == 'N/A':
 			try:
+				print(scorers)
+				print(playerdata.player_ID)
 				player_data_pick2 = NFLPlayer.objects.get(name=pick.pick2)
 				if player_data_pick2.team_name == playerdata.team_name:
 					return 1
@@ -703,14 +706,17 @@ def game_search(username,playerdata):
 					pick.save()
 					return 2
 			except NFLPlayer.DoesNotExist:
-				pick.pick1 = playerdata.name
-				pick.pick1_team = playerdata.team_name
-				pick.pick1_position = playerdata.position
-				pick.pick1_color = playerdata.color
-				pick.pick1_player_ID = playerdata.player_ID
-				pick.pick1_image = playerdata.image
-				pick.save()
-				return 2
+				if playerdata.player_ID in scorers:
+					return 3
+				else:
+					pick.pick1 = playerdata.name
+					pick.pick1_team = playerdata.team_name
+					pick.pick1_position = playerdata.position 
+					pick.pick1_color = playerdata.color
+					pick.pick1_player_ID = playerdata.player_ID
+					pick.pick1_image = playerdata.image
+					pick.save()
+					return 2
 		elif pick.pick2 == 'N/A':
 			try:
 				player_data_pick1 = NFLPlayer.objects.get(name=pick.pick1)
@@ -746,12 +752,16 @@ def game_search(username,playerdata):
 			elif past.pick2 != "N/A":
 				scorers.append(past.pick2)
 		try:
+			print(scorers)
+			print(playerdata.player_ID)
 			player_data_pick2 = NFLPlayer.objects.get(name=pick.pick2)
 			if player_data_pick2.team_name == playerdata.team_name:
 				return 1
 			elif playerdata.player_ID in scorers:
+				print('hi')
 				return 3
 			else:
+				print('hello')
 				pick.pick1 = playerdata.name
 				pick.pick1_team = playerdata.team_name
 				pick.pick1_position = playerdata.position 

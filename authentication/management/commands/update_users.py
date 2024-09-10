@@ -28,7 +28,7 @@ class Command(BaseCommand):
                     pick.pick1_color = "N/A"
                     pick.pick1_player_ID = "N/A"
                     pick.save()
-                elif pick.pick2_player_ID in scorers:
+                if pick.pick2_player_ID in scorers:
                     past_pick = PastPick(username = pick.username,
                         team_name = pick.team_name,
                         week = week,
