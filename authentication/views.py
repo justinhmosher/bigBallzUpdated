@@ -667,13 +667,16 @@ def game(request):
 	team = Pick.objects.get(username = request.user.username, teamnumber = 1)
 	name = team.team_name
 
+	total_in = Pick.objects.filter(isin = True).count()
+
 
 	return render(request, 'authentication/game.html', 
 		{'player_data': player_data, 
 		'user_pick_data' : user_pick_data,
 		'has_started' : has_started,
 		'start':start,
-		'team':name
+		'team':name,
+		'total':total_in
 		})
 
 def game_search(username,playerdata):
@@ -686,11 +689,8 @@ def game_search(username,playerdata):
 				scorers.append(past.pick1)
 			elif past.pick2 != "N/A":
 				scorers.append(past.pick2)
-		print(pick.pick1)
 		if pick.pick1 == 'N/A':
 			try:
-				print(scorers)
-				print(playerdata.player_ID)
 				player_data_pick2 = NFLPlayer.objects.get(name=pick.pick2)
 				if player_data_pick2.team_name == playerdata.team_name:
 					return 1
