@@ -25,7 +25,7 @@ class Command(BaseCommand):
             message = MIMEMultipart()
             message['From'] = f"{sender_name} <{sender_email}>"
             message['To'] = receiver_email
-            message['Subject'] = "Make Your Week 2 Selections"
+            message['Subject'] = "Week 2 Recap & Week 3 Reminder"
             body = render_to_string('authentication/emarketing.html')
             message.attach(MIMEText(body, "html"))
             text = message.as_string()
