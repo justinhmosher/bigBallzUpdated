@@ -533,12 +533,11 @@ def location(request):
 		total_numteams = Paid.objects.filter(paid_status=True).aggregate(Sum('numteams'))['numteams__sum']
 		if total_numteams is None:
 			total_numteams = 0
-		if not (user_state in allowed_states and not is_proxy):
+		if not ((user_state in allowed_states and not is_proxy) or True):
 			if is_proxy:
 				messages.error(request,"You cannot use a VPN.")
 				return redirect('tournaments')
 			else:
-				print("hi")
 				messages.error(request,"You are in a disallowed state.")
 				return redirect('tournaments')
 		else:
