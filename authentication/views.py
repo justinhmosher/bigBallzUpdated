@@ -668,6 +668,24 @@ def game(request):
 
 	total_in = Pick.objects.filter(isin = True).count()
 
+	active_teams = Pick.objects.filter(username=request.user.username, isin=True).values_list('teamnumber', flat=True)
+	
+	past_picks = PastPick.objects.filter(username=request.user.username, teamnumber__in=active_teams).order_by('teamnumber', 'pick1', 'pick2')
+
+	organized_picks = defaultdict(list)
+
+	for pick in past_picks:
+		if pick.pick1 != "N/A":  # Only add if pick1 is not "N/A"
+			player1 = NFLPlayer.objects.get(player_ID=pick.pick1)
+			organized_picks[pick.teamnumber].append(player1.name)
+		if pick.pick2 != "N/A":  # Only add if pick2 is not "N/A"
+			player2 = NFLPlayer.objects.get(player_ID=pick.pick2)
+			organized_picks[pick.teamnumber].append(player2.name)
+
+	organized_picks = dict(organized_picks)
+
+	print(organized_picks)
+
 
 	return render(request, 'authentication/game.html', 
 		{'player_data': player_data, 
@@ -675,7 +693,8 @@ def game(request):
 		'has_started' : has_started,
 		'start':start,
 		'team':name,
-		'total':total_in
+		'total':total_in,
+		'organized_picks': organized_picks
 		})
 
 def game_search(username,playerdata):
