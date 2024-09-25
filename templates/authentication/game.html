@@ -151,10 +151,10 @@
         white-space: nowrap;
         -webkit-overflow-scrolling: touch;
       }
-      .scorer {
+    .scorer {
         padding-left: 5vh;
         padding-right: 5vh;
-      }
+          }
     </style>
 
     
@@ -204,7 +204,7 @@
 <br>
 
 {% for team_number, players in organized_picks.items %}
-    <h3 class="scorer">Team {{ team_number }} Scorers: {{ players|join:", " }}</h3>
+    <h6 class="scorer">Team {{ team_number }} Scorers: {{ players|join:", " }}</h6>
 {% endfor %}
 
 
