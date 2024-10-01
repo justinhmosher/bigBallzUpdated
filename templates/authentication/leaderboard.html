@@ -1,77 +1,89 @@
 {% load static %}
-<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css"></link>
-<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css"></link>
+{% load custom_filters %}
+<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- Bootstrap JS and dependencies -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+
 
 <style type="text/css">
     .form-container {
-      background-color: #f0f0f0; /* Grey background color */
-      border-radius: 20px; /* Rounded corners */
-      /*padding: 20px;  Add padding inside the container */
-      width: 400px; /* Set the desired width */
-      height: 450px; /* Set the desired height */
-      margin: auto; /* Center the container horizontally */
+        background-color: #ffffff;
+        border-radius: 20px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        padding: 30px;
+        width: 100%;
+        max-width: 600px;
+        margin: auto;
     }
-    .form-container-inner{
-      background-color: #f0f0f0; /* Grey background color */
-      border-radius: 20px; /* Rounded corners */
-      padding-top: 20px;  /*Add padding inside the container */
-      padding-left: 40px;
-        width: 350px; /* Set the desired width */
-      margin: auto; /* Center the container horizontally */
+    .flex-container {
+        display: flex;
+        flex-wrap: wrap; /* Allow wrapping to next row */
+        justify-content: space-between; /* Adjusts spacing between items */
+        align-items: flex-start; /* Align cards to the top so they don't stretch */
+        gap: 20px; /* Space between cards */
     }
-    .center-container {
-      display: flex;
-      justify-content: center;
-      align-items: flex-state;
-      padding-bottom: 7vh;
-      padding-top: 3vh;
-    }
-    .scrollable-table {
-    display: block;
-    max-height: 400px; /* Adjust the height as needed */
-    overflow-y: auto;
-    }
-    .scrollable-table thead th {
-    position: sticky;
-    top: 0;
-    /*background-color: #fff;  Ensure the header background isn't transparent */
-    }
-    .top-left {
-        padding-left: 5vh;
-        padding-top: 3vh;
-    }
-     .image-boarder {
-        width: auto;
-        height: 50px;
-        border: 2px solid black;
+    .player-card {
+        background-color: #ffd700; /* Gold color for the player cards */
         border-radius: 10px;
-     }
-     .span-container{
-        padding-left: 10vh;
-        padding-right: 10vh;
-     }
-            .navbar {
-        background-color: #212529; /* Dark background color */
-      }
-      .navbar-nav {
-        flex-direction: row;
-      }
-      .nav-link {
-        padding-right: 1rem !important;
-        padding-left: 1rem !important;
-        color: #ffffff !important; /* White text color */
-      }
-      .navbar-brand img {
-        width: 40px;
-        height: auto;
-      }
-      .nav-scroller {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        text-align: center;
+        margin-bottom: 20px;
+        transition: transform 0.3s ease, height 0.3s ease; /* Smooth height transition */
+        cursor: pointer;
         position: relative;
-        z-index: 2;
-        height: 2.75rem;
-        overflow-y: hidden;
-      }
+        flex: 1 1 calc(25% - 20px); /* Takes 25% width minus the gap */
+        min-width: 200px; /* Minimum width for smaller screens */
+        max-width: 250px; /* Maximum width */
+    }
+    .player-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+    }
+    .player-card h5 {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: #343a40;
+        margin-bottom: 10px;
+    }
+    .player-card p {
+        font-size: 1rem;
+        color: #6c757d;
+        margin-bottom: 10px;
+    }
+    .team-list {
+        display: none; /* Hide by default */
+        margin-top: 10px;
+        width: 100%; /* Make it span the entire width of the player card */
+        transition: max-height 0.3s ease; /* Smooth transition for height */
+        overflow: hidden;
+    }
+    .team-list ul {
+        list-style-type: none; /* Remove bullet points */
+        padding: 0;
+        text-align: left; /* Align teams to the right */
+        color: #343a40; /* Darker color for team names */
+    }
+    .team-list.visible {
+        display: block;
+        max-height: 300px; /* Control max-height for smooth transition */
+    }
+        .navbar {
+            background-color: #212529; /* Dark background color */
+        }
+        .navbar-nav {
+            flex-direction: row;
+        }
+        .nav-link {
+            padding-right: 1rem !important;
+            padding-left: 1rem !important;
+            color: #ffffff !important; /* White text color */
+        }
+        .navbar-brand img {
+            width: 40px;
+            height: auto;
+        }
 
       .nav-scroller .nav {
         display: flex;
@@ -83,9 +95,18 @@
         white-space: nowrap;
         -webkit-overflow-scrolling: touch;
       }
-
-
+    h4 {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #212529;
+        margin-bottom: 20px;
+    }
+    .span-container {
+        font-size: 1.2rem;
+        color: #6c757d;
+    }
 </style>
+
 <body>
     <header>
       <nav class="navbar navbar-expand-lg navbar-dark">
@@ -106,43 +127,103 @@
         </div>
       </nav>
     </header>
-
-
-
 <br>
-<br>
+    <div class="container text-center">
+        <h4>You selected:</h4>
+        <div class="span-container">
+            {% for user in user_data %}
+                <span>{{ user.pick1 }}, {{ user.pick2 }}{% if not forloop.last %}; {% endif %}</span>
+            {% endfor %}
+        </div>
+        <h4>to score!</h4>
+        <h4>Teams left: {{ total_in }}</h4>
+    </div>
 
-<h4 class="text-center">You selected:</h4>
-<h4 class="text-center span-container">
-{% for user in user_data %}
-    <span>{{ user.pick1 }}, {{ user.pick2 }}{% if not forloop.last %}; {% endif %}</span>
-{% endfor %}
-<h4 class="text-center"> to score!</h4>
-</h4>
+    <!-- Player Picks Cards -->
+    <div class="container mt-5">
+        <h4 class="text-center">Player Picks</h4>
+        <div class="flex-container">
+            {% for player, count in page_obj %}
+                <div class="player-card" data-player-id="{{ player }}" onclick="toggleTeamList(this)">
+                    <h5>{{ player }}</h5>
+                    <p>Number of Picks: {{ count }}</p>
+                    <div class="team-list" id="team-list-{{ player }}">
+                        <strong>Teams:</strong>
+                        <ul>
+                            {% for team in player_teams|get_item:player %}
+                                <li>{{ team }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
 
-<br>
+    <!-- Pagination Controls -->
+    <div class="pagination-container text-center mt-4">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+            {% endif %}
+            {% for num in page_obj.paginator.page_range %}
+                <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                    <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                </li>
+            {% endfor %}
+            {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+            {% endif %}
+        </ul>
+    </div>
 
-<h4 class="text-center">Teams left: {{ total_in }}</h4>
+    <script>
+        function toggleTeamList(cardElement) {
+            // Get the team list within the clicked card
+            const clickedTeamList = cardElement.querySelector('.team-list');
 
-<div class="center-container">
-<div class="form-container">
-<div class="form-container-inner">
-<table class="table table-striped table-hover scrollable-table">
-    <thead class="table-dark">
-        <tr>
-            <th>Player</th>
-            <th>Number of Picks</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for player_count in player_counts %}
-            <tr>
-                <td>{{ player_count.0 }}</td>
-                <td>{{ player_count.1 }}</td>
-            </tr>
-        {% endfor %}
-    </tbody>
-</table>
-</div>
-</div>
-</div>
+            // Hide all other team lists
+            document.querySelectorAll('.team-list').forEach(list => {
+                if (list !== clickedTeamList) {
+                    list.style.display = 'none';
+                    list.classList.remove('visible');
+                }
+            });
+
+            // Toggle the clicked card's team list visibility
+            if (clickedTeamList.classList.contains('visible')) {
+                clickedTeamList.classList.remove('visible');
+                clickedTeamList.style.display = 'none';
+            } else {
+                clickedTeamList.classList.add('visible');
+                clickedTeamList.style.display = 'block';
+            }
+        }
+
+        // Ensure all team lists are hidden when the page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.team-list').forEach(list => {
+                list.style.display = 'none';
+                list.classList.remove('visible');
+            });
+        });
+    </script>
+</body>
+
+
+
+
+
+
+
+
+
+

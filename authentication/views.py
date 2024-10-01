@@ -32,6 +32,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from email.utils import formataddr
 from django.db.models import Sum
 import pytz
+from django.core.paginator import Paginator
 
 
 def testing(request):
@@ -360,29 +361,6 @@ def activate(request, uidb64, token):
 def signsamp(request):
 	return render(request,"authentication/signsamp.html")
 
-def playerboard(request):
-	player_counts1 = Pick.objects.filter(isin=True).values('pick1').annotate(count=Count('pick1')).order_by('-count')
-	player_counts2 = Pick.objects.filter(isin=True).values('pick2').annotate(count=Count('pick2')).order_by('-count')
-	
-	player_counts = defaultdict(int)
-
-	for player_count in chain(player_counts1, player_counts2):
-		player_name = player_count.get('pick1') or player_count.get('pick2')
-		player_counts[player_name] += player_count['count']
-
-	sorted_player_counts = sorted(player_counts.items(), key=lambda x: x[1], reverse=True)
-	
-	total_in = Pick.objects.filter(isin = True).count()
-
-	if total_in > 20:
-		total_users = Pick.objects.count()
-		count = (total_in/total_users)*100
-	else:
-		count = total_in
-
-
-	return render(request,'authentication/playerboard.html',{'player_counts':sorted_player_counts,'count':count,'total_in':total_in})
-
 @login_required
 def teamcount(request):
 	team = Paid.objects.get(username = request.user.username)
@@ -468,30 +446,92 @@ def coinbase_webhook(request):
 		messages.error('Payment was not received')
 		return redirect('payment')
 
-@login_required
-def leaderboard(request):
+def playerboard(request):
+	# Collect player counts from both pick1 and pick2
 	player_counts1 = Pick.objects.filter(isin=True).values('pick1').annotate(count=Count('pick1')).order_by('-count')
 	player_counts2 = Pick.objects.filter(isin=True).values('pick2').annotate(count=Count('pick2')).order_by('-count')
-	
+
+	# Combine player counts
 	player_counts = defaultdict(int)
+	player_teams = defaultdict(list)  # Collect teams per player
 
 	for player_count in chain(player_counts1, player_counts2):
 		player_name = player_count.get('pick1') or player_count.get('pick2')
 		player_counts[player_name] += player_count['count']
 
+	for player_name in player_counts.keys():
+		for pick in Pick.objects.filter(isin = True):
+			if pick.pick1 == player_name:
+				player_teams[player_name].append(pick.team_name)
+			if pick.pick2 == player_name:
+				player_teams[player_name].append(pick.team_name)
+
+	# Sort players by the number of picks
 	sorted_player_counts = sorted(player_counts.items(), key=lambda x: x[1], reverse=True)
-	
-	total_in = Pick.objects.filter(isin = True).count()
-	
-	if total_in > 20:
-		total_users = Pick.objects.count()
-		count = (total_in/total_users)*100
-	else:
-		count = total_in
 
-	user_data = Pick.objects.filter(username = request.user.username, isin = True)
+	total_in = Pick.objects.filter(isin=True).count()
 
-	return render(request,'authentication/leaderboard.html',{'player_counts':sorted_player_counts,'total_in':total_in,'count':count,'user_data':user_data})
+	# Paginate sorted_player_counts (show 10 players per page)
+	paginator = Paginator(sorted_player_counts, 10)  # Show 10 players per page
+	page_number = request.GET.get('page')  # Get the page number from the request URL
+	page_obj = paginator.get_page(page_number)  # Get the paginated page
+
+
+	# Pass both sorted_player_counts and player_teams to the template
+	return render(request, 'authentication/playerboard.html', {
+		'page_obj': page_obj,
+		'sorted_player_counts': sorted_player_counts,
+		'player_teams': dict(player_teams),
+		'total_in': total_in,
+	})
+
+
+	return render(request,'authentication/playerboard.html',{'player_counts':sorted_player_counts,'count':count,'total_in':total_in})
+
+@login_required
+def leaderboard(request):
+	# Collect player counts from both pick1 and pick2
+	player_counts1 = Pick.objects.filter(isin=True).values('pick1').annotate(count=Count('pick1')).order_by('-count')
+	player_counts2 = Pick.objects.filter(isin=True).values('pick2').annotate(count=Count('pick2')).order_by('-count')
+
+	# Combine player counts
+	player_counts = defaultdict(int)
+	player_teams = defaultdict(list)  # Collect teams per player
+
+	for player_count in chain(player_counts1, player_counts2):
+		player_name = player_count.get('pick1') or player_count.get('pick2')
+		player_counts[player_name] += player_count['count']
+
+	for player_name in player_counts.keys():
+		for pick in Pick.objects.filter(isin = True):
+			if pick.pick1 == player_name:
+				player_teams[player_name].append(pick.team_name)
+			if pick.pick2 == player_name:
+				player_teams[player_name].append(pick.team_name)
+
+
+	# Sort players by the number of picks
+	sorted_player_counts = sorted(player_counts.items(), key=lambda x: x[1], reverse=True)
+
+	total_in = Pick.objects.filter(isin=True).count()
+
+
+	user_data = Pick.objects.filter(username=request.user.username, isin=True)
+
+	# Paginate sorted_player_counts (show 10 players per page)
+	paginator = Paginator(sorted_player_counts, 10)  # Show 10 players per page
+	page_number = request.GET.get('page')  # Get the page number from the request URL
+	page_obj = paginator.get_page(page_number)  # Get the paginated page
+
+
+	# Pass both sorted_player_counts and player_teams to the template
+	return render(request, 'authentication/leaderboard.html', {
+		'page_obj': page_obj,
+		'sorted_player_counts': sorted_player_counts,
+		'player_teams': dict(player_teams),
+		'total_in': total_in,
+		'user_data': user_data,
+	})
 
 @login_required
 def tournaments(request):
@@ -669,7 +709,7 @@ def game(request):
 	total_in = Pick.objects.filter(isin = True).count()
 
 	active_teams = Pick.objects.filter(username=request.user.username, isin=True).values_list('teamnumber', flat=True)
-	
+
 	past_picks = PastPick.objects.filter(username=request.user.username, teamnumber__in=active_teams).order_by('teamnumber', 'pick1', 'pick2')
 
 	organized_picks = defaultdict(list)
