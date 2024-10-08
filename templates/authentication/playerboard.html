@@ -63,7 +63,7 @@
         display: none; /* Hide by default */
         margin-top: 10px;
         width: 100%; /* Make it span the entire width of the player card */
-        transition: max-height 0.3s ease; /* Smooth transition for height */
+        transition: all 0.3s ease; /* Smooth transition for height */
         overflow: hidden;
     }
     .team-list ul {
@@ -73,9 +73,10 @@
         color: #343a40; /* Darker color for team names */
     }
     .team-list.visible {
-        display: block;
-        max-height: 300px; /* Control max-height for smooth transition */
-    }
+    display: block;
+    max-height: none; /* Remove max-height */
+    height: auto; /* Allow it to expand based on content */
+}
     .navbar {
         background-color: #212529; /* Dark background color */
     }
@@ -187,34 +188,35 @@
     </div>
 
     <script>
-        function toggleTeamList(cardElement) {
-            // Get the team list within the clicked card
-            const clickedTeamList = cardElement.querySelector('.team-list');
+function toggleTeamList(cardElement) {
+    // Get the team list within the clicked card
+    const clickedTeamList = cardElement.querySelector('.team-list');
 
-            // Hide all other team lists
-            document.querySelectorAll('.team-list').forEach(list => {
-                if (list !== clickedTeamList) {
-                    list.style.display = 'none';
-                    list.classList.remove('visible');
-                }
-            });
-
-            // Toggle the clicked card's team list visibility
-            if (clickedTeamList.classList.contains('visible')) {
-                clickedTeamList.classList.remove('visible');
-                clickedTeamList.style.display = 'none';
-            } else {
-                clickedTeamList.classList.add('visible');
-                clickedTeamList.style.display = 'block';
-            }
+    // Hide all other team lists
+    document.querySelectorAll('.team-list').forEach(list => {
+        if (list !== clickedTeamList) {
+            list.style.display = 'none';
+            list.classList.remove('visible');
         }
+    });
 
-        // Ensure all team lists are hidden when the page loads
-        document.addEventListener('DOMContentLoaded', function() {
-            document.querySelectorAll('.team-list').forEach(list => {
-                list.style.display = 'none';
-                list.classList.remove('visible');
-            });
-        });
+    // Toggle the clicked card's team list visibility
+    if (clickedTeamList.classList.contains('visible')) {
+        clickedTeamList.classList.remove('visible');
+        clickedTeamList.style.display = 'none';
+    } else {
+        clickedTeamList.classList.add('visible');
+        clickedTeamList.style.display = 'block';
+    }
+}
+
+// Ensure all team lists are hidden when the page loads
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.team-list').forEach(list => {
+        list.style.display = 'none';
+        list.classList.remove('visible');
+    });
+});
+
     </script>
 </body>
