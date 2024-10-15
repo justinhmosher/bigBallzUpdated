@@ -4,8 +4,10 @@ from authentication.models import Paid
 from decouple import config
 import smtplib
 from email.mime.multipart import MIMEMultipart
+from email.mime.image import MIMEImage
 from email.mime.text import MIMEText
 from django.template.loader import render_to_string
+from django.contrib.staticfiles import finders
 
 class Command(BaseCommand):
     help = 'Fetch NFLPlayers from API and save to the database'
@@ -25,8 +27,17 @@ class Command(BaseCommand):
             message = MIMEMultipart()
             message['From'] = f"{sender_name} <{sender_email}>"
             message['To'] = receiver_email
-            message['Subject'] = "Week 6 Picks Reminder"
+            message['Subject'] = "Final 9 Teams"
             body = render_to_string('authentication/emarketing.html')
+
+            """
+            image_path = finders.find('Simple.png')
+            print(f"Image path: {image_path}")
+            with open(image_path, 'rb') as img:
+                image = MIMEImage(img.read(), _subtype="png")
+                image.add_header('Content-ID', '<logo_image>')  # Content-ID must match the CID in your HTML
+                message.attach(image)
+            """
             message.attach(MIMEText(body, "html"))
             text = message.as_string()
             
