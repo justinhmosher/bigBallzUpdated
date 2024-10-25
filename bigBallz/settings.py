@@ -24,6 +24,12 @@ EMAIL_HOST_USER = EMAIL_HOST_USER
 EMAIL_HOST_PASSWORD = EMAIL_HOST_PASSWORD
 EMAIL_PORT = EMAIL_PORT
 
+# settings.py
+CSRF_FAILURE_VIEW = 'authentication.views.custom_csrf_failure_view'
+
+SESSION_COOKIE_SECURE = True  # Ensures cookies are only sent over HTTPS
+SESSION_COOKIE_AGE = 2592000  # Default session age set to 30 days (for cases when not overridden)
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False  # Prevents session from expiring
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/

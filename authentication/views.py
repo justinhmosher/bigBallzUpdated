@@ -38,6 +38,12 @@ from django.core.paginator import Paginator
 def testing(request):
 	return render(request,'authentication/testing.html')
 
+def custom_csrf_failure_view(request, reason=""):
+	# Set an error message to be displayed on the login page
+	messages.error(request, "There was an issue with your request. Please sign in again.")
+	# Redirect the user back to the login page
+	return redirect('signin')  # 'login' should be the name of your login URL
+
 def home(request):
 	total_numteams = Paid.objects.filter(paid_status=True).aggregate(Sum('numteams'))['numteams__sum']
 	if total_numteams is None:
@@ -227,13 +233,18 @@ def signin(request):
 	if request.method == 'POST':
 		username = request.POST.get('username')
 		password1 = request.POST.get('password1')
+		remember_me = request.POST.get('remember_me')
 
 		user = authenticate(username = username, password = password1)
 
 		if user is not None:
 			login(request, user)
-			return redirect('tournaments')
 
+			if remember_me:  # If "Remember Me" is checked, extend session expiry to 2 weeks
+				request.session.set_expiry(2592000)  # 2 weeks (in seconds)
+			else:  # If "Remember Me" is not checked, expire session when the browser is closed
+				request.session.set_expiry(0)
+			return redirect('tournaments')
 		else:
 			messages.error(request, "Invalid username or password.")
 			return redirect('signin')	
