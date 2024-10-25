@@ -233,7 +233,6 @@ def signin(request):
 	if request.method == 'POST':
 		username = request.POST.get('username')
 		password1 = request.POST.get('password1')
-		remember_me = request.POST.get('remember_me')
 
 		user = authenticate(username = username, password = password1)
 
