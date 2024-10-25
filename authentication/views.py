@@ -240,10 +240,8 @@ def signin(request):
 		if user is not None:
 			login(request, user)
 
-			if remember_me:  # If "Remember Me" is checked, extend session expiry to 2 weeks
-				request.session.set_expiry(2592000)  # 2 weeks (in seconds)
-			else:  # If "Remember Me" is not checked, expire session when the browser is closed
-				request.session.set_expiry(0)
+			request.session.set_expiry(2592000)  # 2 weeks (in seconds)
+			
 			return redirect('tournaments')
 		else:
 			messages.error(request, "Invalid username or password.")
