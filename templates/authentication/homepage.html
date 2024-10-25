@@ -188,6 +188,30 @@
                 transform: translatey(0px);
             }
         }
+        .btn-play {
+            display: inline-block;
+            font-size: 18px;
+            padding: 15px 30px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-align: center;
+            transition: background-color 0.3s ease;
+        }
+        .btn-play:hover {
+            background-color: #0056b3;
+        }
+
+        #typing-text {
+            white-space: nowrap;
+            overflow: hidden;
+            border-right: 2px solid;
+            font-family: monospace;
+            font-size: 1.5rem;
+            color: #fff;
+        }
     </style>
 
     <!-- Bootstrap Bundle with Popper -->
@@ -235,7 +259,11 @@
             </div>
             <h2 class="text-center logo-font">THE CHOSEN FANTASY GAMES<br></h2>
             <p class="lead text-white">Enter the fantasy sports arena: Season-long battles, key stats, one champion. Are you The Chosen?</p>
-            <a href="tournaments" class="btn btn-primary btn-lg my-2 w-50 above-confetti">Play</a>
+            <section class="text-center">
+                <a href="{% url 'tournaments' %}" class="btn btn-primary btn-play">
+                    <span id="typing-text"></span>
+                </a>
+            </section>
         </div>
     </div>
 </section>
@@ -292,6 +320,24 @@
     function switchMap(mapImagePath) {
         document.getElementById('map-image').src = mapImagePath;
     }
+</script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const text = "Click here to become The Chosen";
+    let index = 0;
+    const speed = 100;  // Speed of typing (milliseconds)
+
+    function typeEffect() {
+      if (index < text.length) {
+        document.getElementById("typing-text").innerHTML += text.charAt(index);
+        index++;
+        setTimeout(typeEffect, speed);
+      }
+    }
+
+    // Start typing effect after page load
+    typeEffect();
+  });
 </script>
 </body>
 </html>
