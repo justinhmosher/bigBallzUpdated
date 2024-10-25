@@ -190,7 +190,7 @@
         }
         .btn-play {
             display: inline-block;
-            font-size: 18px;
+            font-size: 1rem; /* Adjusted font size for flexibility */
             padding: 15px 30px;
             background-color: #007bff;
             color: #fff;
@@ -199,18 +199,35 @@
             cursor: pointer;
             text-align: center;
             transition: background-color 0.3s ease;
+            max-width: 100%; /* Ensures button doesn't exceed the screen width */
+            white-space: nowrap; /* Prevents text from breaking lines */
+            overflow: hidden;
         }
+
         .btn-play:hover {
             background-color: #0056b3;
-        }
+        } 
 
         #typing-text {
             white-space: nowrap;
             overflow: hidden;
             border-right: 2px solid;
             font-family: monospace;
-            font-size: 1.5rem;
+            font-size: 1.2rem;
             color: #fff;
+        }
+
+        @media (max-width: 576px) {
+            /* For iPhones or smaller devices */
+            .btn-play {
+            font-size: 0.9rem; /* Smaller font size for small screens */
+            padding: 10px 20px; /* Adjust padding for smaller screens */
+            width: auto; /* Adjust width to be flexible */
+        }
+
+        #typing-text {
+            font-size: 1rem; /* Slightly smaller text on small screens */
+            }
         }
     </style>
 
