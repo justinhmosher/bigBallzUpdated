@@ -204,10 +204,10 @@ def teamname(request):
 			team_name = form.cleaned_data['team_name']
 			username = request.user.username
 			if Pick.objects.filter(team_name = team_name).exists():
-				messages.error(request,"Team name already exists!")
+				messages.error(request,"Team name already exists.")
 				return redirect('teamname')
 			elif len(team_name) > 15 or len(team_name) < 6:
-				messages.error(request,"Team name need to be between 5-14 characters")
+				messages.error(request,"Team name need to be between 5-14 characters.")
 				return redirect("teamname")
 			else:
 				paid = Paid.objects.get(username = request.user.username)
@@ -217,7 +217,7 @@ def teamname(request):
 					new_pick.save()
 				return redirect('checking')
 		else:
-			messages.error(request,"Please submit a valid teamname")
+			messages.error(request,"Please submit a valid teamname.")
 			return redirect('teamname')
 	return render(request,"authentication/teamname.html")
 
@@ -235,14 +235,13 @@ def signin(request):
 			return redirect('tournaments')
 
 		else:
-			messages.error(request, "Bad Credentials!")
+			messages.error(request, "Invalid username or password.")
 			return redirect('signin')	
 
 	return render(request, "authentication/signin.html")
 
 def signout(request):
 	logout(request)
-	messages.success(request, "Logged Out Successfully")
 	return redirect('home')
 
 def confirm_forgot_email(request, email):
@@ -258,7 +257,7 @@ def forgotPassEmail(request):
 		if User.objects.filter(email=email).exists():
 			myuser = User.objects.get(email = email)
 			if myuser.is_active == False:
-				messages.error(request,'Please Sign Up again!')
+				messages.error(request,'Please Sign Up again.')
 				return redirect('signup')
 			else:
 				num = create_forgot_email(request, myuser = myuser)
@@ -269,7 +268,7 @@ def forgotPassEmail(request):
 					return redirect('signup')
 
 		else:
-			messages.error(request, "Email does not exist")
+			messages.error(request, "Email does not exist.")
 			return redirect('forgotPassEmail')
 
 	return render(request,'authentication/forgotPassEmail.html')
@@ -329,7 +328,7 @@ def passreset(request, uidb64, token):
 				myuser.save()
 				return redirect('signin')
 			else:
-				messages.error(request,"Passwords do not match")
+				messages.error(request,"Passwords do not match.")
 				return redirect('passreset',uidb64=uidb64,token=token)
 	return render(request,'authentication/passreset.html',{'uidb64':uidb64,'token':token})
 
@@ -367,10 +366,10 @@ def teamcount(request):
 	if request.method == 'POST':
 		num_teams = request.POST.get('num_teams')
 		if int(num_teams) > 20:
-			messages.error(request,'Maximum of 20 teams allowed')
+			messages.error(request,'Maximum of 20 teams allowed.')
 			return redirect('teamcount')
 		elif int(num_teams) < 1:
-			messages.error(request,'Minimum of 1 team')
+			messages.error(request,'Minimum of 1 team.')
 			return redirect('teamcount')
 		else:
 			team.numteams = num_teams
@@ -443,7 +442,7 @@ def coinbase_webhook(request):
 		info.save()
 		return redirect('checking')
 	else:
-		messages.error('Payment was not received')
+		messages.error('Payment was not received.')
 		return redirect('payment')
 
 def playerboard(request):
@@ -590,25 +589,25 @@ def location(request):
 					if total_numteams >= 200:
 						try:
 							Waitlist.objects.get(username = username)
-							messages.error(request,"You are already added to the waitlist")
+							messages.error(request,"You are already added to the waitlist.")
 							return redirect('tournaments')
 						except Waitlist.DoesNotExist:
 							waiter = Waitlist(username = username)
 							waiter.save()
-							messages.error(request,"Max number of teams entered, we are adding you to a waitlist")
+							messages.error(request,"Max number of teams entered, we are adding you to a waitlist.")
 							return redirect('tournaments')
 					else:
 						if compliance.old == False and compliance.young == False:
 							age_api_key = config('AGE_API')
 							return render(request,'authentication/agechecking.html',{'api':age_api_key})
 						elif compliance.young == True:
-							messages.error(request,"You are too young to participate")
+							messages.error(request,"You are too young to participate.")
 							return redirect("tournaments")
 						else:
 							return redirect('checking')
 
 	else:
-		messages.error(request,"Failed to register location data")
+		messages.error(request,"Failed to register location data.")
 		return redirect('tournaments')
 
 @login_required
@@ -663,13 +662,13 @@ def game(request):
 			player_data_selected = NFLPlayer.objects.get(name=selected_player)
 		except NFLPlayer.DoesNotExist:
 			player_data_selected = None
-			messages.error(request, "Selected player does not exist.")
+			#messages.error(request, "Selected player does not exist.")
 		if player_data_selected is not None:
 			num = game_search(request.user.username,player_data_selected)
 			if num == 1:
-				messages.error(request,"Selected players cannot be on the same team")
+				messages.error(request,"Selected players cannot be on the same team.")
 			elif num ==3:
-				messages.error(request,"Your selected player has already scored a TD")
+				messages.error(request,"Your selected player has already scored a TD.")
 
 		change_pick = request.POST.get('change_pick','{}')
 		try:
