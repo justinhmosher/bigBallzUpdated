@@ -7,6 +7,7 @@
 
 
 <style type="text/css">
+    /* Styles related to player card display */
     .form-container {
         background-color: #ffffff;
         border-radius: 20px;
@@ -23,27 +24,26 @@
         align-items: flex-start; /* Align cards to the top so they don't stretch */
         gap: 20px; /* Space between cards */
     }
-.player-card {
-    background-color: #ffd700; /* Gold color for the player cards */
-    border-radius: 10px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    padding: 20px;
-    text-align: center;
-    margin-bottom: 20px;
-    transition: transform 0.3s ease, height 0.3s ease;
-    cursor: pointer;
-    position: relative;
-    flex: 1 1 calc(25% - 20px); /* Takes 25% width minus the gap */
-    min-width: 200px; /* Minimum width for smaller screens */
-    max-width: 250px; /* Maximum width */
-}
-    @media (max-width: 768px) {
     .player-card {
+        background-color: #ffd700; /* Gold color for the player cards */
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        text-align: center;
+        margin-bottom: 20px;
+        transition: transform 0.3s ease, height 0.3s ease; /* Smooth height transition */
+        cursor: pointer;
+        position: relative;
+        flex: 1 1 calc(25% - 20px); /* Takes 25% width minus the gap */
+        min-width: 200px; /* Minimum width for smaller screens */
+        max-width: 250px; /* Maximum width */
+    }
+    @media (max-width: 768px) {
+      .player-card {
         flex: 1 1 calc(100% - 20px); /* One card per row, full width */
         max-width: none;
         }
     }
-
     .player-card:hover {
         transform: translateY(-5px);
         box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
@@ -69,7 +69,7 @@
     .team-list ul {
         list-style-type: none; /* Remove bullet points */
         padding: 0;
-        text-align: left; /* Align teams to the right */
+        text-align: left; /* Align teams to the left */
         color: #343a40; /* Darker color for team names */
     }
     .team-list.visible {
@@ -77,23 +77,23 @@
     max-height: none; /* Remove max-height */
     height: auto; /* Allow it to expand based on content */
 }
-        .navbar {
-            background-color: #212529; /* Dark background color */
-        }
-        .navbar-nav {
-            flex-direction: row;
-        }
-        .nav-link {
-            padding-right: 1rem !important;
-            padding-left: 1rem !important;
-            color: #ffffff !important; /* White text color */
-        }
-        .navbar-brand img {
-            width: 40px;
-            height: auto;
-        }
+    .navbar {
+        background-color: #212529; /* Dark background color */
+    }
+    .navbar-nav {
+        flex-direction: row;
+    }
+    .nav-link {
+        padding-right: 1rem !important;
+        padding-left: 1rem !important;
+        color: #ffffff !important; /* White text color */
+    }
+    .navbar-brand img {
+        width: 40px;
+        height: auto;
+    }
 
-      .nav-scroller .nav {
+    .nav-scroller .nav {
         display: flex;
         flex-wrap: nowrap;
         padding-bottom: 1rem;
@@ -102,7 +102,7 @@
         text-align: center;
         white-space: nowrap;
         -webkit-overflow-scrolling: touch;
-      }
+    }
     h4 {
         font-size: 1.5rem;
         font-weight: 600;
@@ -187,6 +187,7 @@
     </div>
   </nav>
 </header>
+
 
 <br>
     <div class="container text-center">
