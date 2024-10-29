@@ -38,21 +38,94 @@
             background-color: #000000;
             text-align: center;
         }
-        .navbar {
-            background-color: #212529; /* Dark background color */
-        }
-        .navbar-nav {
-            flex-direction: row;
-        }
-        .nav-link {
-            padding-right: 1rem !important;
-            padding-left: 1rem !important;
-            color: #ffffff !important; /* White text color */
-        }
-        .navbar-brand img {
-            width: 40px;
-            height: auto;
-        }
+            .navbar {
+        background-color: #212529; /* Dark background color */
+    }
+    .navbar-nav {
+        flex-direction: row;
+    }
+    .nav-link {
+        padding-right: 1rem !important;
+        padding-left: 1rem !important;
+        color: #ffffff !important; /* White text color */
+    }
+    .navbar-brand img {
+        width: 40px;
+        height: auto;
+    }
+
+    .nav-scroller .nav {
+        display: flex;
+        flex-wrap: nowrap;
+        padding-bottom: 1rem;
+        margin-top: -1px;
+        overflow-x: auto;
+        text-align: center;
+        white-space: nowrap;
+        -webkit-overflow-scrolling: touch;
+    }
+    h4 {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #212529;
+        margin-bottom: 20px;
+    }
+    .span-container {
+        font-size: 1.2rem;
+        color: #6c757d;
+    }
+    /* Remove the toggle button and ensure the navbar is always visible */
+    .navbar .navbar-toggler {
+        display: none;
+    }
+
+    /* Center the navigation links and add space for the Sign Out button */
+    .navbar-content {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-grow: 1;
+    }
+    .navbar .container {
+    display: flex;
+    align-items: center; /* Centers items vertically */
+    justify-content: space-between; /* Adds equal space between logo and nav elements */
+}
+
+    .navbar-nav {
+        flex: 1;
+        justify-content: center;
+    }
+    .navbar-brand {
+    margin-right: 20px; /* Adjust this as necessary to control spacing from other elements */
+    }
+
+    .btn-signout {
+        color: #ffffff;
+        background-color: #212529;
+        border: 2px solid #ffffff; /* Adds a white border */
+        padding: 8px 16px;
+        border-radius: 5px;
+        transition: background-color 0.3s ease, border-color 0.3s ease;
+    }
+
+    .btn-signout:hover {
+        background-color: #444;
+        border-color: #ddd; /* Lightens the border color on hover */
+    }
+    .game-link {
+    position: relative;
+    }
+
+    .game-link::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        bottom: -2px; /* Adjust as necessary */
+        width: 100%;
+        height: 2px; /* Thickness of the underline */
+        background-color: white;
+    }
         .logo-font {
             font-family: 'Archivo Black', sans-serif;
             color: #ffde59; /* Gold color */
@@ -236,23 +309,20 @@
 </head>
 <body>
 <header>
-    <nav class="navbar navbar-expand-lg navbar-dark">
-        <div class="container">
-            <a class="navbar-brand" href="/">
-                <img src="{% static 'Trophy-words-logo.svg' %}" alt="The Chosen Fantasy Games Logo">
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
-                <ul class="navbar-nav text-center">
-                    <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
-                    <li class="nav-item"><a class="nav-link" href="tournaments">Games</a></li>
-                    <li class="nav-item"><a class="nav-link" href="media-page">Media</a></li>
-                </ul>
-            </div>
-        </div>
-    </nav>
+  <nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container">
+      <a class="navbar-brand" href="/">
+        <img src="{% static 'Trophy-logo.svg' %}" alt="The Chosen Fantasy Games">
+      </a>
+      <div class="navbar-content">
+        <ul class="navbar-nav mx-auto text-center">
+          <li class="nav-item"><a class="nav-link game-link" href="/">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'checking' %}">Game</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'media-page' %}">Media</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
 </header>
 <div class="text-center">
 {% for message in messages %}
