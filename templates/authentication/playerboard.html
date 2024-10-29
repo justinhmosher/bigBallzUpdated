@@ -165,6 +165,26 @@
         height: 2px; /* Thickness of the underline */
         background-color: white;
     }
+@media (max-width: 576px) {
+    .navbar .container {
+        justify-content: space-between;
+        flex-wrap: nowrap;
+        padding: 0 10px; /* Adjust padding for better fit */
+    }
+
+    .navbar-brand img {
+        width: 36px; /* Slightly smaller for better alignment on mobile */
+    }
+
+    .nav-link {
+        padding: 0.4rem 0.8rem;
+    }
+
+    .btn-signout {
+        padding: 6px 12px;
+        font-size: 0.9rem;
+    }
+}
 
 
 </style>
