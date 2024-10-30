@@ -185,6 +185,20 @@
         font-size: 0.7rem;
     }
 }
+.player-card.green-card {
+    background-color: #28a745; /* Green for scored */
+    color: #ffffff;
+}
+
+.player-card.red-card {
+    background-color: #dc3545; /* Red for not scored */
+    color: #ffffff;
+}
+
+.player-card.yellow-card {
+    background-color: #ffd700; /* Yellow for undecided or both true/false */
+    color: #343a40;
+}
 
 
 </style>
@@ -215,13 +229,17 @@
     </div>
 
     <!-- Player Picks Cards -->
-    <div class="container mt-5">
-        <h4 class="text-center">Player Picks</h4>
-        <div class="flex-container">
-            {% for player, count in page_obj %}
-                <div class="player-card" data-player-id="{{ player }}" onclick="toggleTeamList(this)">
-                    <h5>{{ player }}</h5>
-                    <p>Number of Picks: {{ count }}</p>
+<div class="container mt-5">
+    <h4 class="text-center">Player Picks</h4>
+    <div class="flex-container">
+        {% for player, count in page_obj %}
+            {% with status=player_status|get_item:player %}
+                <div class="player-card 
+                    {% if status.scored and not status.not_scored %}green-card{% elif not status.scored and status.not_scored %}red-card{% else %}yellow-card{% endif %}" 
+                    data-player-id="{{ player }}" onclick="toggleTeamList(this)">
+                    
+                    <h5 style="color: black;">{{ player }}</h5>
+                    <p style="color: black;">Number of Picks: {{ count }}</p>
                     <div class="team-list" id="team-list-{{ player }}">
                         <strong>Teams:</strong>
                         <ul>
@@ -231,9 +249,10 @@
                         </ul>
                     </div>
                 </div>
-            {% endfor %}
-        </div>
+            {% endwith %}
+        {% endfor %}
     </div>
+</div>
 
     <!-- Pagination Controls -->
     <div class="pagination-container text-center mt-4">

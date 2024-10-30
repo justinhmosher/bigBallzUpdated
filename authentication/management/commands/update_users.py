@@ -7,10 +7,10 @@ class Command(BaseCommand):
     help = 'Fetch NFLPlayers from API and save to the database'
 
     def handle(self, *args, **options):
-        scorers = Scorer.objects.all().values_list('player_ID', flat=True)
+        scorers = Scorer.objects.filter(scored=True).values_list('player_ID', flat=True)
         game = Game.objects.get(sport = "Football")
         week = game.week
-        for pick in Pick.objects.all():
+        for pick in Pick.objects.filter(isin = True):
             if pick.pick1_player_ID not in scorers and pick.pick2_player_ID not in scorers:
                 pick.isin = False
                 pick.save()

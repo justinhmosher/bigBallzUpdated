@@ -18,7 +18,7 @@ from decouple import config
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from .forms import PlayerSearchForm, Pickform, Pick1Form, CreateTeam
-from .models import Pick,Paid,NFLPlayer,Game,PastPick,PromoCode,PromoUser,OfAge,UserVerification,Blog,ChatMessage,Waitlist
+from .models import Pick,Scorer,Paid,NFLPlayer,Game,PastPick,PromoCode,PromoUser,OfAge,UserVerification,Blog,ChatMessage,Waitlist
 from django.db.models import Count,F,ExpressionWrapper,fields
 from datetime import datetime
 from itertools import chain
@@ -455,8 +455,8 @@ def coinbase_webhook(request):
 
 def playerboard(request):
 	# Collect player counts from both pick1 and pick2
-	player_counts1 = Pick.objects.filter(isin=True).values('pick1').annotate(count=Count('pick1')).order_by('-count')
-	player_counts2 = Pick.objects.filter(isin=True).values('pick2').annotate(count=Count('pick2')).order_by('-count')
+	player_counts1 = Pick.objects.filter(isin=True).exclude(pick1='N/A').values('pick1').annotate(count=Count('pick1')).order_by('-count')
+	player_counts2 = Pick.objects.filter(isin=True).exclude(pick2='N/A').values('pick2').annotate(count=Count('pick2')).order_by('-count')
 
 	# Combine player counts
 	player_counts = defaultdict(int)
@@ -472,6 +472,20 @@ def playerboard(request):
 				player_teams[player_name].append(pick.team_name)
 			if pick.pick2 == player_name:
 				player_teams[player_name].append(pick.team_name)
+		# Get player statuses
+	player_status = {}
+	for player in player_counts.keys():
+		scorer = Scorer.objects.filter(name=player).first()
+		if scorer:
+			player_status[player] = {
+				'scored': scorer.scored,
+				'not_scored': scorer.not_scored,
+			}
+		else:
+			player_status[player] = {
+				'scored': False,
+				'not_scored': False,
+			}
 
 	# Sort players by the number of picks
 	sorted_player_counts = sorted(player_counts.items(), key=lambda x: x[1], reverse=True)
@@ -489,6 +503,7 @@ def playerboard(request):
 		'page_obj': page_obj,
 		'sorted_player_counts': sorted_player_counts,
 		'player_teams': dict(player_teams),
+		'player_status': player_status,
 		'total_in': total_in,
 	})
 
@@ -498,8 +513,9 @@ def playerboard(request):
 @login_required
 def leaderboard(request):
 	# Collect player counts from both pick1 and pick2
-	player_counts1 = Pick.objects.filter(isin=True).values('pick1').annotate(count=Count('pick1')).order_by('-count')
-	player_counts2 = Pick.objects.filter(isin=True).values('pick2').annotate(count=Count('pick2')).order_by('-count')
+	player_counts1 = Pick.objects.filter(isin=True).exclude(pick1='N/A').values('pick1').annotate(count=Count('pick1')).order_by('-count')
+	player_counts2 = Pick.objects.filter(isin=True).exclude(pick2='N/A').values('pick2').annotate(count=Count('pick2')).order_by('-count')
+
 
 	# Combine player counts
 	player_counts = defaultdict(int)
@@ -515,6 +531,22 @@ def leaderboard(request):
 				player_teams[player_name].append(pick.team_name)
 			if pick.pick2 == player_name:
 				player_teams[player_name].append(pick.team_name)
+
+	# Get player statuses
+	player_status = {}
+	for player in player_counts.keys():
+		scorer = Scorer.objects.filter(name=player).first()
+		if scorer:
+			player_status[player] = {
+				'scored': scorer.scored,
+				'not_scored': scorer.not_scored,
+			}
+		else:
+			player_status[player] = {
+				'scored': False,
+				'not_scored': False,
+			}
+
 
 
 	# Sort players by the number of picks
@@ -536,6 +568,7 @@ def leaderboard(request):
 		'page_obj': page_obj,
 		'sorted_player_counts': sorted_player_counts,
 		'player_teams': dict(player_teams),
+		'player_status': player_status,
 		'total_in': total_in,
 		'user_data': user_data,
 	})
@@ -899,7 +932,7 @@ def checking(request):
                 if i.isin:
                     count_ins += 1
             if count_ins >= 1:
-                if current_day_pst in [1, 2] and count > 1 and week != 18:
+                if current_day_pst not in [1, 2] and count > 1 and week != 18:
                     return redirect('game')
                 elif count == 1 or week == 18:
                     winners_list = Pick.objects.filter(isin=True)
