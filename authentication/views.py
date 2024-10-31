@@ -879,7 +879,9 @@ def game_search(username,playerdata):
 				return 2
 	return 2
 
-
+def picking(request):
+	total_in = Pick.objects.filter(isin = True).count()
+	return render(request, 'authentication/picking.html', {'total_in': total_in})
 
 @login_required
 def checking(request):
@@ -907,7 +909,7 @@ def checking(request):
     
     # Check if the current date is within the game's start and end dates
     if paid.paid_status == False and (start_date <= current_date_pst < end_date) and current_day_pst in [1, 2]:
-        return render(request, 'authentication/picking.html')
+        return redirect('picking')
     
     elif paid.paid_status == False and (start_date <= current_date_pst < end_date) and current_day_pst not in [1, 2]:
         return redirect('playerboard')
