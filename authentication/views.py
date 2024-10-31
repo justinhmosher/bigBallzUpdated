@@ -947,6 +947,6 @@ def checking(request):
                     return redirect('leaderboard')
             else:
                 if current_day_pst in [1, 2]:
-                    return render(request, 'authentication/picking.html')
+                    return redirect('picking')
                 else:
                     return redirect('playerboard')
