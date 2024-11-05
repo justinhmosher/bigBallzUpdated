@@ -82,81 +82,64 @@
         .text-red {
             color: red;
         }
-    .navbar {
-        background-color: #212529; /* Dark background color */
-    }
-    .navbar-nav {
-        flex-direction: row;
-    }
-    .nav-link {
-        padding-right: 1rem !important;
-        padding-left: 1rem !important;
-        color: #ffffff !important; /* White text color */
-    }
-    .navbar-brand img {
-        width: 40px;
-        height: auto;
-    }
-
-    .nav-scroller .nav {
-        display: flex;
-        flex-wrap: nowrap;
-        padding-bottom: 1rem;
-        margin-top: -1px;
-        overflow-x: auto;
-        text-align: center;
-        white-space: nowrap;
-        -webkit-overflow-scrolling: touch;
-    }
-    h4 {
-        font-size: 1.5rem;
-        font-weight: 600;
-        color: #212529;
-        margin-bottom: 20px;
-    }
-    .span-container {
-        font-size: 1.2rem;
-        color: #6c757d;
-    }
-    /* Remove the toggle button and ensure the navbar is always visible */
-    .navbar .navbar-toggler {
-        display: none;
-    }
-
-    /* Center the navigation links and add space for the Sign Out button */
-    .navbar-content {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-grow: 1;
-    }
-    .navbar .container {
-    display: flex;
-    align-items: center; /* Centers items vertically */
-    justify-content: space-between; /* Adds equal space between logo and nav elements */
+      .navbar {
+    background-color: #212529;
+    padding: 0.5rem;
 }
-
-    .navbar-nav {
-        flex: 1;
-        justify-content: center;
-    }
-    .navbar-brand {
-    margin-right: 20px; /* Adjust this as necessary to control spacing from other elements */
-    }
-
-    .btn-signout {
-        color: #ffffff;
-        background-color: #212529;
-        border: 2px solid #ffffff; /* Adds a white border */
-        padding: 8px 16px;
-        border-radius: 5px;
-        transition: background-color 0.3s ease, border-color 0.3s ease;
-    }
-
-    .btn-signout:hover {
-        background-color: #444;
-        border-color: #ddd; /* Lightens the border color on hover */
-    }
+.navbar .container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.navbar-brand {
+    margin-right: 10px;
+}
+.navbar-brand img {
+    width: 40px;
+    height: auto;
+    cursor: pointer;
+}
+.navbar-content {
+    display: flex;
+    justify-content: center;
+    flex-grow: 1;
+}
+.navbar-nav {
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+    justify-content: center;
+    margin: 0;
+}
+.nav-link {
+    color: #ffffff !important; /* Ensures links are white */
+    font-size: 1rem;
+    text-decoration: none;
+    font-weight: 500;
+    padding: 0.5rem 0.8rem !important; /* Ensures links are white */
+}
+.dropdown-menu {
+    display: none; /* Hidden by default */
+    position: absolute;
+    top: 60px;
+    left: 10px;
+    background-color: #212529;
+    border: 1px solid #ffffff;
+    border-radius: 5px;
+    padding: 10px;
+    z-index: 1000;
+    width: 150px;
+}
+.dropdown-item {
+    color: #ffffff;
+    text-decoration: none;
+    display: block;
+    padding: 5px 10px;
+    font-size: 0.9rem;
+}
+.dropdown-item:hover {
+    background-color: #444;
+}
     .game-link {
     position: relative;
     }
