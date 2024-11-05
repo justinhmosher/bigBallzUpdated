@@ -3,49 +3,56 @@
 <head>
     <style>
         body {
-            font-family: 'Arial', sans-serif;
+            font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            line-height: 1.6;
             background-color: #f4f4f4;
+            color: #333333;
         }
         .container {
-            padding: 20px;
-            background-color: #000000;
-            color: #FFD700;
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
         .header {
             background-color: #FFD700;
-            color: black;
-            padding: 20px;
+            color: #333333;
             text-align: center;
+            padding: 20px;
         }
         .content {
             padding: 20px;
-            background-color: #ffffff;
-            color: black;
-            border-top: none;
+            color: #555555;
         }
-        .button-container {
+        .content p {
+            margin: 0 0 20px;
+        }
+        .teams {
+            font-weight: bold;
+            color: #333333;
             text-align: center;
         }
-        .button {
+        .cta {
             display: inline-block;
             padding: 10px 20px;
-            margin: 20px 0;
             background-color: #FFD700;
-            color: black;
+            color: #000000;
             text-decoration: none;
             border-radius: 5px;
-        }
-        .button:hover {
-            background-color: #FFC300;
+            font-weight: bold;
+            margin-top: 20px;
+            text-align: center;
         }
         .footer {
-            text-align: center;
-            margin-top: 20px;
-            font-size: 0.9em;
+            background-color: #333333;
             color: #FFD700;
+            text-align: center;
+            padding: 10px;
+            font-size: 0.9em;
         }
     </style>
 </head>
@@ -55,20 +62,27 @@
             <h1> The Chosen Fantasy Games </h1>
         </div>
         <div class="content">
-            <p>Hey Champion,</p>
-            <p>This is a quick reminder that your picks are due tonight by <strong>11:59pm PST</strong>. Make sure to submit them on time to stay in the game!</p>
-            <div class="button-container">
-                <a href="https://thechosenfg.com/tournaments" class="button">Submit Your Picks</a>
+            <p>After a season of tough competition and strategic plays, we’re thrilled to announce the final three teams in <strong>The Chosen</strong>! These teams have shown incredible skill to make it to the final round.</p>
+            <p>Join us in congratulating:</p>
+            <ul class="teams" style="list-style-type: none; padding: 0;">
+                <li><strong>Quizhong</strong></li>
+                <li><strong>B-Rad</strong></li>
+                <li><strong>Chuck's Team</strong></li>
+            </ul>
+            <p><strong>Week 9</strong> was a tough one, with only 1 out of the 11 players picked scoring a touchdown - Jahmyr Gibbs. As the choices narrow and the competition heats up, now is the time to bring your best decisions to the table.</p>
+            <div style="text-align: center;">
+                <a href="https://thechosenfg.com/tournaments" class="cta">Make Your Picks</a>
             </div>
-            <p>Best of luck!</p>
-            <p>The Chosen Fantasy Games Team</p>
-        </div>      
+            <br>
+            <p>This is it—the final stretch. Make your picks wisely, as every choice could mean the difference between victory and defeat. Only one can emerge as the ultimate champion of this season!</p>
+        </div>
         <div class="footer">
             <p>&copy; 2024 The Chosen Fantasy Games</p>
         </div>
     </div>
 </body>
 </html>
+
 
 
 
