@@ -466,9 +466,11 @@ def playerboard(request):
 	start_date = game.startDate
 	end_date = game.endDate
 
+
 	if (current_day_pst in [1,2]) or not (start_date <= current_date_pst < end_date):
 		return redirect('checking')  # Replace 'some_other_page' with the name of an appropriate view
-	# Collect player counts from both pick1 and pick2
+
+
 	player_counts1 = Pick.objects.filter(isin=True).exclude(pick1='N/A').values('pick1').annotate(count=Count('pick1')).order_by('-count')
 	player_counts2 = Pick.objects.filter(isin=True).exclude(pick2='N/A').values('pick2').annotate(count=Count('pick2')).order_by('-count')
 
@@ -980,7 +982,7 @@ def checking(request):
                 if i.isin:
                     count_ins += 1
             if count_ins >= 1:
-                if current_day_pst not in [1, 2] and count > 1 and week != 18:
+                if current_day_pst in [1, 2] and count > 1 and week != 18:
                     return redirect('game')
                 elif count == 1 or week == 18:
                     winners_list = Pick.objects.filter(isin=True)
