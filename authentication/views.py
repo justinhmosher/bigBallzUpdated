@@ -454,6 +454,20 @@ def coinbase_webhook(request):
 		return redirect('payment')
 
 def playerboard(request):
+	# Define the PST timezone
+	pst = pytz.timezone('America/Los_Angeles')
+
+	# Get the current time in PST
+	current_pst_time = timezone.now().astimezone(pst)
+	current_day_pst = current_pst_time.weekday()  # This gives the day of the week (int)
+	current_date_pst = current_pst_time.date()
+
+	game = Game.objects.get(sport="Football")
+	start_date = game.startDate
+	end_date = game.endDate
+
+	if (current_day_pst in [1,2]) or not (start_date <= current_date_pst < end_date):
+		return redirect('checking')  # Replace 'some_other_page' with the name of an appropriate view
 	# Collect player counts from both pick1 and pick2
 	player_counts1 = Pick.objects.filter(isin=True).exclude(pick1='N/A').values('pick1').annotate(count=Count('pick1')).order_by('-count')
 	player_counts2 = Pick.objects.filter(isin=True).exclude(pick2='N/A').values('pick2').annotate(count=Count('pick2')).order_by('-count')
@@ -512,7 +526,21 @@ def playerboard(request):
 
 @login_required
 def leaderboard(request):
-	# Collect player counts from both pick1 and pick2
+	# Define the PST timezone
+	pst = pytz.timezone('America/Los_Angeles')
+
+	# Get the current time in PST
+	current_pst_time = timezone.now().astimezone(pst)
+	current_day_pst = current_pst_time.weekday()  # This gives the day of the week (int)
+	current_date_pst = current_pst_time.date()
+
+	game = Game.objects.get(sport="Football")
+	start_date = game.startDate
+	end_date = game.endDate
+
+	if (current_day_pst in [1,2]) or not (start_date <= current_date_pst < end_date):
+		return redirect('checking')  # Replace 'some_other_page' with the name of an appropriate view
+
 	player_counts1 = Pick.objects.filter(isin=True).exclude(pick1='N/A').values('pick1').annotate(count=Count('pick1')).order_by('-count')
 	player_counts2 = Pick.objects.filter(isin=True).exclude(pick2='N/A').values('pick2').annotate(count=Count('pick2')).order_by('-count')
 
@@ -682,10 +710,34 @@ def submitverification(request):
 
 	# If not a POST request, render the form page
 	return redirect('checking')
+"""
+#@login_required
+def player_list(request):
+	data = Pick.objects \
+		.annotate(
+			pick_count=Count('pastpick__id', filter=PastPick.objects.filter(username=F('username'), teamnumber=F('teamnumber')))
+			) \
+		.order_by('-isin','-pick_count')
 
-
+	return render(request, 'leaders.html', {'leaderboard': data})
+"""
 @login_required
 def game(request):
+	# Define the PST timezone
+	pst = pytz.timezone('America/Los_Angeles')
+
+	# Get the current time in PST
+	current_pst_time = timezone.now().astimezone(pst)
+	current_day_pst = current_pst_time.weekday()  # This gives the day of the week (int)
+	current_date_pst = current_pst_time.date()
+
+	game = Game.objects.get(sport="Football")
+	start_date = game.startDate
+	end_date = game.endDate
+
+	if (current_day_pst not in [1,2]) and (start_date <= current_date_pst < end_date):
+		return redirect('checking')  # Replace 'some_other_page' with the name of an appropriate view
+
 	user_data = Pick.objects.filter(username = request.user.username)
 	user_pick_data = Pick.objects.filter(username = request.user.username,isin = True).order_by('teamnumber')
 	player_data = []
@@ -697,13 +749,13 @@ def game(request):
 
 		if search is not None:
 			player_data = NFLPlayer.objects.filter(name__icontains=search)[:5]
-		
+
 		selected_player = request.POST.get('selected_player')
 		try:
 			player_data_selected = NFLPlayer.objects.get(name=selected_player)
 		except NFLPlayer.DoesNotExist:
 			player_data_selected = None
-			#messages.error(request, "Selected player does not exist.")
+
 		if player_data_selected is not None:
 			num = game_search(request.user.username,player_data_selected)
 			if num == 1:
@@ -763,8 +815,6 @@ def game(request):
 			organized_picks[pick.teamnumber].append(player2.name)
 
 	organized_picks = dict(organized_picks)
-
-	print(organized_picks)
 
 
 	return render(request, 'authentication/game.html', 
@@ -850,16 +900,12 @@ def game_search(username,playerdata):
 			elif past.pick2 != "N/A":
 				scorers.append(past.pick2)
 		try:
-			print(scorers)
-			print(playerdata.player_ID)
 			player_data_pick2 = NFLPlayer.objects.get(name=pick.pick2)
 			if player_data_pick2.team_name == playerdata.team_name:
 				return 1
 			elif playerdata.player_ID in scorers:
-				print('hi')
 				return 3
 			else:
-				print('hello')
 				pick.pick1 = playerdata.name
 				pick.pick1_team = playerdata.team_name
 				pick.pick1_position = playerdata.position 
@@ -934,7 +980,7 @@ def checking(request):
                 if i.isin:
                     count_ins += 1
             if count_ins >= 1:
-                if current_day_pst in [1, 2] and count > 1 and week != 18:
+                if current_day_pst not in [1, 2] and count > 1 and week != 18:
                     return redirect('game')
                 elif count == 1 or week == 18:
                     winners_list = Pick.objects.filter(isin=True)
