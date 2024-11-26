@@ -1,10 +1,11 @@
 from django.db import models
 from django.contrib.auth.models import User
-from datetime import date
+from datetime import date, datetime, timedelta, time
 from django.utils import timezone
 from django.utils.text import slugify
 from django.urls import reverse
 from django_ckeditor_5.fields import CKEditor5Field
+import pytz
 #from Pillow import ImageTk, Image
 
 class Pick(models.Model):
@@ -43,7 +44,9 @@ class PastPick(models.Model):
     teamnumber = models.IntegerField(default=1)
     week = models.IntegerField(default = 1)
     pick1 = models.CharField(max_length = 100, default = "N/A")
+    pick1_name = models.CharField(max_length = 100, default = "N/A")
     pick2 = models.CharField(max_length = 100, default = "N/A")
+    pick2_name = models.CharField(max_length = 100, default = "N/A")
     def __str__(self):
         return f"{self.team_name}"
 
@@ -66,8 +69,19 @@ class NFLPlayer(models.Model):
     def __str__(self):
         return f"{self.name}"
 
+class NBAPlayer(models.Model):
+    name = models.CharField(max_length=100,default = "player name")
+    position = models.CharField(max_length= 100, default = "player position name")
+    team_name = models.CharField(max_length= 100, default = "player team name")
+    player_ID = models.CharField(max_length= 100, default = "player ID")
+    def __str__(self):
+        return f"{self.name}"
+
 class BaseballPlayer(models.Model):
     name = models.CharField(max_length=100,default = "player name")
+    position = models.CharField(max_length= 100, default = "player position name")
+    team = models.CharField(max_length= 100, default = "player team name")
+    player_ID = models.CharField(max_length= 100, default = "player ID")
     def __str__(self):
         return f"{self.name}"
 
@@ -135,15 +149,39 @@ class ChatMessage(models.Model):
     message = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)
     team_name = models.CharField(max_length=100, default="Team")
-    likes = models.IntegerField(default=0,null = False)
-    dislikes = models.IntegerField(default=0, null = False)
+    likes_count = models.IntegerField(default=0)
+    dislikes_count = models.IntegerField(default=0)
     def __str__(self):
         return f"{self.room_name} - {self.message[:50]}"
+
+class MessageReaction(models.Model):
+    LIKE = 'like'
+    DISLIKE = 'dislike'
+    REACTION_CHOICES = [
+        (LIKE, 'Like'),
+        (DISLIKE, 'Dislike')
+    ]
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    message = models.ForeignKey(ChatMessage, on_delete=models.CASCADE, related_name='reactions')
+    reaction_type = models.CharField(max_length=10, choices=REACTION_CHOICES)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'message')
 
 class Waitlist(models.Model):
     username = models.CharField(max_length = 100, default = "username")
     def __str__(self):
         return f"{self.username}"
 
+class Message(models.Model):
+    timestamp = models.DateTimeField(auto_now_add=True)
+    content = models.TextField()
+    week = models.IntegerField(null=True, blank=True)
+    is_header = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.content}"
 
 

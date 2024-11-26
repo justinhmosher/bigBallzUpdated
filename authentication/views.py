@@ -18,9 +18,9 @@ from decouple import config
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from .forms import PlayerSearchForm, Pickform, Pick1Form, CreateTeam
-from .models import Pick,Scorer,Paid,NFLPlayer,Game,PastPick,PromoCode,PromoUser,OfAge,UserVerification,Blog,ChatMessage,Waitlist
-from django.db.models import Count,F,ExpressionWrapper,fields
-from datetime import datetime
+from .models import Pick,Scorer,Paid,NFLPlayer,Game,PastPick,PromoCode,PromoUser,OfAge,UserVerification,Blog,ChatMessage,Waitlist,MessageReaction,Message
+from django.db.models import Count,F,ExpressionWrapper,fields,OuterRef,Subquery
+from datetime import datetime, time
 from itertools import chain
 from collections import defaultdict
 from django.utils import timezone
@@ -33,7 +33,20 @@ from email.utils import formataddr
 from django.db.models import Sum
 import pytz
 from django.core.paginator import Paginator
+from django.db import models
 
+def message_board(request):
+	# Fetch all messages, ordered by week and timestamp
+	messages = Message.objects.order_by('week', '-timestamp')
+
+	# Group messages by week
+	grouped_messages = {}
+	for message in messages:
+		if message.week not in grouped_messages:
+			grouped_messages[message.week] = []
+		grouped_messages[message.week].append(message)
+
+	return render(request, 'authentication/messages.html', {'grouped_messages': grouped_messages})
 
 def testing(request):
 	return render(request,'authentication/testing.html')
@@ -66,29 +79,25 @@ def discord(request):
 @login_required
 def room(request, room_name):
 	username = request.user.username
-	paids = Pick.objects.get(username=username,teamnumber=1)
-	team = paids.team_name
-	messages = ChatMessage.objects.filter(room_name=room_name).order_by('timestamp')
+	try:
+		paids = Pick.objects.get(username=username, teamnumber=1)
+		team = paids.team_name
+	except Pick.DoesNotExist:
+		team = "No Team"
+
+	# Fetch all chat messages for the room, including their likes and dislikes count
+	messages = ChatMessage.objects.filter(room_name=room_name).order_by('timestamp').values(
+		'id', 'message', 'team_name', 'timestamp', 'likes_count', 'dislikes_count'
+	)
+
+	# Convert the QuerySet to a list of dictionaries
+	messages = list(messages)
+    
 	return render(request, 'authentication/room.html', {
 		'room_name': room_name,
-		'team':team,
+		'team': team,
 		'messages': messages
 	})
-
-@require_POST
-def like_message(request, message_id):
-    message = ChatMessage.objects.get(id=message_id)
-    message.likes += 1
-    message.save()
-    return JsonResponse({'likes': message.likes})
-
-@require_POST
-def dislike_message(request, message_id):
-    message = ChatMessage.objects.get(id=message_id)
-    message.dislikes += 1
-    message.save()
-    return JsonResponse({'dislikes': message.dislikes})
-
 
 def terms(request):
 	return render(request,"authentication/terms.html")
@@ -466,10 +475,25 @@ def playerboard(request):
 	start_date = game.startDate
 	end_date = game.endDate
 
+	end_datetime = datetime.combine(end_date, time(23, 59, 59))
+	end_datetime = pst.localize(end_datetime)
 
-	if (current_day_pst in [1,2]) or not (start_date <= current_date_pst < end_date):
+	start_datetime = datetime.combine(start_date, time(17, 0))  # Combine date with 5:00 PM
+	start_datetime = pst.localize(start_datetime)  # Make it timezone-aware
+
+	current_pst_time = datetime.now(pst)
+
+
+	if current_day_pst == 3 and current_pst_time <= thursday_deadline:  # Thursday before 5:00 PM PST
+		within_deadline = True
+	elif current_day_pst in [1, 2]:  # Tuesday or Wednesday
+		within_deadline = True
+	else:
+		within_deadline = False
+	"""
+	if (within_deadline or not (start_datetime <= current_pst_time < end_datetime):
 		return redirect('checking')  # Replace 'some_other_page' with the name of an appropriate view
-
+	"""
 
 	player_counts1 = Pick.objects.filter(isin=True).exclude(pick1='N/A').values('pick1').annotate(count=Count('pick1')).order_by('-count')
 	player_counts2 = Pick.objects.filter(isin=True).exclude(pick2='N/A').values('pick2').annotate(count=Count('pick2')).order_by('-count')
@@ -540,9 +564,23 @@ def leaderboard(request):
 	start_date = game.startDate
 	end_date = game.endDate
 
-	if (current_day_pst in [1,2]) or not (start_date <= current_date_pst < end_date):
-		return redirect('checking')  # Replace 'some_other_page' with the name of an appropriate view
+	end_datetime = datetime.combine(end_date, time(23, 59, 59))
+	end_datetime = pst.localize(end_datetime)
 
+	start_datetime = datetime.combine(start_date, time(17, 0))  # Combine date with 5:00 PM
+	start_datetime = pst.localize(start_datetime)  # Make it timezone-aware
+	current_pst_time = datetime.now(pst)
+
+	if current_day_pst == 3 and current_pst_time <= thursday_deadline:  # Thursday before 5:00 PM PST
+		within_deadline = True
+	elif current_day_pst in [1, 2]:  # Tuesday or Wednesday
+		within_deadline = True
+	else:
+		within_deadline = False
+	"""
+	if (within_deadline or not (start_datetime <= current_pst_time < end_datetime):
+		return redirect('checking')  # Replace 'some_other_page' with the name of an appropriate view
+	"""
 	player_counts1 = Pick.objects.filter(isin=True).exclude(pick1='N/A').values('pick1').annotate(count=Count('pick1')).order_by('-count')
 	player_counts2 = Pick.objects.filter(isin=True).exclude(pick2='N/A').values('pick2').annotate(count=Count('pick2')).order_by('-count')
 
@@ -607,13 +645,45 @@ def leaderboard(request):
 def tournaments(request):
 	user = Paid.objects.get(username = request.user.username)
 	play = user.paid_status
+
+	games = {
+		"Football": [
+			{"name": "Touchdown Mainia/Season Long", "summary": "Each week, choose two players to score a touchdown./If one or both score, you advance, else you're out./Last man standing wins the pot!//Pot: $10K", "rules": "/rules", "playable": True},
+			{"name": "Cumulative Touchdown Tournament/Season Long", "summary": "Each week, choose two players to score touchdowns./The user with the highest cumulative touchdown amount by week 18, wins the pot!//Pot: $10K", "rules": "/football-rules-2", "playable": False},
+			{"name": "Touchdown Mainia/Weekly Game", "summary": "Select 10 NFL players to score touchdowns./The user with the most comultive touchdowns wins the pot!//Pot: $10k", "rules": "/football-rules-3", "playable": False},
+		],
+		"Baseball": [
+			{"name": "Game 1", "summary": "Pick 2 players to get a hit.", "rules": "/baseball-rules-1", "playable": False},
+			{"name": "Game 2", "summary": "Custom rules for Game 2.", "rules": "/baseball-rules-2", "playable": False},
+			{"name": "Game 3", "summary": "Custom rules for Game 3.", "rules": "/baseball-rules-3", "playable": False},
+		],
+		"Basketball": [
+			{"name": "Game 1", "summary": "Pick 2 players to make a 3-pointer.", "rules": "/basketball-rules-1", "playable": False},
+			{"name": "Game 2", "summary": "Custom rules for Game 2.", "rules": "/basketball-rules-2", "playable": False},
+			{"name": "Game 3", "summary": "Custom rules for Game 3.", "rules": "/basketball-rules-3", "playable": False},
+		],
+	}
+	for sport, sport_games in games.items():
+		for game in sport_games:
+			game["summary"] = game["summary"].split('/')
+	"""
 	game = Game.objects.get(sport = "Football")
 	start_date = game.startDate
 	today = timezone.now().date()
 	days_until_start = (start_date - today).days
 	pot = game.pot
+	"""
+	current_sport = request.GET.get("sport", "Football")
+	current_games = games.get(current_sport, [])
+	context = {
+		"current_sport": current_sport,
+		"games": current_games,
+		"play": play
+	}
 
-	return render(request,'authentication/tournaments.html',{'days':days_until_start,"pot":pot,"play":play})
+	#return render(request,'authentication/tournaments.html',{'days':days_until_start,"pot":pot,"play":play})
+	return render(request, 'authentication/tournaments.html', context)
+
 
 @login_required
 def location(request):
@@ -712,17 +782,34 @@ def submitverification(request):
 
 	# If not a POST request, render the form page
 	return redirect('checking')
-"""
+
 #@login_required
 def player_list(request):
-	data = Pick.objects \
-		.annotate(
-			pick_count=Count('pastpick__id', filter=PastPick.objects.filter(username=F('username'), teamnumber=F('teamnumber')))
-			) \
-		.order_by('-isin','-pick_count')
+	# Create a Subquery to count matching PastPick entries
+	past_pick_count = PastPick.objects.filter(
+		username=OuterRef('username'),
+		teamnumber=OuterRef('teamnumber')
+	).values('username').annotate(count=Count('id')).values('count')
 
-	return render(request, 'leaders.html', {'leaderboard': data})
-"""
+	# Annotate the Picks queryset with the count of past picks
+	data = Pick.objects.annotate(
+		pick_count=Subquery(past_pick_count, output_field=models.IntegerField())
+	).order_by('-isin', '-pick_count')
+
+	# Fetch all past picks and group them by (username, teamnumber)
+	past_picks_map = {}
+	for pick in data:
+		# Fetch the related past picks for each team
+		past_picks = PastPick.objects.filter(username=pick.username, teamnumber=pick.teamnumber)
+		past_picks_map[(pick.username, pick.teamnumber)] = past_picks
+
+	# Pass the data to the template
+	return render(request, 'authentication/leaders.html', {
+		'leaderboard': data,
+		'past_picks_map': past_picks_map
+	})
+
+
 @login_required
 def game(request):
 	# Define the PST timezone
@@ -737,9 +824,25 @@ def game(request):
 	start_date = game.startDate
 	end_date = game.endDate
 
-	if (current_day_pst not in [1,2]) and (start_date <= current_date_pst < end_date):
-		return redirect('checking')  # Replace 'some_other_page' with the name of an appropriate view
+	end_datetime = datetime.combine(end_date, time(23, 59, 59))
+	end_datetime = pst.localize(end_datetime)
 
+	start_datetime = datetime.combine(start_date, time(17, 0))  # Combine date with 5:00 PM
+	start_datetime = pst.localize(start_datetime)  # Make it timezone-aware
+	current_pst_time = datetime.now(pst)
+
+	thursday_deadline = current_pst_time.replace(hour=17, minute=0, second=0, microsecond=0)
+	if current_day_pst == 3 and current_pst_time <= thursday_deadline:  # Thursday before 5:00 PM PST
+		within_deadline = True
+	elif current_day_pst in [1, 2]:  # Tuesday or Wednesday
+		within_deadline = True
+	else:
+		within_deadline = False
+
+	"""
+	if (not within_deadline and (start_datetime <= current_pst_time < end_datetime):
+		return redirect('checking')  # Replace 'some_other_page' with the name of an appropriate view
+	"""
 	user_data = Pick.objects.filter(username = request.user.username)
 	user_pick_data = Pick.objects.filter(username = request.user.username,isin = True).order_by('teamnumber')
 	player_data = []
@@ -818,16 +921,48 @@ def game(request):
 
 	organized_picks = dict(organized_picks)
 
+	user_picks_out = Pick.objects.filter(username=request.user.username, isin=False).order_by('teamnumber')
+	user_picks_in = Pick.objects.filter(username=request.user.username, isin=True).order_by('teamnumber')
+
+	all_teams_in = user_picks_out.count() == 0
+	all_teams_out = user_picks_in.count() == 0
+
+	if all_teams_in:
+		isin = True
+	elif all_teams_out:
+		isin = False
+	else:
+		isin = request.GET.get('isin', 'True') == 'True'  # Use the query parameter if mixed
+
+	page_number = request.GET.get('page', 1)  # Default to page 1
+	in_paginator = Paginator(user_pick_data,20)
+	out_paginator = Paginator(user_picks_out,20)
+
+	user_pick_data = in_paginator.get_page(page_number) if isin else out_paginator.get_page(page_number)
+
 
 	return render(request, 'authentication/game.html', 
 		{'player_data': player_data, 
 		'user_pick_data' : user_pick_data,
 		'has_started' : has_started,
+		'isin': isin,
 		'start':start,
+		'all_teams_in': all_teams_in,
+		'all_teams_out': all_teams_out,
+		'page_obj': user_pick_data,
 		'team':name,
 		'total':total_in,
 		'organized_picks': organized_picks
 		})
+
+def search_players(request):
+	if request.headers.get('x-requested-with') == 'XMLHttpRequest' and request.method == 'GET':
+		search_query = request.GET.get('search', '')
+		if search_query:
+			players = NFLPlayer.objects.filter(name__icontains=search_query)[:5]
+			player_list = [{'name': player.name} for player in players]
+			return JsonResponse({'players': player_list})
+	return JsonResponse({'players': []})
 
 def game_search(username,playerdata):
 	user_pick_data = Pick.objects.filter(username = username,isin = True).order_by('teamnumber')
@@ -946,6 +1081,13 @@ def checking(request):
     # Get the current time in PST
     current_pst_time = timezone.now().astimezone(pst)
     current_day_pst = current_pst_time.weekday()  # This gives the day of the week (int)
+    thursday_deadline = current_pst_time.replace(hour=17, minute=0, second=0, microsecond=0)
+    if current_day_pst == 3 and current_pst_time <= thursday_deadline:  # Thursday before 5:00 PM PST
+    	within_deadline = True
+    elif current_day_pst in [1, 2]:  # Tuesday or Wednesday
+    	within_deadline = True
+    else:
+    	within_deadline = False
 
     # Get the current date in PST for comparison with start and end dates
     current_date_pst = current_pst_time.date()
@@ -954,18 +1096,26 @@ def checking(request):
     start_date = game.startDate
     end_date = game.endDate
     week = game.week
+
+    end_datetime = datetime.combine(end_date, time(23, 59, 59))
+    end_datetime = pst.localize(end_datetime)
+
+    start_datetime = datetime.combine(start_date, time(17, 0))  # Combine date with 5:00 PM
+    start_datetime = pst.localize(start_datetime)  # Make it timezone-aware
+    current_pst_time = datetime.now(pst)
+
     
     # Check if the current date is within the game's start and end dates
-    if paid.paid_status == False and (start_date <= current_date_pst < end_date) and current_day_pst in [1, 2]:
+    if paid.paid_status == False and (start_datetime <= current_pst_timet < end_datetime) and within_deadline:
         return redirect('picking')
     
-    elif paid.paid_status == False and (start_date <= current_date_pst < end_date) and current_day_pst not in [1, 2]:
+    elif paid.paid_status == False and (start_datetime <= current_pst_time < end_datetime) and not within_deadline:
         return redirect('playerboard')
     
     elif paid.paid_status == False:
         return redirect('payment')
     
-    elif (paid.paid_status == True) and not (start_date <= current_date_pst < end_date):
+    elif (paid.paid_status == True) and not (start_datetime <= current_pst_time < end_datetime):
         username = request.user.username
         if not Pick.objects.filter(username=username).exists():
             return redirect('teamname')
@@ -982,7 +1132,7 @@ def checking(request):
                 if i.isin:
                     count_ins += 1
             if count_ins >= 1:
-                if current_day_pst in [1, 2] and count > 1 and week != 18:
+                if within_deadline and count > 1 and week != 18:
                     return redirect('game')
                 elif count == 1 or week == 18:
                     winners_list = Pick.objects.filter(isin=True)
@@ -994,7 +1144,7 @@ def checking(request):
                 else:
                     return redirect('leaderboard')
             else:
-                if current_day_pst in [1, 2]:
-                    return redirect('picking')
+                if within_deadline:
+                    return redirect('game')
                 else:
                     return redirect('playerboard')

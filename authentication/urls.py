@@ -37,10 +37,10 @@ urlpatterns = [
     path('media-page',views.media_page,name = 'media-page'),
     path('blog/<slug:slug>/', views.blog_detail, name='blog_detail'),
     path('chat/<str:room_name>/', views.room, name='room'),
-    path('like_message/<int:message_id>/', views.like_message, name='like_message'),
-    path('dislike_message/<int:message_id>/', views.dislike_message, name='dislike_message'),
     path('dicord', views.discord, name='discord'),
     path('picking', views.picking, name='picking'),
-    #path('leaders', views.player_list, name='leaders'),
+    path('leaders', views.player_list, name='leaders'),
+    path('search_players/', views.search_players, name='search_players'),
     path('ckeditor5/', include('django_ckeditor_5.urls')),
+    path('messages', views.message_board, name = 'messages')
 ]+static(settings.MEDIA_URL,document_root = settings.MEDIA_ROOT)

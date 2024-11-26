@@ -1,0 +1,194 @@
+{% load custom_tags %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaderboard</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap">
+    <style>
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #f5f7fa;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 20px auto;
+            background-color: #ffffff;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 40px;
+        }
+
+        .leaderboard-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .leaderboard-table th, .leaderboard-table td {
+            text-align: left;
+            padding: 16px;
+        }
+
+        .leaderboard-table th {
+            background-color: #ffd700;
+            color: #000000;
+            font-weight: 600;
+            text-transform: uppercase;
+            border-bottom: 4px solid #0056b3;
+        }
+
+        .leaderboard-table tr {
+            background-color: #f9f9f9;
+            transition: background-color 0.3s ease;
+        }
+
+        .leaderboard-table tr:hover {
+            background-color: #e0f0ff;
+        }
+
+        .leaderboard-table td {
+            border-bottom: 1px solid #ddd;
+        }
+
+        .team-name {
+            position: relative;
+            cursor: pointer;
+            color: #007bff;
+            font-weight: 600;
+        }
+
+        .pick-count {
+            text-align: center;
+            font-weight: bold;
+        }
+
+        /* Tooltip Styling */
+        .hover-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        .hover-content {
+            display: none;
+            position: absolute;
+            top: 120%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #ffffff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            white-space: nowrap;
+            z-index: 100;
+            min-width: 200px;
+        }
+
+        .hover-container:hover .hover-content {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Leaderboard</h1>
+        <table class="leaderboard-table" id="leaderboardTable">
+            <tr>
+                <th>Ranking</th>
+                <th>Team Name</th>
+                <th>Previous Scorers</th>
+            </tr>
+            {% for pick in leaderboard %}
+            <tr>
+                <td class="rank"></td> <!-- This will be populated by JavaScript -->
+                <td>
+                    <div class="hover-container">
+                        <span class="team-name">
+                        {{ pick.team_name }}
+                            {% if pick.isin %}
+                                👑
+                            {% endif %}</span>
+                        {% get_past_picks past_picks_map pick.username pick.teamnumber as past_picks %}
+                        <div class="hover-content">
+                            <h4>Previous Scorers</h4>
+                            <ul>
+                                {% for past_pick in past_picks %}
+                                    {% if past_pick.pick1_name != "N/A" %}
+                                    <li>{{ past_pick.pick1_name }}</li>
+                                    {% endif %}
+                                    {% if past_pick.pick2_name != "N/A" %}
+                                        <li>{{ past_pick.pick2_name }}</li>
+                                    {% endif %}
+                                {% empty %}
+                                    <li>No previous scorers</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </td>
+                <td class="pick-count">{{ pick.pick_count|default:"0" }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+
+    <script>
+        // Function to calculate rankings and update the table
+        function updateRankings() {
+            const table = document.getElementById('leaderboardTable');
+            const rows = Array.from(table.rows).slice(1); // Skip the header row
+
+            // Extract rows with pick counts and store them in an array
+            const data = rows.map(row => {
+                const teamName = row.cells[1].innerText.trim();
+                const pickCount = parseInt(row.cells[2].innerText.trim()) || 0;
+                return { row, teamName, pickCount };
+            });
+
+            // Sort the rows by pick count in descending order
+            data.sort((a, b) => b.pickCount - a.pickCount);
+
+            // Assign rankings and update the rows
+            let currentRank = 1;
+            let previousCount = null;
+            let tieRank = 1;
+
+            data.forEach((entry, index) => {
+                const { row, pickCount } = entry;
+
+                // Check for ties
+                if (pickCount !== previousCount) {
+                    currentRank = index + 1;
+                    tieRank = currentRank;
+                }
+                row.cells[0].innerText = `T${tieRank}`; // Update the rank cell
+                previousCount = pickCount;
+            });
+        }
+
+        // Run the function on page load
+        window.onload = updateRankings;
+    </script>
+</body>
+</html>
+
+
+
+
+
+
+

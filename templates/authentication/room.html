@@ -21,23 +21,13 @@
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
         }
         .chat-header {
             background-color: #444;
             color: #f2c94c;
             padding: 15px;
             text-align: center;
-            font-size: 1.5em;
-            position: relative;
-        }
-        .chat-header img {
-            position: absolute;
-            right: 15px;
-            top: 15px;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
         }
         .chat-messages {
             flex: 1;
@@ -52,28 +42,40 @@
             margin-bottom: 10px;
             max-width: 70%;
             display: flex;
-            justify-content: space-between;
-            align-items: center;
+            flex-direction: column;
         }
         .message.personal {
-            background-color: #f2c94c;
+            background-color: #4a4a4a;
+            color: #eaeaea;
             align-self: flex-end;
         }
         .message.other {
-            background-color: #d9d9d9;
+            background-color: #2e2e2e;
+            color: #eaeaea;
             align-self: flex-start;
         }
-        .message span {
-            display: block;
-            font-size: 0.8em;
-            color: #ccc;
-        }
-        .timestamp {
-            display: block;
-            font-size: 0.8em;
-            color: #000000;  /* Change this to the desired color */
+        .reaction-buttons {
+            display: flex;
+            gap: 10px;
             margin-top: 5px;
-            text-align: right;
+        }
+        .reaction-buttons button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #f2c94c;
+            font-size: 1.2em;
+            display: flex;
+            align-items: center;
+        }
+        .reaction-count {
+            background-color: #444;
+            color: white;
+            border-radius: 12px;
+            padding: 2px 6px;
+            margin-left: 5px;
+            font-size: 0.9em;
+            display: inline-block;
         }
         .chat-input {
             display: flex;
@@ -93,112 +95,153 @@
             background-color: #f2c94c;
             border-radius: 0 5px 5px 0;
             cursor: pointer;
-            transition: background-color 0.3s;
         }
         .chat-input button:hover {
             background-color: #e2b84c;
         }
+        .timestamp {
+            font-size: 0.8em; /* Makes the timestamp smaller */
+            color: #bbb; /* Optional: Makes the timestamp a lighter color */
+       }
     </style>
 </head>
 <body>
     <div class="chat-container">
-        <div class="chat-header">
-            Room: {{ room_name }}
-            <img src="path/to/profile-pic.jpg" alt="Profile">
-        </div>
+        <div class="chat-header">Room: {{ room_name }}</div>
         <div id="chat-messages" class="chat-messages">
             {% for message in messages %}
                 <div class="message {% if message.team_name == team %}personal{% else %}other{% endif %}">
                     <div>
-                        <b>{{ message.team_name }}</b>: {{ message.message }}<br>
-                        <span class="timestamp">{{ message.timestamp|date:"Y-m-d H:i" }}</span>
+                        <b>{{ message.team_name }}</b><br>
+                        <span class="message-content">{{ message.message }}</span><br>
+                        <span class="timestamp" data-timestamp="{{ message.timestamp|date:"c" }}">
+                            {{ message.timestamp|date:"Y-m-d H:i" }}
+                        </span>
                     </div>
-                    <div>
-                        <button class="like-btn" data-message-id="{{ message.id }}">👍 <span id="likes-{{ message.id }}">{{ message.likes }}</span></button>
-                        <button class="dislike-btn" data-message-id="{{ message.id }}">👎 <span id="dislikes-{{ message.id }}">{{ message.dislikes }}</span></button>
+                    <div class="reaction-buttons">
+                        <button class="like-btn" data-message-id="{{ message.id }}">
+                            👍 <span class="reaction-count" id="likes-{{ message.id }}">{{ message.likes_count }}</span>
+                        </button>
+                        <button class="dislike-btn" data-message-id="{{ message.id }}">
+                            👎 <span class="reaction-count" id="dislikes-{{ message.id }}">{{ message.dislikes_count }}</span>
+                        </button>
                     </div>
                 </div>
             {% endfor %}
         </div>
         <div class="chat-input">
-            <input id="chat-message-input" type="text" placeholder="Type your message here...">
+            <input id="chat-message-input" type="text" placeholder="Type your message...">
             <button id="chat-message-submit">Send</button>
         </div>
     </div>
+
     <script>
+        function formatTimestamp(timestamp) {
+            const now = new Date();
+            const messageTime = new Date(timestamp);
+            const diffInSeconds = Math.floor((now - messageTime) / 1000);
+
+            if (diffInSeconds < 60) return 'just now';
+            if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} minutes ago`;
+            if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} hours ago`;
+            if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)} days ago`;
+            return messageTime.toLocaleDateString();
+        }
+         document.addEventListener('DOMContentLoaded', function () {
+        const timestampElements = document.querySelectorAll('.timestamp');
+        timestampElements.forEach(element => {
+            const isoTimestamp = element.getAttribute('data-timestamp');
+            element.textContent = formatTimestamp(isoTimestamp);
+        });
+    });
+
         const roomName = "{{ room_name }}";
         const teamName = "{{ team }}";
         const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
         const chatSocket = new WebSocket(
-            protocol + window.location.hostname + ':8001/ws/chat/' + roomName + '/'
+            `${protocol}${window.location.hostname}:${window.location.port}/ws/chat/${roomName}/`
         );
 
-        chatSocket.onopen = function() {
-            console.log('WebSocket connection established.');
-        };
 
-        chatSocket.onmessage = function(e) {
+
+function sendMessage() {
+    const messageInput = document.querySelector('#chat-message-input');
+    const message = messageInput.value.trim();
+    if (message) {
+        chatSocket.send(JSON.stringify({
+            'action': 'message',
+            'message': message,
+            'team_name': teamName
+        }));
+        messageInput.value = ''; // Clear the input field after sending
+    }
+}
+
+// Event listener for clicking the "Send" button
+document.querySelector('#chat-message-submit').onclick = function() {
+    sendMessage();
+};
+// Event listener for sending a message when pressing the "Enter" key
+document.querySelector('#chat-message-input').addEventListener('keydown', function(event) {
+    if (event.key === 'Enter' || event.keyCode === 13) {
+        event.preventDefault(); // Prevents the default action (like form submission)
+        sendMessage();
+    }
+});
+
+chatSocket.onmessage = function(e) {
             const data = JSON.parse(e.data);
             if (data.action === 'chat_message') {
-                const messageElement = document.createElement('div');
-                messageElement.className = 'message';
-                messageElement.classList.add(data.team_name === teamName ? 'personal' : 'other');
-                messageElement.innerHTML = `<div> 
-                            <b>${data.team_name}</b>: ${data.message} 
-                            <br><span class="timestamp">${data.timestamp}</span>
-                            </div>
-                            <div>
-                            <button class="like-btn" data-message-id="${data.id}">👍 <span id="likes-${data.id}">${data.likes}</span></button>
-                            <button class="dislike-btn" data-message-id="${data.id}">👎 <span id="dislikes-${data.id}">${data.dislikes}</span></button>
-                            </div>`;
-                document.getElementById('chat-messages').appendChild(messageElement);
-                document.getElementById('chat-messages').scrollTop = document.getElementById('chat-messages').scrollHeight;
+                appendMessage(data);
             } else if (data.action === 'update_likes_dislikes') {
-                document.querySelector(`#likes-${data.message_id}`).textContent = data.likes;
-                document.querySelector(`#dislikes-${data.message_id}`).textContent = data.dislikes;
+                updateLikesDislikes(data);
             }
         };
 
-        chatSocket.onclose = function(e) {
-            console.error('Chat socket closed unexpectedly');
-        };
-
-        document.querySelector('#chat-message-input').focus();
-        document.querySelector('#chat-message-input').onkeyup = function(e) {
-            if (e.keyCode === 13) {  // enter key
-                document.querySelector('#chat-message-submit').click();
-            }
-        };
-
-        document.querySelector('#chat-message-submit').onclick = function(e) {
-            const messageInputDom = document.querySelector('#chat-message-input');
-            const message = messageInputDom.value;
-            chatSocket.send(JSON.stringify({
-                'action': 'message',
-                'message': message,
-                'team_name': teamName
-            }));
-            messageInputDom.value = '';
-        };
-
+        function appendMessage(data) {
+            const chatMessages = document.getElementById('chat-messages');
+            const messageElement = document.createElement('div');
+            messageElement.className = 'message ' + (data.team_name === teamName ? 'personal' : 'other');
+            messageElement.innerHTML = `
+                <div>
+                    <b>${data.team_name}</b><br>
+                    <span class="message-content">${data.message}</span><br>
+                    <span class="timestamp">${formatTimestamp(data.timestamp)}</span>
+                </div>
+                <div class="reaction-buttons">
+                    <button class="like-btn" data-message-id="${data.id}">
+                        👍 <span class="reaction-count" id="likes-${data.id}">${data.likes}</span>
+                    </button>
+                    <button class="dislike-btn" data-message-id="${data.id}">
+                        👎 <span class="reaction-count" id="dislikes-${data.id}">${data.dislikes}</span>
+                    </button>
+                </div>`;
+            chatMessages.appendChild(messageElement);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
         document.addEventListener('click', function(event) {
+            const messageId = event.target.dataset.messageId;
             if (event.target.classList.contains('like-btn')) {
-                const messageId = event.target.dataset.messageId;
+                console.log(`Sending like for message ID: ${messageId}`);
                 chatSocket.send(JSON.stringify({
                     'action': 'like',
                     'message_id': messageId
                 }));
             } else if (event.target.classList.contains('dislike-btn')) {
-                const messageId = event.target.dataset.messageId;
+                console.log(`Sending dislike for message ID: ${messageId}`);
                 chatSocket.send(JSON.stringify({
                     'action': 'dislike',
                     'message_id': messageId
                 }));
             }
         });
+
+        function updateLikesDislikes(data) {
+            const likeElement = document.querySelector(`#likes-${data.message_id}`);
+            const dislikeElement = document.querySelector(`#dislikes-${data.message_id}`);
+            if (likeElement) likeElement.textContent = data.likes;
+            if (dislikeElement) dislikeElement.textContent = data.dislikes;
+        }
     </script>
 </body>
 </html>
-
-
-
