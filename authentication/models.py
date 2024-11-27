@@ -144,6 +144,11 @@ class Blog(models.Model):
     def get_absolute_url(self):
         return reverse('blog_detail', kwargs={'slug': self.slug})
 
+class Waitlist(models.Model):
+    username = models.CharField(max_length = 100, default = "username")
+    def __str__(self):
+        return f"{self.username}"
+
 class ChatMessage(models.Model):
     room_name = models.CharField(max_length=255)
     message = models.TextField()
@@ -169,11 +174,6 @@ class MessageReaction(models.Model):
 
     class Meta:
         unique_together = ('user', 'message')
-
-class Waitlist(models.Model):
-    username = models.CharField(max_length = 100, default = "username")
-    def __str__(self):
-        return f"{self.username}"
 
 class Message(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)

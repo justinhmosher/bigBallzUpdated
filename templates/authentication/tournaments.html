@@ -20,10 +20,11 @@
         }
 
         main {
-            flex: 1;
             display: flex;
             flex-direction: column;
             justify-content: center;
+            align-items: center; /* Center content horizontally */
+            height: -200vh; /* Make main take up full viewport height */
         }
 
         .tabs-container {
@@ -62,6 +63,7 @@
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 20px;
             align-items: center; /* Center content vertically in each row */
+            justify-items: center; /* Center items within the grid */
         }
 
         .card {
@@ -152,12 +154,23 @@
         footer a:hover {
             text-decoration: underline;
         }
+        
         .text-center {
             position: absolute; /* Take the SVG out of the document flow */
             top: 40px; /* Adjust distance from the top of the page */
             left: 50%; /* Center horizontally */
             transform: translateX(-50%); /* Center alignment correction */
         }
+
+        .text-center {
+            position: relative; /* Change from absolute to relative */
+            top: 0; /* Remove offset positioning */
+            left: 0; /* Remove offset positioning */
+            transform: none; /* Reset transformation */
+            text-align: center; /* Align the logo centrally */
+            margin-top: 20px; /* Add some spacing above */
+       }
+
 
         /* Responsive Layout */
         @media (max-width: 576px) {
