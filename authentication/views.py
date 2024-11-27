@@ -490,10 +490,9 @@ def playerboard(request):
 		within_deadline = True
 	else:
 		within_deadline = False
-	"""
-	if (within_deadline or not (start_datetime <= current_pst_time < end_datetime):
+	
+	if (within_deadline) or not (start_datetime <= current_pst_time < end_datetime):
 		return redirect('checking')  # Replace 'some_other_page' with the name of an appropriate view
-	"""
 
 	player_counts1 = Pick.objects.filter(isin=True).exclude(pick1='N/A').values('pick1').annotate(count=Count('pick1')).order_by('-count')
 	player_counts2 = Pick.objects.filter(isin=True).exclude(pick2='N/A').values('pick2').annotate(count=Count('pick2')).order_by('-count')
@@ -577,10 +576,10 @@ def leaderboard(request):
 		within_deadline = True
 	else:
 		within_deadline = False
-	"""
-	if (within_deadline or not (start_datetime <= current_pst_time < end_datetime):
+
+	if (within_deadline) or not (start_datetime <= current_pst_time < end_datetime):
 		return redirect('checking')  # Replace 'some_other_page' with the name of an appropriate view
-	"""
+	
 	player_counts1 = Pick.objects.filter(isin=True).exclude(pick1='N/A').values('pick1').annotate(count=Count('pick1')).order_by('-count')
 	player_counts2 = Pick.objects.filter(isin=True).exclude(pick2='N/A').values('pick2').annotate(count=Count('pick2')).order_by('-count')
 
@@ -680,8 +679,6 @@ def tournaments(request):
 		"games": current_games,
 		"play": play
 	}
-
-	#return render(request,'authentication/tournaments.html',{'days':days_until_start,"pot":pot,"play":play})
 	return render(request, 'authentication/tournaments.html', context)
 
 
@@ -738,6 +735,7 @@ def location(request):
 							messages.error(request,"Max number of teams entered, we are adding you to a waitlist.")
 							return redirect('tournaments')
 					else:
+						return redirect('checking') #needs to be removed to check age
 						if compliance.old == False and compliance.young == False:
 							age_api_key = config('AGE_API')
 							return render(request,'authentication/agechecking.html',{'api':age_api_key})
@@ -838,11 +836,8 @@ def game(request):
 		within_deadline = True
 	else:
 		within_deadline = False
-
-	"""
-	if (not within_deadline and (start_datetime <= current_pst_time < end_datetime):
+	if (not within_deadline and (start_datetime <= current_pst_time < end_datetime)):
 		return redirect('checking')  # Replace 'some_other_page' with the name of an appropriate view
-	"""
 	user_data = Pick.objects.filter(username = request.user.username)
 	user_pick_data = Pick.objects.filter(username = request.user.username,isin = True).order_by('teamnumber')
 	player_data = []
