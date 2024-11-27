@@ -1101,7 +1101,7 @@ def checking(request):
 
     
     # Check if the current date is within the game's start and end dates
-    if paid.paid_status == False and (start_datetime <= current_pst_timet < end_datetime) and within_deadline:
+    if paid.paid_status == False and (start_datetime <= current_pst_time < end_datetime) and within_deadline:
         return redirect('picking')
     
     elif paid.paid_status == False and (start_datetime <= current_pst_time < end_datetime) and not within_deadline:
