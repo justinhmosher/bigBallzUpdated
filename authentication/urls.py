@@ -42,5 +42,6 @@ urlpatterns = [
     path('leaders', views.player_list, name='leaders'),
     path('search_players/', views.search_players, name='search_players'),
     path('ckeditor5/', include('django_ckeditor_5.urls')),
-    path('messages', views.message_board, name = 'messages')
+    path('messages', views.message_board, name = 'messages'),
+    path('football/', include('authentication.NFL_weekly_view.urls')),
 ]+static(settings.MEDIA_URL,document_root = settings.MEDIA_ROOT)

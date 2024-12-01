@@ -25,7 +25,7 @@ EMAIL_HOST_PASSWORD = EMAIL_HOST_PASSWORD
 EMAIL_PORT = EMAIL_PORT
 
 # settings.py
-CSRF_FAILURE_VIEW = 'authentication.views.custom_csrf_failure_view'
+#CSRF_FAILURE_VIEW = 'authentication.views.custom_csrf_failure_view'
 
 SESSION_COOKIE_SECURE = True  # Ensures cookies are only sent over HTTPS
 SESSION_COOKIE_AGE = 2592000  # Default session age set to 30 days (for cases when not overridden)
@@ -57,6 +57,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'authentication',
+    'authentication.NFL_weekly_view',
     'django.contrib.sitemaps',
     'channels',
     'django_ckeditor_5',

@@ -647,19 +647,67 @@ def tournaments(request):
 
 	games = {
 		"Football": [
-			{"name": "Touchdown Mainia/Season Long", "summary": "Each week, choose two players to score a touchdown./If one or both score, you advance, else you're out./Last man standing wins the pot!//Pot: $10K", "rules": "/rules", "playable": True},
-			{"name": "Cumulative Touchdown Tournament/Season Long", "summary": "Each week, choose two players to score touchdowns./The user with the highest cumulative touchdown amount by week 18, wins the pot!//Pot: $10K", "rules": "/football-rules-2", "playable": False},
-			{"name": "Touchdown Mainia/Weekly Game", "summary": "Select 10 NFL players to score touchdowns./The user with the most comultive touchdowns wins the pot!//Pot: $10k", "rules": "/football-rules-3", "playable": False},
+			{"name": "Touchdown Mainia/Season Long", 
+			"summary": "Each week, choose two players to score a touchdown./If one or both score, you advance, else you're out./Last man standing wins the pot!//Pot: $10K", 
+			"rules": "/rules", 
+			"playable": True,
+			"path":"location"
+		},
+		{
+			"name": "Cumulative Touchdown Tournament/Season Long", 
+			"summary": "Each week, choose two players to score touchdowns./The user with the highest cumulative touchdown amount by week 18, wins the pot!//Pot: $10K", 
+			"rules": "/football-rules-2", 
+			"playable": False,
+			"path":"location"
+		},
+		{	
+			"name": "Touchdown Mainia/Weekly Game", 
+			"summary": "Select 10 NFL players to score touchdowns./The user with the most comultive touchdowns wins the pot!//Pot: $10k", 
+			"rules": "/football-rules-3", 
+			"playable": True,
+			"path":"football/location"},
 		],
 		"Baseball": [
-			{"name": "Game 1", "summary": "Pick 2 players to get a hit.", "rules": "/baseball-rules-1", "playable": False},
-			{"name": "Game 2", "summary": "Custom rules for Game 2.", "rules": "/baseball-rules-2", "playable": False},
-			{"name": "Game 3", "summary": "Custom rules for Game 3.", "rules": "/baseball-rules-3", "playable": False},
+			{"name": "Game 1", 
+			"summary": "Pick 2 players to get a hit.", 
+			"rules": "/baseball-rules-1", 
+			"playable": False,
+			"path":"location"
+		},
+		{	
+			"name": "Game 2", 
+			"summary": "Custom rules for Game 2.", 
+			"rules": "/baseball-rules-2", 
+			"playable": False,
+			"path":"location"
+		},
+		{
+			"name": "Game 3", 
+			"summary": "Custom rules for Game 3.", 
+			"rules": "/baseball-rules-3", 
+			"playable": False,
+			"path":"location"},
 		],
 		"Basketball": [
-			{"name": "Game 1", "summary": "Pick 2 players to make a 3-pointer.", "rules": "/basketball-rules-1", "playable": False},
-			{"name": "Game 2", "summary": "Custom rules for Game 2.", "rules": "/basketball-rules-2", "playable": False},
-			{"name": "Game 3", "summary": "Custom rules for Game 3.", "rules": "/basketball-rules-3", "playable": False},
+			{"name": "Game 1", 
+			"summary": "Pick 2 players to make a 3-pointer.", 
+			"rules": "/basketball-rules-1", 
+			"playable": False,
+			"path":"location"
+		},
+		{
+			"name": "Game 2", 
+			"summary": "Custom rules for Game 2.", 
+			"rules": "/basketball-rules-2", 
+			"playable": False,
+			"path":"location"
+		},
+		{
+			"name": "Game 3", 
+			"summary": "Custom rules for Game 3.", 
+			"rules": "/basketball-rules-3", 
+			"playable": False,
+			"path":"location"},
 		],
 	}
 	for sport, sport_games in games.items():
