@@ -16,7 +16,7 @@ import requests
 from decouple import config
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
-from .models import Pick,Scorer,Paid,PromoCode,PromoUser,OfAge,UserVerification,Waitlist,Message
+from .models import PickNW,ScorerNW,PaidNW,PromoCodeNW,PromoUserNW,WaitlistNW,MessageNW
 from django.db.models import Count,F,ExpressionWrapper,fields,OuterRef,Subquery
 from datetime import datetime, time
 from itertools import chain

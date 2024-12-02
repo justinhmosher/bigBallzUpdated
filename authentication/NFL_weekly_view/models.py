@@ -8,7 +8,7 @@ from django_ckeditor_5.fields import CKEditor5Field
 import pytz
 #from Pillow import ImageTk, Image
 
-class Pick(models.Model):
+class PickNW(models.Model):
     your_primary_key = models.AutoField(primary_key=True)
     team_name = models.CharField(max_length = 100, default='Default Team Name')
     teamnumber = models.IntegerField(default=1)
@@ -23,7 +23,7 @@ class Pick(models.Model):
     def __str__(self):
         return f"{self.team_name}"
 
-class Scorer(models.Model):
+class ScorerNW(models.Model):
     name = models.CharField(max_length = 100, default = "name")
     player_ID = models.CharField(max_length= 100, default = "player ID")
     scored = models.BooleanField(default = False)
@@ -32,7 +32,7 @@ class Scorer(models.Model):
     def __str__(self):
         return f"{self.name}" 
 
-class Paid(models.Model):
+class PaidNW(models.Model):
     your_primary_key = models.AutoField(primary_key=True)
     username = models.CharField(max_length = 100, default = "username")
     paid_status = models.BooleanField(default = False)
@@ -41,42 +41,25 @@ class Paid(models.Model):
     def __str__(self):
         return f"{self.username}"
 
-class PromoCode(models.Model):
+class PromoCodeNW(models.Model):
     name = models.CharField(max_length=100,default = "name of influencer")
     code = models.CharField(max_length=100,default = "Code")
     def __str__(self):
         return f"{self.name}"
 
-class PromoUser(models.Model):
+class PromoUserNW(models.Model):
     username = models.CharField(max_length = 100, default = "username")
     code = models.CharField(max_length=100,default = "Code")
     active = models.BooleanField(default = False)
     def __str__(self):
         return f"{self.username}"
 
-class OfAge(models.Model):
-    username = models.CharField(max_length = 100, default = "username")
-    old = models.BooleanField(default = False)
-    young = models.BooleanField(default = False)
-    def __str__(self):
-        return f"{self.username}"
-
-class UserVerification(models.Model):
-    username = models.CharField(max_length = 100, default = "username")
-    first_name = models.CharField(max_length=100,default = "first name")
-    last_name = models.CharField(max_length=100, default = 'last name')
-    dob = models.DateTimeField(default=timezone.now)
-    verification_status = models.CharField(max_length=20, blank=True)
-    uuid = models.CharField(max_length=100, blank=True)
-    def __str__(self):
-        return f"{self.username}"
-
-class Waitlist(models.Model):
+class WaitlistNW(models.Model):
     username = models.CharField(max_length = 100, default = "username")
     def __str__(self):
         return f"{self.username}"
 
-class Message(models.Model):
+class MessageNW(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
     content = models.TextField()
     week = models.IntegerField(null=True, blank=True)
