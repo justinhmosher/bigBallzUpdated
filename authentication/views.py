@@ -34,6 +34,7 @@ from django.db.models import Sum
 import pytz
 from django.core.paginator import Paginator
 from django.db import models
+from authentication.NFL_weekly_view.models import PaidNW,PromoUserNW
 
 def message_board(request):
 	# Fetch all messages, ordered by week and timestamp
@@ -367,6 +368,10 @@ def activate(request, uidb64, token):
 			compliance.save()
 			new_user = Paid(username = myuser.username)
 			new_user.save()
+			NW_paid = PaidNW(username = myuser.username)
+			NW_paid.save()
+			NW_promo = PromoUserNW(username = myuser.username)
+			NW_promo.save()
 		except ObjectDoesNotExist:
 			pass
 		login(request, myuser)
