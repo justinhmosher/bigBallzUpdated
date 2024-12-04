@@ -225,6 +225,11 @@ def playerboard(request):
     """
     pick_counts = PickNW.objects.exclude(pick='N/A').values('pick').annotate(count=Count('pick')).order_by('-count')
 
+    player_counts = defaultdict(int)
+    for players in pick_counts:
+        player_name = players.get('pick')
+        player_counts[player_name] += players['count']
+
     # Collect teams or users associated with each pick
     pick_teams = defaultdict(list)
     for pick_record in PickNW.objects.exclude(pick='N/A'):
@@ -233,16 +238,17 @@ def playerboard(request):
     player_status = {}
     for pick_name in pick_counts:
         player_name = pick_name['pick']
-        scorer = Scorer.objects.filter(name=player_name).first()
+        scorer = ScorerNW.objects.filter(name=player_name).first()
         player_status[player_name] = {
             'scored':scorer.scored if scorer else False,
             'not_scored':scorer.not_scored if scorer else False,
         }
 
-    # Sort players by the number of picks
-    sorted_player_counts = sorted(pick_counts.items(), key=lambda x: x[1], reverse=True)
 
-    total_in = PickNW.objects.count()
+    # Sort players by the number of picks
+    sorted_player_counts = sorted(player_counts.items(), key=lambda x: x[1], reverse=True)
+
+    total_in = int(PickNW.objects.count()/10)
 
     # Paginate sorted_player_counts (show 10 players per page)
     paginator = Paginator(sorted_player_counts, 10)  # Show 10 players per page
@@ -264,7 +270,7 @@ def playerboard(request):
 
 @login_required
 def leaderboard(request):
-        # Define the PST timezone
+    # Define the PST timezone
     pst = pytz.timezone('America/Los_Angeles')
 
     # Get the current time in PST
@@ -291,11 +297,16 @@ def leaderboard(request):
         within_deadline = True
     else:
         within_deadline = False
-    """
+    
     if (within_deadline) or not (start_datetime <= current_pst_time < end_datetime):
         return redirect('checking')  # Replace 'some_other_page' with the name of an appropriate view
-
+    """
     pick_counts = PickNW.objects.exclude(pick='N/A').values('pick').annotate(count=Count('pick')).order_by('-count')
+
+    player_counts = defaultdict(int)
+    for players in pick_counts:
+        player_name = players.get('pick')
+        player_counts[player_name] += players['count']
 
     # Collect teams or users associated with each pick
     pick_teams = defaultdict(list)
@@ -305,21 +316,21 @@ def leaderboard(request):
     player_status = {}
     for pick_name in pick_counts:
         player_name = pick_name['pick']
-        scorer = Scorer.objects.filter(name=player_name).first()
+        scorer = ScorerNW.objects.filter(name=player_name).first()
         player_status[player_name] = {
             'scored':scorer.scored if scorer else False,
             'not_scored':scorer.not_scored if scorer else False,
         }
 
 
-
     # Sort players by the number of picks
-    sorted_player_counts = sorted(pick_counts.items(), key=lambda x: x[1], reverse=True)
+    sorted_player_counts = sorted(player_counts.items(), key=lambda x: x[1], reverse=True)
 
-    total_in = Pick.objects.count()
+    total_in = int(PickNW.objects.count()/10)
 
 
     user_data = PickNW.objects.filter(username=request.user.username)
+    print(user_data)
 
     # Paginate sorted_player_counts (show 10 players per page)
     paginator = Paginator(sorted_player_counts, 10)  # Show 10 players per page
@@ -331,7 +342,7 @@ def leaderboard(request):
     return render(request, 'authentication/leaderboard.html', {
         'page_obj': page_obj,
         'sorted_player_counts': sorted_player_counts,
-        'player_teams': dict(player_teams),
+        'player_teams': dict(pick_teams),
         'player_status': player_status,
         'total_in': total_in,
         'user_data': user_data,
@@ -561,7 +572,7 @@ def game(request):
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
-    total_in = PickNW.objects.count()
+    total_in = int(PickNW.objects.count() / 10)
 
 
     return render(request, 'NFL_weekly_view/weeklyNFLgame.html', 
@@ -582,17 +593,13 @@ def update_pick(request):
             data = json.loads(change_pick)
             pick = data.get('pick_number')
             team = data.get('teamnumber')
-            print(pick)
-            print(team)
 
             if not (pick and team):
                 raise ValueError("Invalid pick or team data.")
 
             user_pick_data = PickNW.objects.filter(username=request.user.username)
             for user_pick in user_pick_data.filter(teamnumber=team):
-                print("hello")
                 if int(pick) == user_pick.pick_number:
-                    print('hi')
                     user_pick.pick = "N/A"
                     user_pick.pick_team = "N/A"
                     user_pick.pick_position = "N/A" 
