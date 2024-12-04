@@ -21,5 +21,6 @@ urlpatterns = [
     path('picking', weekly_NFL.picking, name='picking'),
     path('leaders', weekly_NFL.player_list, name='leaders'),
     path('messages', weekly_NFL.message_board, name = 'messages'),
+    path('update-pick', weekly_NFL.update_pick, name = 'update_pick'),
 ]+static(settings.MEDIA_URL,document_root = settings.MEDIA_ROOT)
 

@@ -502,41 +502,41 @@ def game(request):
     pick1_data = None
     pick2_data = None
 
-    if request.method == 'POST':
-        search = request.POST.get('searched')
-
-        if search is not None:
-            player_data = NFLPlayer.objects.filter(name__icontains=search)[:5]
-
+    if request.method == 'POST' and request.headers.get('x-requested-with') == 'XMLHttpRequest':
         selected_player = request.POST.get('selected_player')
-        try:
-            player_data_selected = NFLPlayer.objects.get(name=selected_player)
-        except NFLPlayer.DoesNotExist:
-            player_data_selected = None
+        if selected_player:
+            try:
+                # Retrieve the selected player
+                player_data_selected = NFLPlayer.objects.get(name=selected_player)
 
-        if player_data_selected is not None:
-            num = game_search(request.user.username,player_data_selected)
-            if num == 1:
-                messages.error(request,"Selected players cannot be on the same team.")
-            elif num == 3:
-                messages.error(request, "Player already selected.")
+                # Use your existing game_search function
+                result = game_search(request.user.username, player_data_selected)
 
-        change_pick = request.POST.get('change_pick','{}')
-        try:
-            data = json.loads(change_pick)
-            pick = data.get('picknumber')
-            team = data.get('team')
-            for user_pick in user_pick_data.filter(teamnumber=team):
-                if int(pick) == user_pick.pick_number:
-                    user_pick.pick = "N/A"
-                    user_pick.pick_number = pick
-                    user_pick.pick_team = "N/A"
-                    user_pick.pick_position = "N/A" 
-                    user_pick.pick_color = "N/A"
-                    user_pick.pick_player_ID = "N/A"
-                    user_pick.save()
-        except:
-            messages.error(request, "Invalid change pick data.")
+                if result == 11:
+                    return JsonResponse({'success': False, 'message': "Selected players cannot be on the same team."})
+                elif result == 13:
+                     return JsonResponse({'success': False, 'message': "Player already selected."})
+                else:
+                    return JsonResponse({
+                        'success': True,
+                        'message': 'Player selected successfully!',
+                        'pick': {
+                            #[pick.teamnumber,pick.pick_number,pick.pick,pick.pick_team,pick.pick_position,pick.pick_color,pick.pick_player_ID]
+                            'pick_number': result[1],
+                            'team_number': result[0],
+                            'pick_name': result[2],
+                            'pick_team': result[3],
+                            'pick_position': result[4],
+                            'pick_color': result[5],
+                        }
+                    })
+
+            except NFLPlayer.DoesNotExist:
+                return JsonResponse({'success': False, 'message': 'Player not found!'})
+            except PickNW.DoesNotExist:
+                return JsonResponse({'success': False, 'message': 'Pick not found!'})
+        else:
+            return JsonResponse({'success': False, 'message': 'Invalid data!'})
 
     game = Game.objects.get(sport = "Football")
     start = game.startDate
@@ -548,17 +548,64 @@ def game(request):
     team = PickNW.objects.get(username = request.user.username, teamnumber = 1, pick_number =1)
     name = team.team_name
 
+    # Group picks by team
+    team_picks_dict = defaultdict(list)
+    for pick in user_pick_data:
+        team_picks_dict[pick.teamnumber].append(pick)
+
+    # Convert to a list of teams with picks
+    team_picks_list = list(team_picks_dict.values())
+
+    # Paginate the team-level data (1 team per page)
+    paginator = Paginator(team_picks_list, 1)  # One team per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
     total_in = PickNW.objects.count()
 
 
     return render(request, 'NFL_weekly_view/weeklyNFLgame.html', 
-        {'player_data': player_data, 
+        {'page_obj': page_obj,
         'user_pick_data' : user_pick_data,
         'has_started' : has_started,
         'start':start,
         'team':name,
         'total':total_in,
         })
+
+@csrf_exempt
+@login_required
+def update_pick(request):
+    if request.method == 'POST':
+        change_pick = request.POST.get('change_pick', '{}')
+        try:
+            data = json.loads(change_pick)
+            pick = data.get('pick_number')
+            team = data.get('teamnumber')
+            print(pick)
+            print(team)
+
+            if not (pick and team):
+                raise ValueError("Invalid pick or team data.")
+
+            user_pick_data = PickNW.objects.filter(username=request.user.username)
+            for user_pick in user_pick_data.filter(teamnumber=team):
+                print("hello")
+                if int(pick) == user_pick.pick_number:
+                    print('hi')
+                    user_pick.pick = "N/A"
+                    user_pick.pick_team = "N/A"
+                    user_pick.pick_position = "N/A" 
+                    user_pick.pick_color = "N/A"
+                    user_pick.pick_player_ID = "N/A"
+                    user_pick.save()
+
+            return JsonResponse({'success': True})
+
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)})
+
+    return JsonResponse({'success': False, 'message': 'Invalid request.'})
 
 def search_players(request):
     if request.headers.get('x-requested-with') == 'XMLHttpRequest' and request.method == 'GET':
@@ -578,9 +625,9 @@ def game_search(username,playerdata):
                 all_equal = all(item == playerdata.team_name for item in team_list)
                 ID_list = PickNW.objects.filter(username=username, teamnumber=pick.teamnumber).values_list('pick_player_ID', flat=True)
                 if all_equal:
-                    return 1
+                    return 11
                 elif playerdata.player_ID in ID_list:
-                    return 3
+                    return 13
                 else:
                     pick.pick = playerdata.name
                     pick.pick_team = playerdata.team_name
@@ -588,17 +635,17 @@ def game_search(username,playerdata):
                     pick.pick_color = playerdata.color
                     pick.pick_player_ID = playerdata.player_ID
                     pick.save()
-                    return 2
+                    return [pick.teamnumber,pick.pick_number,pick.pick,pick.pick_team,pick.pick_position,pick.pick_color,pick.pick_player_ID]
             except NFLPlayer.DoesNotExist:
-                return 2
+                return [pick.teamnumber,pick.pick_number,pick.pick,pick.pick_team,pick.pick_position,pick.pick_color,pick.pick_player_ID]
     for pick in user_pick_data:
         team_list = PickNW.objects.filter(username=username, teamnumber=pick.teamnumber).values_list('pick_team', flat=True)
         all_equal = all(item == playerdata.team_name for item in team_list)
         ID_list = PickNW.objects.filter(username=username, teamnumber=pick.teamnumber).values_list('pick_player_ID', flat=True)
         if all_equal:
-            return 1
+            return 11
         elif playerdata.player_ID in ID_list:
-            return 3
+            return 13
         else:
             pick.pick = playerdata.name
             pick.pick_team = playerdata.team_name
@@ -606,8 +653,8 @@ def game_search(username,playerdata):
             pick.pick_color = playerdata.color
             pick.pick_player_ID = playerdata.player_ID
             pick.save()
-            return 2
-    return 2
+            return [pick.teamnumber,pick.pick_number,pick.pick,pick.pick_team,pick.pick_position,pick.pick_color,pick.pick_player_ID]
+    return [pick.teamnumber,pick.pick_number,pick.pick,pick.pick_team,pick.pick_position,pick.pick_color,pick.pick_player_ID]
 
 def picking(request):
     total_in = PickNW.objects.count()
