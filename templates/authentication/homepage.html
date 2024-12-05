@@ -1,5 +1,5 @@
-<!doctype html>
 {% load static %}
+<!doctype html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
@@ -31,70 +31,14 @@
 
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous" defer></script>
+    <link rel="stylesheet" href="{% static 'css/shared.css' %}">
 
     <!-- Custom CSS -->
 <style type="text/css">
 body {
     background-color: #000000;
     text-align: center;
-}
-.navbar {
-    background-color: #212529;
-    padding: 0.5rem;
-}
-.navbar .container {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-.navbar-brand {
-    margin-right: 10px;
-}
-.navbar-brand img {
-    width: 40px;
-    height: auto;
-    cursor: pointer;
-}
-.navbar-content {
-    display: flex;
-    justify-content: center;
-    flex-grow: 1;
-}
-.navbar-nav {
-    display: flex;
-    flex-direction: row;
-    gap: 1rem;
-    justify-content: center;
-    margin: 0;
-}
-.nav-link {
-    color: #ffffff;
-    font-size: 1rem;
-    text-decoration: none;
-    font-weight: 500;
-    padding: 0.5rem 0.8rem;
-}
-.dropdown-menu {
-    display: none; /* Hidden by default */
-    position: absolute;
-    top: 60px;
-    left: 10px;
-    background-color: #212529;
-    border: 1px solid #ffffff;
-    border-radius: 5px;
-    padding: 10px;
-    z-index: 1000;
-    width: 150px;
-}
-.dropdown-item {
-    color: #ffffff;
-    text-decoration: none;
-    display: block;
-    padding: 5px 10px;
-    font-size: 0.9rem;
-}
-.dropdown-item:hover {
-    background-color: #444;
 }
 .btn-play {
     font-size: 0.9rem; /* Smaller font size for small screens */
@@ -103,18 +47,6 @@ body {
 }
 #typing-text {
     font-size: 1rem; /* Slightly smaller text on small screens */
-}
-.game-link {
-    position: relative;
-}
-.game-link::after {
-    content: '';
-    position: absolute;
-    left: 0;
-    bottom: -2px; /* Adjust as necessary */
-    width: 100%;
-    height: 2px; /* Thickness of the underline */
-    background-color: white;
 }
 .logo-font {
     font-family: 'Archivo Black', sans-serif;
@@ -280,37 +212,15 @@ body {
     color: #fff;
 }
 </style>
-
-
-
-    <!-- Bootstrap Bundle with Popper -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous" defer></script>
 </head>
-<body>
-<header>
-  <nav class="navbar navbar-expand-lg navbar-dark">
-    <div class="container">
-      <!-- Logo with dropdown for mobile -->
+{% include 'authentication/partials/header.html' %}
+{% block trophy %}
       <a class="navbar-brand"  href="javascript:void(0);">
         <img src="{% static 'Trophy-logo.svg' %}" alt="The Chosen Fantasy Games">
       </a>
-      <!-- Dropdown menu for mobile -->
-      <div class="dropdown-menu">
-          <a href="{% url 'signin' %}" class="dropdown-item">Sign In</a>
-          <a href="{% url 'signup' %}" class="dropdown-item">Sign Up</a>
-      </div>
-      <!-- Centered Navbar Links -->
-      <div class="navbar-content">
-        <ul class="navbar-nav mx-auto text-center">
-          <li class="nav-item"><a class="nav-link game-link" href="/">Home</a></li>
-          <li class="nav-item"><a class="nav-link" href="{% url 'checking' %}">Game</a></li>
-          <li class="nav-item"><a class="nav-link" href="{% url 'media-page' %}">Media</a></li>
-        </ul>
-      </div>
+{% endblock %}
+<body>
 
-    </div>
-  </nav>
-</header>
 <div class="text-center">
 {% for message in messages %}
 <div class="alert alert-{{ message.tags }} alert-dismissible fade show d-inline-block" role="alert">

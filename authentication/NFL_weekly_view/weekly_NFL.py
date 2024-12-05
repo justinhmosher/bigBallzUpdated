@@ -265,9 +265,6 @@ def playerboard(request):
         'total_in': total_in,
     })
 
-
-    return render(request,'authentication/playerboard.html',{'player_counts':sorted_player_counts,'count':count,'total_in':total_in})
-
 @login_required
 def leaderboard(request):
     # Define the PST timezone
@@ -330,7 +327,6 @@ def leaderboard(request):
 
 
     user_data = PickNW.objects.filter(username=request.user.username)
-    print(user_data)
 
     # Paginate sorted_player_counts (show 10 players per page)
     paginator = Paginator(sorted_player_counts, 10)  # Show 10 players per page
@@ -339,7 +335,7 @@ def leaderboard(request):
 
 
     # Pass both sorted_player_counts and player_teams to the template
-    return render(request, 'authentication/leaderboard.html', {
+    return render(request, 'NFL_weekly_view/leaderboard.html', {
         'page_obj': page_obj,
         'sorted_player_counts': sorted_player_counts,
         'player_teams': dict(pick_teams),

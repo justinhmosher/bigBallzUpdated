@@ -1,0 +1,325 @@
+{% load static %}
+{% load custom_filters %}
+<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- Bootstrap JS and dependencies -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+
+
+<style type="text/css">
+    /* Styles related to player card display */
+    .form-container {
+        background-color: #ffffff;
+        border-radius: 20px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        padding: 30px;
+        width: 100%;
+        max-width: 600px;
+        margin: auto;
+    }
+    .flex-container {
+        display: flex;
+        flex-wrap: wrap; /* Allow wrapping to next row */
+        justify-content: space-between; /* Adjusts spacing between items */
+        align-items: flex-start; /* Align cards to the top so they don't stretch */
+        gap: 20px; /* Space between cards */
+    }
+    .player-card {
+        background-color: #ffd700; /* Gold color for the player cards */
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        text-align: center;
+        margin-bottom: 20px;
+        transition: transform 0.3s ease, height 0.3s ease; /* Smooth height transition */
+        cursor: pointer;
+        position: relative;
+        flex: 1 1 calc(25% - 20px); /* Takes 25% width minus the gap */
+        min-width: 200px; /* Minimum width for smaller screens */
+        max-width: 250px; /* Maximum width */
+    }
+    @media (max-width: 768px) {
+      .player-card {
+        flex: 1 1 calc(100% - 20px); /* One card per row, full width */
+        max-width: none;
+        }
+    }
+    .player-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+    }
+    .player-card h5 {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: #343a40;
+        margin-bottom: 10px;
+    }
+    .player-card p {
+        font-size: 1rem;
+        color: #6c757d;
+        margin-bottom: 10px;
+    }
+    .team-list {
+        display: none; /* Hide by default */
+        margin-top: 10px;
+        width: 100%; /* Make it span the entire width of the player card */
+        transition: all 0.3s ease; /* Smooth transition for height */
+        overflow: hidden;
+    }
+    .team-list ul {
+        list-style-type: none; /* Remove bullet points */
+        padding: 0;
+        text-align: left; /* Align teams to the left */
+        color: #343a40; /* Darker color for team names */
+    }
+    .team-list.visible {
+    display: block;
+    max-height: none; /* Remove max-height */
+    height: auto; /* Allow it to expand based on content */
+}
+.navbar {
+    background-color: #212529;
+    padding: 0.5rem;
+}
+.navbar .container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.navbar-brand {
+    margin-right: 10px;
+}
+.navbar-brand img {
+    width: 40px;
+    height: auto;
+    cursor: pointer;
+}
+.navbar-content {
+    display: flex;
+    justify-content: center;
+    flex-grow: 1;
+}
+.navbar-nav {
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+    justify-content: center;
+    margin: 0;
+}
+.nav-link {
+    color: #ffffff;
+    font-size: 1rem;
+    text-decoration: none;
+    font-weight: 500;
+    padding: 0.5rem 0.8rem;
+}
+.dropdown-menu {
+    display: none; /* Hidden by default */
+    position: absolute;
+    top: 60px;
+    left: 10px;
+    background-color: #212529;
+    border: 1px solid #ffffff;
+    border-radius: 5px;
+    padding: 10px;
+    z-index: 1000;
+    width: 150px;
+}
+.dropdown-item {
+    color: #ffffff;
+    text-decoration: none;
+    display: block;
+    padding: 5px 10px;
+    font-size: 0.9rem;
+}
+.dropdown-item:hover {
+    background-color: #444;
+}
+    .game-link {
+    position: relative;
+    }
+
+    .game-link::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        bottom: -2px; /* Adjust as necessary */
+        width: 100%;
+        height: 2px; /* Thickness of the underline */
+        background-color: white;
+    }
+.player-card.green-card {
+    background-color: #28a745; /* Green for scored */
+    color: #343a40;
+}
+
+.player-card.red-card {
+    background-color: #dc3545; /* Red for not scored */
+    color: #343a40;
+}
+
+.player-card.yellow-card {
+    background-color: #ffd700; /* Yellow for undecided or both true/false */
+    color: #343a40;
+}
+
+
+</style>
+
+<body>
+<header>
+  <nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container">
+      <!-- Logo with dropdown for mobile -->
+      <a class="navbar-brand"  href="javascript:void(0);">
+        <img src="{% static 'Trophy-logo.svg' %}" alt="The Chosen Fantasy Games">
+      </a>
+      <!-- Dropdown menu for mobile -->
+      <div class="dropdown-menu">
+          <a href="{% url 'signout' %}" class="dropdown-item">Sign Out</a>
+      </div>
+      <!-- Centered Navbar Links -->
+      <div class="navbar-content">
+        <ul class="navbar-nav mx-auto text-center">
+          <li class="nav-item"><a class="nav-link" href="{% url 'tournaments' %}">Tournaments</a></li>
+          <li class="nav-item"><a class="nav-link game-link" href="{% url 'checking' %}">Game</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'discord' %}">Chat</a></li>
+        </ul>
+        </ul>
+      </div>
+
+    </div>
+  </nav>
+</header>
+
+<br>
+    <div class="container text-center">
+        <h1>League Picks</h1>
+        <h4>Teams left: {{ total_in }}</h4>
+    </div>
+
+    <div class="pagination-container text-center mt-4">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+            {% endif %}
+            {% for num in page_obj.paginator.page_range %}
+                <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                    <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                </li>
+            {% endfor %}
+            {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+            {% endif %}
+        </ul>
+    </div>
+
+    <!-- Player Picks Cards -->
+<div class="container mt-5">
+    <h4 class="text-center">Player Picks</h4>
+    <div class="flex-container">
+        {% for player, count in page_obj %}
+            {% with status=player_status|get_item:player %}
+                <div class="player-card 
+                    {% if status.scored and not status.not_scored %}green-card{% elif not status.scored and status.not_scored %}red-card{% else %}yellow-card{% endif %}" 
+                    data-player-id="{{ player }}" onclick="toggleTeamList(this)">
+                    
+                    <h5 style="color: black;">{{ player }}</h5>
+                    <p style="color: black;">Number of Picks: {{ count }}</p>
+                    <div class="team-list" id="team-list-{{ player }}">
+                        <strong>Teams:</strong>
+                        <ul>
+                            {% for team in player_teams|get_item:player %}
+                                <li>{{ team }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            {% endwith %}
+        {% endfor %}
+    </div>
+</div>
+
+    <!-- Pagination Controls -->
+    <div class="pagination-container text-center mt-4">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+            {% endif %}
+            {% for num in page_obj.paginator.page_range %}
+                <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                    <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                </li>
+            {% endfor %}
+            {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+            {% endif %}
+        </ul>
+    </div>
+
+    <script>
+function toggleTeamList(cardElement) {
+    // Get the team list within the clicked card
+    const clickedTeamList = cardElement.querySelector('.team-list');
+
+    // Hide all other team lists
+    document.querySelectorAll('.team-list').forEach(list => {
+        if (list !== clickedTeamList) {
+            list.style.display = 'none';
+            list.classList.remove('visible');
+        }
+    });
+
+    // Toggle the clicked card's team list visibility
+    if (clickedTeamList.classList.contains('visible')) {
+        clickedTeamList.classList.remove('visible');
+        clickedTeamList.style.display = 'none';
+    } else {
+        clickedTeamList.classList.add('visible');
+        clickedTeamList.style.display = 'block';
+    }
+}
+
+// Ensure all team lists are hidden when the page loads
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.team-list').forEach(list => {
+        list.style.display = 'none';
+        list.classList.remove('visible');
+    });
+});
+    document.addEventListener("DOMContentLoaded", function() {
+        const logo = document.querySelector('.navbar-brand img');
+        const dropdownMenu = document.querySelector('.dropdown-menu');
+
+        function toggleDropdown() {
+            console.log("Toggle function triggered"); // For debugging
+            dropdownMenu.classList.toggle("show");
+        }
+
+        logo.addEventListener("click", toggleDropdown);
+
+        document.addEventListener("click", function(event) {
+            if (!logo.contains(event.target) && !dropdownMenu.contains(event.target)) {
+                dropdownMenu.classList.remove("show");
+            }
+        });
+    });
+
+    </script>
+</body>

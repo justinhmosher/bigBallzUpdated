@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<style type="text/css">
+.navbar {
+    background-color: #212529;
+    padding: 0.5rem;
+}
+.navbar .container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.navbar-brand {
+    margin-right: 10px;
+}
+.navbar-brand img {
+    width: 40px;
+    height: auto;
+    cursor: pointer;
+}
+.navbar-content {
+    display: flex;
+    justify-content: center;
+    flex-grow: 1;
+}
+.navbar-nav {
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+    justify-content: center;
+    margin: 0;
+}
+.nav-link {
+    color: #ffffff;
+    font-size: 1rem;
+    text-decoration: none;
+    font-weight: 500;
+    padding: 0.5rem 0.8rem;
+}
+.dropdown-menu {
+    display: none; /* Hidden by default */
+    position: absolute;
+    top: 60px;
+    left: 10px;
+    background-color: #212529;
+    border: 1px solid #ffffff;
+    border-radius: 5px;
+    padding: 10px;
+    z-index: 1000;
+    width: 150px;
+}
+.dropdown-item {
+    color: #ffffff;
+    text-decoration: none;
+    display: block;
+    padding: 5px 10px;
+    font-size: 0.9rem;
+}
+.dropdown-item:hover {
+    background-color: #444;
+}
+.game-link {
+    position: relative;
+}
+
+.game-link::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -2px; /* Adjust as necessary */
+    width: 100%;
+    height: 2px; /* Thickness of the underline */
+    background-color: white;
+}
+</style>
+    {% block extra_css %}
+    <!-- Additional CSS for specific pages will be injected here -->
+    {% endblock %}
