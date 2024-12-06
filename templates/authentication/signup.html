@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="{% static 'css/shared.css' %}">
     <style type="text/css">
         .custom-width {
           width: 300px; /* Adjust the width as desired */
@@ -82,77 +83,6 @@
         .text-red {
             color: red;
         }
-      .navbar {
-    background-color: #212529;
-    padding: 0.5rem;
-}
-.navbar .container {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-.navbar-brand {
-    margin-right: 10px;
-}
-.navbar-brand img {
-    width: 40px;
-    height: auto;
-    cursor: pointer;
-}
-.navbar-content {
-    display: flex;
-    justify-content: center;
-    flex-grow: 1;
-}
-.navbar-nav {
-    display: flex;
-    flex-direction: row;
-    gap: 1rem;
-    justify-content: center;
-    margin: 0;
-}
-.nav-link {
-    color: #ffffff !important; /* Ensures links are white */
-    font-size: 1rem;
-    text-decoration: none;
-    font-weight: 500;
-    padding: 0.5rem 0.8rem !important; /* Ensures links are white */
-}
-.dropdown-menu {
-    display: none; /* Hidden by default */
-    position: absolute;
-    top: 60px;
-    left: 10px;
-    background-color: #212529;
-    border: 1px solid #ffffff;
-    border-radius: 5px;
-    padding: 10px;
-    z-index: 1000;
-    width: 150px;
-}
-.dropdown-item {
-    color: #ffffff;
-    text-decoration: none;
-    display: block;
-    padding: 5px 10px;
-    font-size: 0.9rem;
-}
-.dropdown-item:hover {
-    background-color: #444;
-}
-    .game-link {
-    position: relative;
-    }
-
-    .game-link::after {
-        content: '';
-        position: absolute;
-        left: 0;
-        bottom: -2px; /* Adjust as necessary */
-        width: 100%;
-        height: 2px; /* Thickness of the underline */
-        background-color: white;
-    }
         .bubble-alert {
     background-color: #f8d7da; /* Light red background */
     color: #721c24; /* Dark red text color */
@@ -178,23 +108,13 @@
 }
     </style>
 </head>
-<body>
-<header>
-  <nav class="navbar navbar-expand-lg navbar-dark">
-    <div class="container">
-      <a class="navbar-brand" href="/">
+{% include 'authentication/partials/header.html' %}
+{% block trophy %}
+      <a class="navbar-brand"  href="javascript:void(0);">
         <img src="{% static 'Trophy-logo.svg' %}" alt="The Chosen Fantasy Games">
       </a>
-      <div class="navbar-content">
-        <ul class="navbar-nav mx-auto text-center">
-          <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
-          <li class="nav-item"><a class="nav-link game-link" href="{% url 'checking' %}">Game</a></li>
-          <li class="nav-item"><a class="nav-link" href="media-page">Media</a></li>
-        </ul>
-      </div>
-    </div>
-  </nav>
-</header>
+{% endblock %}
+<body>
 
 
     <main>
@@ -261,4 +181,23 @@
         </div>
     </footer>
 </body>
+<script type="text/javascript">
+      document.addEventListener("DOMContentLoaded", function() {
+        const logo = document.querySelector('.navbar-brand img');
+        const dropdownMenu = document.querySelector('.dropdown-menu');
+
+        function toggleDropdown() {
+            console.log("Toggle function triggered"); // For debugging
+            dropdownMenu.classList.toggle("show");
+        }
+
+        logo.addEventListener("click", toggleDropdown);
+
+        document.addEventListener("click", function(event) {
+            if (!logo.contains(event.target) && !dropdownMenu.contains(event.target)) {
+                dropdownMenu.classList.remove("show");
+            }
+        });
+    });
+</script>
 </html>

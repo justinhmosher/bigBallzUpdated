@@ -41,28 +41,6 @@ body {
         height: 100vh;
       }
 
-      .bi {
-        vertical-align: -.125em;
-        fill: currentColor;
-      }
-
-      .nav-scroller {
-        position: relative;
-        z-index: 2;
-        height: 2.75rem;
-        overflow-y: hidden;
-      }
-
-      .nav-scroller .nav {
-        display: flex;
-        flex-wrap: nowrap;
-        padding-bottom: 1rem;
-        margin-top: -1px;
-        overflow-x: auto;
-        text-align: center;
-        white-space: nowrap;
-        -webkit-overflow-scrolling: touch;
-      }
 
       .btn-bd-primary {
         --bd-violet-bg: #712cf9;
@@ -259,4 +237,23 @@ body {
       </div>
     </footer>
   </body>
+  <script type="text/javascript">
+      document.addEventListener("DOMContentLoaded", function() {
+        const logo = document.querySelector('.navbar-brand img');
+        const dropdownMenu = document.querySelector('.dropdown-menu');
+
+        function toggleDropdown() {
+            console.log("Toggle function triggered"); // For debugging
+            dropdownMenu.classList.toggle("show");
+        }
+
+        logo.addEventListener("click", toggleDropdown);
+
+        document.addEventListener("click", function(event) {
+            if (!logo.contains(event.target) && !dropdownMenu.contains(event.target)) {
+                dropdownMenu.classList.remove("show");
+            }
+        });
+    });
+</script>
 </html>

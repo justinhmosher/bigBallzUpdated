@@ -5,6 +5,8 @@ from django.views.generic import RedirectView
 from django.conf import settings
 from django.conf.urls.static import static
 
+app_name = "football"  # Namespace for this app
+
 urlpatterns = [
     path('',weekly_NFL.home,name="home"),
     path('signout',weekly_NFL.signout,name="signout"),
@@ -22,5 +24,7 @@ urlpatterns = [
     path('leaders', weekly_NFL.player_list, name='leaders'),
     path('messages', weekly_NFL.message_board, name = 'messages'),
     path('update-pick', weekly_NFL.update_pick, name = 'update_pick'),
+    path('search-players', weekly_NFL.search_players, name = 'search_players'),
+    path('chat/<str:room_name>/', weekly_NFL.room, name='room'),
 ]+static(settings.MEDIA_URL,document_root = settings.MEDIA_ROOT)
 

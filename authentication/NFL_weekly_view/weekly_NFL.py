@@ -17,7 +17,7 @@ from decouple import config
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from .models import PickNW,ScorerNW,PaidNW,PromoCodeNW,PromoUserNW,WaitlistNW,MessageNW
-from authentication.models import OfAge,Game,NFLPlayer
+from authentication.models import OfAge,Game,NFLPlayer,ChatMessage
 from authentication.forms import CreateTeam
 from django.db.models import Count,F,ExpressionWrapper,fields,OuterRef,Subquery
 from datetime import datetime, time
@@ -39,7 +39,7 @@ from django.db.models.functions import Lower
 
 def message_board(request):
     # Fetch all messages, ordered by week and timestamp
-    messages = Message.objects.order_by('week', '-timestamp')
+    messages = MessageNW.objects.order_by('week', '-timestamp')
 
     # Group messages by week
     grouped_messages = {}
@@ -48,13 +48,13 @@ def message_board(request):
             grouped_messages[message.week] = []
         grouped_messages[message.week].append(message)
 
-    return render(request, 'authentication/messages.html', {'grouped_messages': grouped_messages})
+    return render(request, 'NFL_weekly_view/messages.html', {'grouped_messages': grouped_messages})
 
 def custom_csrf_failure_view(request, reason=""):
     # Set an error message to be displayed on the login page
     messages.error(request, "There was an issue with your request. Please sign in again.")
     # Redirect the user back to the login page
-    return redirect('signin')  # 'login' should be the name of your login URL
+    return redirect('football:signin')  # 'login' should be the name of your login URL
 
 def home(request):
     total_numteams = PaidNW.objects.filter(paid_status=True).aggregate(Sum('numteams'))['numteams__sum']
@@ -67,7 +67,7 @@ def home(request):
 def room(request, room_name):
     username = request.user.username
     try:
-        paids = PickNW.objects.get(username=username, teamnumber=1)
+        paids = PickNW.objects.get(username=username, teamnumber=1,pick_number=1)
         team = paids.team_name
     except PickNW.DoesNotExist:
         team = "No Team"
@@ -80,7 +80,7 @@ def room(request, room_name):
     # Convert the QuerySet to a list of dictionaries
     messages = list(messages)
     
-    return render(request, 'authentication/room.html', {
+    return render(request, 'NFL_weekly_view/room.html', {
         'room_name': room_name,
         'team': team,
         'messages': messages
@@ -99,10 +99,10 @@ def teamname(request):
             username = request.user.username
             if PickNW.objects.filter(team_name = team_name).exists():
                 messages.error(request,"Team name already exists.")
-                return redirect('teamname')
+                return redirect('football:teamname')
             elif len(team_name) > 15 or len(team_name) < 6:
                 messages.error(request,"Team name need to be between 5-14 characters.")
-                return redirect("teamname")
+                return redirect("football:teamname")
             else:
                 paid = PaidNW.objects.get(username = request.user.username)
                 teamcount = paid.numteams
@@ -110,16 +110,16 @@ def teamname(request):
                     for j in range(10):
                         new_pick = PickNW(team_name=team_name,username= request.user.username,pick_number = j+1,teamnumber = i+1)
                         new_pick.save()
-                return redirect('checking')
+                return redirect('football:checking')
         else:
             messages.error(request,"Please submit a valid teamname.")
-            return redirect('teamname')
+            return redirect('football:teamname')
     return render(request,"authentication/teamname.html")
 
 
 def signout(request):
     logout(request)
-    return redirect('home')
+    return redirect('football:homeNW')
 
 @login_required
 def teamcount(request):
@@ -128,14 +128,14 @@ def teamcount(request):
         num_teams = request.POST.get('num_teams')
         if int(num_teams) > 20:
             messages.error(request,'Maximum of 20 teams allowed.')
-            return redirect('teamcount')
+            return redirect('football:teamcount')
         elif int(num_teams) < 1:
             messages.error(request,'Minimum of 1 team.')
-            return redirect('teamcount')
+            return redirect('football:teamcount')
         else:
             team.numteams = num_teams
             team.save()
-            return redirect('checking')
+            return redirect('football:checking')
     return render(request,'authentication/teamcount.html')
 
 
@@ -221,7 +221,7 @@ def playerboard(request):
         within_deadline = False
     
     if (within_deadline) or not (start_datetime <= current_pst_time < end_datetime):
-        return redirect('checking')  # Replace 'some_other_page' with the name of an appropriate view
+        return redirect('football:checking')  # Replace 'some_other_page' with the name of an appropriate view
     """
     pick_counts = PickNW.objects.exclude(pick='N/A').values('pick').annotate(count=Count('pick')).order_by('-count')
 
@@ -257,7 +257,7 @@ def playerboard(request):
 
 
     # Pass both sorted_player_counts and player_teams to the template
-    return render(request, 'authentication/playerboard.html', {
+    return render(request, 'NFL_weekly_view/playerboard.html', {
         'page_obj': page_obj,
         'sorted_player_counts': sorted_player_counts,
         'player_teams': dict(pick_teams),
@@ -296,7 +296,7 @@ def leaderboard(request):
         within_deadline = False
     
     if (within_deadline) or not (start_datetime <= current_pst_time < end_datetime):
-        return redirect('checking')  # Replace 'some_other_page' with the name of an appropriate view
+        return redirect('football:checking')  # Replace 'some_other_page' with the name of an appropriate view
     """
     pick_counts = PickNW.objects.exclude(pick='N/A').values('pick').annotate(count=Count('pick')).order_by('-count')
 
@@ -376,41 +376,41 @@ def location(request):
         if not ((user_state in allowed_states and not is_proxy) or True):
             if is_proxy:
                 messages.error(request,"You cannot use a VPN.")
-                return redirect('tournaments')
+                return redirect('football:tournaments')
             else:
                 messages.error(request,"You are in a disallowed state.")
-                return redirect('tournaments')
+                return redirect('football:tournaments')
         else:
             if (start_date <= current_day < end_date):
-                return redirect('checking')
+                return redirect('football:checking')
             else:
                 if paid.paid_status == True:
-                    return redirect('checking')
+                    return redirect("football:checking")
                 else:
                     if total_numteams >= 200:
                         try:
                             Waitlist.objects.get(username = username)
                             messages.error(request,"You are already added to the waitlist.")
-                            return redirect('tournaments')
+                            return redirect('football:tournaments')
                         except Waitlist.DoesNotExist:
                             waiter = Waitlist(username = username)
                             waiter.save()
                             messages.error(request,"Max number of teams entered, we are adding you to a waitlist.")
-                            return redirect('tournaments')
+                            return redirect('football:tournaments')
                     else:
-                        return redirect('checking') #needs to be removed to check age
+                        return redirect('football:checking') #needs to be removed to check age
                         if compliance.old == False and compliance.young == False:
                             age_api_key = config('AGE_API')
                             return render(request,'authentication/agechecking.html',{'api':age_api_key})
                         elif compliance.young == True:
                             messages.error(request,"You are too young to participate.")
-                            return redirect("tournaments")
+                            return redirect("football:tournaments")
                         else:
-                            return redirect('checking')
+                            return redirect('football:checking')
 
     else:
         messages.error(request,"Failed to register location data.")
-        return redirect('tournaments')
+        return redirect('football:tournaments')
 
 @login_required
 @csrf_exempt  # Use cautiously, ensure your site is protected against CSRF attacks
@@ -435,40 +435,55 @@ def submitverification(request):
         if verification_status in ['accepted', 'verified']:
             compliance.old = True
             compliance.save()
-            return redirect('checking')
+            return redirect('football:checking')
         else:
             compliance.young = True
             compliance.save()
-            return redirect('location')
+            return redirect('football:location')
 
     # If not a POST request, render the form page
-    return redirect('checking')
+    return redirect('football:checking')
 
-#@login_required
+@login_required
 def player_list(request):
-    # Create a Subquery to count matching PastPick entries
-    past_pick_count = PastPick.objects.filter(
-        username=OuterRef('username'),
-        teamnumber=OuterRef('teamnumber')
-    ).values('username').annotate(count=Count('id')).values('count')
+    # Fetch all PickNW entries
+    all_picks = PickNW.objects.all()
 
-    # Annotate the Picks queryset with the count of past picks
-    data = Pick.objects.annotate(
-        pick_count=Subquery(past_pick_count, output_field=models.IntegerField())
-    ).order_by('-isin', '-pick_count')
+    # Build a dictionary to store team data
+    teams_data = defaultdict(lambda: {'team_name': '', 'total_touchdowns': 0, 'picks': []})
 
-    # Fetch all past picks and group them by (username, teamnumber)
-    past_picks_map = {}
-    for pick in data:
-        # Fetch the related past picks for each team
-        past_picks = PastPick.objects.filter(username=pick.username, teamnumber=pick.teamnumber)
-        past_picks_map[(pick.username, pick.teamnumber)] = past_picks
+    # Iterate through all picks
+    for pick in all_picks:
+        team_key = (pick.teamnumber, pick.team_name)  # Unique key for each team by teamnumber and team_name
+        teams_data[team_key]['team_name'] = pick.team_name
+        # Store player names (PickNW.pick) instead of IDs for hover display
+        teams_data[team_key]['picks'].append(pick.pick)
+
+    # Fetch all ScorerNW data for lookup
+    scorer_data = {scorer.player_ID: scorer.touchdown_count for scorer in ScorerNW.objects.all()}
+
+    # Calculate total touchdowns for each team
+    for team_key, team_info in teams_data.items():
+        # Filter picks specific to this team and calculate total touchdowns
+        total_touchdowns = sum(
+            scorer_data.get(pick.pick_player_ID, 0)
+            for pick in all_picks
+            if pick.team_name == team_info['team_name'] and pick.teamnumber == team_key[0]
+        )
+        teams_data[team_key]['total_touchdowns'] = total_touchdowns
+
+    # Convert to a sorted list by total_touchdowns in descending order
+    sorted_teams = sorted(
+        [{'teamnumber': team_key[0], 'team_name': team_key[1], **team_info} for team_key, team_info in teams_data.items()],
+        key=lambda x: x['total_touchdowns'],
+        reverse=True
+    )
 
     # Pass the data to the template
-    return render(request, 'authentication/leaders.html', {
-        'leaderboard': data,
-        'past_picks_map': past_picks_map
+    return render(request, 'NFL_weekly_view/leaders.html', {
+        'leaderboard': sorted_teams,
     })
+
 
 
 @login_required
@@ -501,7 +516,7 @@ def game(request):
     else:
         within_deadline = False
     if (not within_deadline and (start_datetime <= current_pst_time < end_datetime)):
-        return redirect('checking')  # Replace 'some_other_page' with the name of an appropriate view
+        return redirect('football:checking')  # Replace 'some_other_page' with the name of an appropriate view
     """
     user_data = PickNW.objects.filter(username = request.user.username)
     user_pick_data = PickNW.objects.filter(username = request.user.username).order_by('teamnumber','pick_number')
@@ -704,27 +719,27 @@ def checking(request):
     
     # Check if the current date is within the game's start and end dates
     if paid.paid_status == False and (start_datetime <= current_pst_time < end_datetime) and within_deadline:
-        return redirect('picking')
+        return redirect('football:picking')
     
     elif paid.paid_status == False and (start_datetime <= current_pst_time < end_datetime) and not within_deadline:
-        return redirect('playerboard')
+        return redirect('football:playerboard')
     
     elif paid.paid_status == False:
-        return redirect('payment')
+        return redirect('football:payment')
     
     elif (paid.paid_status == True) and not (start_datetime <= current_pst_time < end_datetime):
         username = request.user.username
         if not PickNW.objects.filter(username=username).exists():
-            return redirect('teamname')
-        return redirect('game')
+            return redirect('football:teamname')
+        return redirect('football:game')
     
     else:
         username = request.user.username
         if not PickNW.objects.filter(username=username).exists():
-            return redirect('teamname')
+            return redirect('football:teamname')
         else:
             user_data = PickNW.objects.filter(username=username)
             if within_deadline:
-                return redirect('game')
+                return redirect('football:game')
             else:
-                return redirect('leaderboard')
+                return redirect('football:leaderboard')

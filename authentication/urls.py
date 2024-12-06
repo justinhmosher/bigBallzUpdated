@@ -5,7 +5,10 @@ from . import views
 from django.conf import settings
 from django.conf.urls.static import static
 
+app_name = 'authentication'
+
 urlpatterns = [
+    path('football/', include(('authentication.NFL_weekly_view.urls', 'football'), namespace='football')),
     path('',views.home,name="home"),
     path('signup',views.signup,name="signup"),
     path('signin',views.signin,name="signin"),
@@ -43,5 +46,4 @@ urlpatterns = [
     path('search_players/', views.search_players, name='search_players'),
     path('ckeditor5/', include('django_ckeditor_5.urls')),
     path('messages', views.message_board, name = 'messages'),
-    path('football/', include('authentication.NFL_weekly_view.urls')),
 ]+static(settings.MEDIA_URL,document_root = settings.MEDIA_ROOT)

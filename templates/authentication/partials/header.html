@@ -4,13 +4,13 @@
       {% block trophy %}
       {% endblock %}
       <div class="dropdown-menu">
-          <a href="{% url 'signin' %}" class="dropdown-item">Sign In</a>
-          <a href="{% url 'signup' %}" class="dropdown-item">Sign Up</a>
+          <a href="{% url 'authentication:signin' %}" class="dropdown-item">Sign In</a>
+          <a href="{% url 'authentication:signup' %}" class="dropdown-item">Sign Up</a>
       </div>
       <ul class="navbar-nav">
         <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
-        <li class="nav-item"><a class="nav-link" href="{% url 'checking' %}">Play</a></li>
-        <li class="nav-item"><a class="nav-link" href="{% url 'media-page' %}">H-O-F</a></li>
+        <li class="nav-item"><a class="nav-link" href="{% url 'authentication:checking' %}">Play</a></li>
+        <li class="nav-item"><a class="nav-link" href="{% url 'authentication:media-page' %}">H-O-F</a></li>
       </ul>
     </div>
   </nav>

@@ -106,7 +106,7 @@
 
     </style>
 </head>
-{% include 'authentication/partials/header_game.html' %}
+{% include 'authentication/partials/header_game_NW.html' %}
 {% block trophy %}
       <a class="navbar-brand"  href="javascript:void(0);">
         <img src="{% static 'Trophy-logo.svg' %}" alt="The Chosen Fantasy Games">
@@ -119,76 +119,80 @@
             <tr>
                 <th>Ranking</th>
                 <th>Team Name</th>
-                <th>Previous Scorers</th>
+                <th>Total Touchdowns</th>
             </tr>
-            {% for pick in leaderboard %}
+            {% for team in leaderboard %}
             <tr>
                 <td class="rank"></td> <!-- This will be populated by JavaScript -->
                 <td>
                     <div class="hover-container">
                         <span class="team-name">
-                        {{ pick.team_name }}
-                            {% if pick.isin %}
-                                👑
-                            {% endif %}</span>
-                        {% get_past_picks past_picks_map pick.username pick.teamnumber as past_picks %}
+                            {{ team.team_name }}
+                        </span>
+                        <!-- Hover content for displaying team picks -->
                         <div class="hover-content">
-                            <h4>Previous Scorers</h4>
+                            <h4>Picks</h4>
                             <ul>
-                                {% for past_pick in past_picks %}
-                                    {% if past_pick.pick1_name != "N/A" %}
-                                    <li>{{ past_pick.pick1_name }}</li>
-                                    {% endif %}
-                                    {% if past_pick.pick2_name != "N/A" %}
-                                        <li>{{ past_pick.pick2_name }}</li>
-                                    {% endif %}
+                                {% for pick in team.picks %}
+                                    <li>{{ pick }}</li>
                                 {% empty %}
-                                    <li>No previous scorers</li>
+                                    <li>No picks</li>
                                 {% endfor %}
                             </ul>
                         </div>
                     </div>
                 </td>
-                <td class="pick-count">{{ pick.pick_count|default:"0" }}</td>
+                <td class="pick-count">{{ team.total_touchdowns }}</td>
             </tr>
             {% endfor %}
         </table>
     </div>
 </body>
     <script>
-    window.onload = updateRankings;
-        // Function to calculate rankings and update the table
-        function updateRankings() {
-            const table = document.getElementById('leaderboardTable');
-            const rows = Array.from(table.rows).slice(1); // Skip the header row
+window.onload = updateRankings;
 
-            // Extract rows with pick counts and store them in an array
-            const data = rows.map(row => {
-                const teamName = row.cells[1].innerText.trim();
-                const pickCount = parseInt(row.cells[2].innerText.trim()) || 0;
-                return { row, teamName, pickCount };
-            });
+// Function to calculate rankings and update the table
+function updateRankings() {
+    const table = document.getElementById('leaderboardTable');
+    const rows = Array.from(table.rows).slice(1); // Skip the header row
 
-            // Sort the rows by pick count in descending order
-            data.sort((a, b) => b.pickCount - a.pickCount);
+    // Extract rows with total touchdowns and store them in an array
+    const data = rows.map(row => {
+        const teamName = row.cells[1].innerText.trim(); // Team Name
+        const touchdownCount = parseInt(row.cells[2].innerText.trim()) || 0; // Total Touchdowns
+        return { row, teamName, touchdownCount };
+    });
 
-            // Assign rankings and update the rows
-            let currentRank = 1;
-            let previousCount = null;
-            let tieRank = 1;
+    // Sort the rows by total touchdowns in descending order
+    data.sort((a, b) => b.touchdownCount - a.touchdownCount);
 
-            data.forEach((entry, index) => {
-                const { row, pickCount } = entry;
+    // Assign rankings and update the rows
+    let currentRank = 1;
+    let previousCount = null;
+    let tieRank = null;
 
-                // Check for ties
-                if (pickCount !== previousCount) {
-                    currentRank = index + 1;
-                    tieRank = currentRank;
-                }
-                row.cells[0].innerText = `T${tieRank}`; // Update the rank cell
-                previousCount = pickCount;
-            });
+    data.forEach((entry, index) => {
+        const { row, touchdownCount } = entry;
+
+        // Check for ties
+        if (touchdownCount === previousCount) {
+            row.cells[0].innerText = `T${tieRank}`; // Use the same tieRank for tied rows
+        } else {
+            currentRank = index + 1;
+            tieRank = currentRank; // Update the tieRank for new ranks
+            row.cells[0].innerText = currentRank; // Use normal rank
         }
+        previousCount = touchdownCount; // Update the previous count
+    });
+
+    // Append sorted rows back to the table
+    const tbody = table.querySelector('tbody');
+    if (tbody) {
+        data.forEach(entry => tbody.appendChild(entry.row));
+    }
+}
+
+
     document.addEventListener("DOMContentLoaded", function() {
         const logo = document.querySelector('.navbar-brand img');
         const dropdownMenu = document.querySelector('.dropdown-menu');
@@ -208,10 +212,3 @@
     });
     </script>
 </html>
-
-
-
-
-
-
-

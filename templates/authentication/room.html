@@ -1,19 +1,22 @@
+{% load static %}
 <!DOCTYPE html>
 <html>
 <head>
     <title>Chat Room</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="{% static 'css/shared.css' %}">
     <style>
         body {
             background: linear-gradient(to right, #f2c94c, #f2994a);
             height: 100vh;
-            display: flex;
             justify-content: center;
             align-items: center;
-            font-family: 'Arial', sans-serif;
         }
         .chat-container {
+            position: absolute;
+            top: 7%;
+            left: 5%;
             width: 90%;
             height: 90%;
             background-color: #333;
@@ -105,6 +108,12 @@
        }
     </style>
 </head>
+{% include 'authentication/partials/header_game.html' %}
+{% block trophy %}
+      <a class="navbar-brand"  href="javascript:void(0);">
+        <img src="{% static 'Trophy-logo.svg' %}" alt="The Chosen Fantasy Games">
+      </a>
+{% endblock %}
 <body>
     <div class="chat-container">
         <div class="chat-header">Room: {{ room_name }}</div>
@@ -242,6 +251,23 @@ chatSocket.onmessage = function(e) {
             if (likeElement) likeElement.textContent = data.likes;
             if (dislikeElement) dislikeElement.textContent = data.dislikes;
         }
+            document.addEventListener("DOMContentLoaded", function() {
+        const logo = document.querySelector('.navbar-brand img');
+        const dropdownMenu = document.querySelector('.dropdown-menu');
+
+        function toggleDropdown() {
+            console.log("Toggle function triggered"); // For debugging
+            dropdownMenu.classList.toggle("show");
+        }
+
+        logo.addEventListener("click", toggleDropdown);
+
+        document.addEventListener("click", function(event) {
+            if (!logo.contains(event.target) && !dropdownMenu.contains(event.target)) {
+                dropdownMenu.classList.remove("show");
+            }
+        });
+    });
     </script>
 </body>
 </html>

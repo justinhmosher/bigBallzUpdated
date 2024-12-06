@@ -30,11 +30,12 @@ from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
 from django.core.exceptions import ObjectDoesNotExist
 from email.utils import formataddr
-from django.db.models import Sum
+from django.db.models import Sum, IntegerField, F
 import pytz
 from django.core.paginator import Paginator
 from django.db import models
 from authentication.NFL_weekly_view.models import PaidNW,PromoUserNW
+from django.urls import reverse
 
 def message_board(request):
 	# Fetch all messages, ordered by week and timestamp
@@ -56,7 +57,7 @@ def custom_csrf_failure_view(request, reason=""):
 	# Set an error message to be displayed on the login page
 	messages.error(request, "There was an issue with your request. Please sign in again.")
 	# Redirect the user back to the login page
-	return redirect('signin')  # 'login' should be the name of your login URL
+	return redirect('authentication:signin')  # 'login' should be the name of your login URL
 
 def home(request):
 	total_numteams = Paid.objects.filter(paid_status=True).aggregate(Sum('numteams'))['numteams__sum']
@@ -134,20 +135,20 @@ def signup(request):
 
 		if password1 != password2:
 			messages.error(request,"Passwors didn't match!")
-			return redirect('signup')
+			return redirect('authentication:signup')
 
 		if not promocode:
 			promocode = "0000"
 
 		if promocode != "0000" and not PromoCode.objects.filter(code = promocode).exists():
 			messages.error(request, "Please enter a valid promocode")
-			return redirect('signup')
+			return redirect('authentication:signup')
 
 		myuser = User.objects.filter(email=email).first()
 		if myuser:
 			if myuser.is_active:
 				messages.error(request, "Email already registered with an active account! Please try another.")
-				return redirect('signup')
+				return redirect('authentication:signup')
 			else:
 				myuser.username = username
 				myuser.email = email
@@ -161,10 +162,10 @@ def signup(request):
 
 		num = create_email(request, myuser)
 		if num == 1:
-			return redirect('confirm_email',email = email)
+			return redirect('authentication:confirm_email',email = email)
 		else:
 			messages.error(request, "There was a problem sending your confirmation email.  Please try again.")
-			return redirect('signup')
+			return redirect('authentication:signup')
 
 
 
@@ -221,20 +222,20 @@ def teamname(request):
 			username = request.user.username
 			if Pick.objects.filter(team_name = team_name).exists():
 				messages.error(request,"Team name already exists.")
-				return redirect('teamname')
+				return redirect('authentication:teamname')
 			elif len(team_name) > 15 or len(team_name) < 6:
 				messages.error(request,"Team name need to be between 5-14 characters.")
-				return redirect("teamname")
+				return redirect("authentication:teamname")
 			else:
 				paid = Paid.objects.get(username = request.user.username)
 				teamcount = paid.numteams
 				for i in range(teamcount):
 					new_pick = Pick(team_name=team_name,username= request.user.username,teamnumber = i+1)
 					new_pick.save()
-				return redirect('checking')
+				return redirect('authentication:checking')
 		else:
 			messages.error(request,"Please submit a valid teamname.")
-			return redirect('teamname')
+			return redirect('authentication:teamname')
 	return render(request,"authentication/teamname.html")
 
 
@@ -251,16 +252,16 @@ def signin(request):
 
 			request.session.set_expiry(2592000)  # 2 weeks (in seconds)
 			
-			return redirect('tournaments')
+			return redirect('authentication:tournaments')
 		else:
 			messages.error(request, "Invalid username or password.")
-			return redirect('signin')	
+			return redirect('authentication:signin')	
 
 	return render(request, "authentication/signin.html")
 
 def signout(request):
 	logout(request)
-	return redirect('home')
+	return redirect('authentication:home')
 
 def confirm_forgot_email(request, email):
 	user = User.objects.get(username = email)
@@ -276,18 +277,18 @@ def forgotPassEmail(request):
 			myuser = User.objects.get(email = email)
 			if myuser.is_active == False:
 				messages.error(request,'Please Sign Up again.')
-				return redirect('signup')
+				return redirect('authentication:signup')
 			else:
 				num = create_forgot_email(request, myuser = myuser)
 				if num == 1:
-					return redirect('confirm_forgot_email',email = email)
+					return redirect('authentication:confirm_forgot_email',email = email)
 				else:
 					messages.error(request, "There was a problem sending your confirmation email.  Please try again.")
-					return redirect('signup')
+					return redirect('authentication:signup')
 
 		else:
 			messages.error(request, "Email does not exist.")
-			return redirect('forgotPassEmail')
+			return redirect('authentication:forgotPassEmail')
 
 	return render(request,'authentication/forgotPassEmail.html')
 
@@ -344,10 +345,10 @@ def passreset(request, uidb64, token):
 			if pass1 == pass2:
 				myuser.set_password(pass1)
 				myuser.save()
-				return redirect('signin')
+				return redirect('authentication:signin')
 			else:
 				messages.error(request,"Passwords do not match.")
-				return redirect('passreset',uidb64=uidb64,token=token)
+				return redirect('authentication:passreset',uidb64=uidb64,token=token)
 	return render(request,'authentication/passreset.html',{'uidb64':uidb64,'token':token})
 
 
@@ -375,7 +376,7 @@ def activate(request, uidb64, token):
 		except ObjectDoesNotExist:
 			pass
 		login(request, myuser)
-		return redirect('signin')
+		return redirect('authentication:signin')
 	else:
 		return render(request, 'authentication/activation_failed.html')	
 
@@ -389,14 +390,14 @@ def teamcount(request):
 		num_teams = request.POST.get('num_teams')
 		if int(num_teams) > 20:
 			messages.error(request,'Maximum of 20 teams allowed.')
-			return redirect('teamcount')
+			return redirect('authentication:teamcount')
 		elif int(num_teams) < 1:
 			messages.error(request,'Minimum of 1 team.')
-			return redirect('teamcount')
+			return redirect('authentication:teamcount')
 		else:
 			team.numteams = num_teams
 			team.save()
-			return redirect('checking')
+			return redirect('authentication:checking')
 	return render(request,'authentication/teamcount.html')
 
 
@@ -450,7 +451,6 @@ def payment(request):
 		'total_amount': total_amount,
 		'promo':codeuser
 		} 
-	print(context)
 
 	return render(request, 'authentication/payment.html', context)
 
@@ -462,10 +462,10 @@ def coinbase_webhook(request):
 		info = Paid.objects.get(username = request.user.username)
 		info.paid_status == True
 		info.save()
-		return redirect('checking')
+		return redirect('authentication:checking')
 	else:
 		messages.error('Payment was not received.')
-		return redirect('payment')
+		return redirect('authentication:payment')
 
 def playerboard(request):
 	# Define the PST timezone
@@ -487,7 +487,7 @@ def playerboard(request):
 	start_datetime = pst.localize(start_datetime)  # Make it timezone-aware
 
 	current_pst_time = datetime.now(pst)
-
+	thursday_deadline = current_pst_time.replace(hour=17, minute=0, second=0, microsecond=0)
 
 	if current_day_pst == 3 and current_pst_time <= thursday_deadline:  # Thursday before 5:00 PM PST
 		within_deadline = True
@@ -497,7 +497,7 @@ def playerboard(request):
 		within_deadline = False
 	
 	if (within_deadline) or not (start_datetime <= current_pst_time < end_datetime):
-		return redirect('checking')  # Replace 'some_other_page' with the name of an appropriate view
+		return redirect('authentication:checking')  # Replace 'some_other_page' with the name of an appropriate view
 
 	player_counts1 = Pick.objects.filter(isin=True).exclude(pick1='N/A').values('pick1').annotate(count=Count('pick1')).order_by('-count')
 	player_counts2 = Pick.objects.filter(isin=True).exclude(pick2='N/A').values('pick2').annotate(count=Count('pick2')).order_by('-count')
@@ -574,6 +574,7 @@ def leaderboard(request):
 	start_datetime = datetime.combine(start_date, time(17, 0))  # Combine date with 5:00 PM
 	start_datetime = pst.localize(start_datetime)  # Make it timezone-aware
 	current_pst_time = datetime.now(pst)
+	thursday_deadline = current_pst_time.replace(hour=17, minute=0, second=0, microsecond=0)
 
 	if current_day_pst == 3 and current_pst_time <= thursday_deadline:  # Thursday before 5:00 PM PST
 		within_deadline = True
@@ -583,7 +584,7 @@ def leaderboard(request):
 		within_deadline = False
 
 	if (within_deadline) or not (start_datetime <= current_pst_time < end_datetime):
-		return redirect('checking')  # Replace 'some_other_page' with the name of an appropriate view
+		return redirect('authentication:checking')  # Replace 'some_other_page' with the name of an appropriate view
 	
 	player_counts1 = Pick.objects.filter(isin=True).exclude(pick1='N/A').values('pick1').annotate(count=Count('pick1')).order_by('-count')
 	player_counts2 = Pick.objects.filter(isin=True).exclude(pick2='N/A').values('pick2').annotate(count=Count('pick2')).order_by('-count')
@@ -670,7 +671,7 @@ def tournaments(request):
 			"summary": "Select 10 NFL players to score touchdowns./The user with the most comultive touchdowns wins the pot!//Pot: $10k", 
 			"rules": "/football-rules-3", 
 			"playable": True,
-			"path":"football/location"},
+			"path": reverse("football:location")},
 		],
 		"Baseball": [
 			{"name": "Game 1", 
@@ -766,41 +767,41 @@ def location(request):
 		if not ((user_state in allowed_states and not is_proxy) or True):
 			if is_proxy:
 				messages.error(request,"You cannot use a VPN.")
-				return redirect('tournaments')
+				return redirect('authentication:tournaments')
 			else:
 				messages.error(request,"You are in a disallowed state.")
-				return redirect('tournaments')
+				return redirect('authentication:tournaments')
 		else:
 			if (start_date <= current_day < end_date):
-				return redirect('checking')
+				return redirect('authentication:checking')
 			else:
 				if paid.paid_status == True:
-					return redirect('checking')
+					return redirect('authentication:checking')
 				else:
 					if total_numteams >= 200:
 						try:
 							Waitlist.objects.get(username = username)
 							messages.error(request,"You are already added to the waitlist.")
-							return redirect('tournaments')
+							return redirect('authentication:tournaments')
 						except Waitlist.DoesNotExist:
 							waiter = Waitlist(username = username)
 							waiter.save()
 							messages.error(request,"Max number of teams entered, we are adding you to a waitlist.")
-							return redirect('tournaments')
+							return redirect('authentication:tournaments')
 					else:
-						return redirect('checking') #needs to be removed to check age
+						return redirect('authentication:checking') #needs to be removed to check age
 						if compliance.old == False and compliance.young == False:
 							age_api_key = config('AGE_API')
 							return render(request,'authentication/agechecking.html',{'api':age_api_key})
 						elif compliance.young == True:
 							messages.error(request,"You are too young to participate.")
-							return redirect("tournaments")
+							return redirect("authentication:tournaments")
 						else:
-							return redirect('checking')
+							return redirect('authentication:checking')
 
 	else:
 		messages.error(request,"Failed to register location data.")
-		return redirect('tournaments')
+		return redirect('authentication:tournaments')
 
 @login_required
 @csrf_exempt  # Use cautiously, ensure your site is protected against CSRF attacks
@@ -825,14 +826,14 @@ def submitverification(request):
 		if verification_status in ['accepted', 'verified']:
 			compliance.old = True
 			compliance.save()
-			return redirect('checking')
+			return redirect('authentication:checking')
 		else:
 			compliance.young = True
 			compliance.save()
-			return redirect('location')
+			return redirect('authentication:location')
 
 	# If not a POST request, render the form page
-	return redirect('checking')
+	return redirect('authentication:checking')
 
 #@login_required
 def player_list(request):
@@ -842,10 +843,15 @@ def player_list(request):
 		teamnumber=OuterRef('teamnumber')
 	).values('username').annotate(count=Count('id')).values('count')
 
+
 	# Annotate the Picks queryset with the count of past picks
 	data = Pick.objects.annotate(
-		pick_count=Subquery(past_pick_count, output_field=models.IntegerField())
-	).order_by('-isin', '-pick_count')
+		pick_count=Subquery(past_pick_count, output_field=IntegerField())
+	).order_by(
+		'-isin',  # Order by `isin` (True first)
+		F('pick_count').desc(nulls_last=True),  # Then by pick_count (nulls go to the end)
+		'team_name',  # Optional: Break ties by team_name
+	)
 
 	# Fetch all past picks and group them by (username, teamnumber)
 	past_picks_map = {}
@@ -890,7 +896,7 @@ def game(request):
 	else:
 		within_deadline = False
 	if (not within_deadline and (start_datetime <= current_pst_time < end_datetime)):
-		return redirect('checking')  # Replace 'some_other_page' with the name of an appropriate view
+		return redirect('authentication:checking')  # Replace 'some_other_page' with the name of an appropriate view
 	user_data = Pick.objects.filter(username = request.user.username)
 	user_pick_data = Pick.objects.filter(username = request.user.username,isin = True).order_by('teamnumber')
 	player_data = []
@@ -987,7 +993,6 @@ def game(request):
 	out_paginator = Paginator(user_picks_out,20)
 
 	user_pick_data = in_paginator.get_page(page_number) if isin else out_paginator.get_page(page_number)
-
 
 	return render(request, 'authentication/game.html', 
 		{'player_data': player_data, 
@@ -1155,24 +1160,24 @@ def checking(request):
     
     # Check if the current date is within the game's start and end dates
     if paid.paid_status == False and (start_datetime <= current_pst_time < end_datetime) and within_deadline:
-        return redirect('picking')
+        return redirect('authentication:picking')
     
     elif paid.paid_status == False and (start_datetime <= current_pst_time < end_datetime) and not within_deadline:
-        return redirect('playerboard')
+        return redirect('authentication:playerboard')
     
     elif paid.paid_status == False:
-        return redirect('payment')
+        return redirect('authentication:payment')
     
     elif (paid.paid_status == True) and not (start_datetime <= current_pst_time < end_datetime):
         username = request.user.username
         if not Pick.objects.filter(username=username).exists():
-            return redirect('teamname')
-        return redirect('game')
+            return redirect('authentication:teamname')
+        return redirect('authentication:game')
     
     else:
         username = request.user.username
         if not Pick.objects.filter(username=username).exists():
-            return redirect('teamname')
+            return redirect('authentication:teamname')
         else:
             user_data = Pick.objects.filter(username=username)
             count_ins = 0
@@ -1181,7 +1186,7 @@ def checking(request):
                     count_ins += 1
             if count_ins >= 1:
                 if within_deadline and count > 1 and week != 18:
-                    return redirect('game')
+                    return redirect('authentication:game')
                 elif count == 1 or week == 18:
                     winners_list = Pick.objects.filter(isin=True)
                     winners = []
@@ -1190,9 +1195,9 @@ def checking(request):
                             winners.append(win.team_name)
                     return render(request, 'authentication/win.html', {'winners': winners})
                 else:
-                    return redirect('leaderboard')
+                    return redirect('authentication:leaderboard')
             else:
                 if within_deadline:
-                    return redirect('game')
+                    return redirect('authentication:game')
                 else:
-                    return redirect('playerboard')
+                    return redirect('authentication:playerboard')
