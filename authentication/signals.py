@@ -46,10 +46,3 @@ def check_player_scored_pre_save(sender, instance, **kwargs):
                 Message.objects.create(content=content, week= week)
         except Scorer.DoesNotExist:
             pass  # Handle the rare case where the instance doesn't exist (e.g., deleted)
-
-# Signal for player buy-back
-@receiver(post_save, sender=Pick)
-def check_player_buy_back(sender, instance, **kwargs):
-    if instance.isin:
-        content = f"Team {instance.team_name} bought back {instance.pick1}!"
-        Message.objects.create(content=content)

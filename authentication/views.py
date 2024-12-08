@@ -39,7 +39,7 @@ from django.urls import reverse
 
 def message_board(request):
 	# Fetch all messages, ordered by week and timestamp
-	messages = Message.objects.order_by('week', '-timestamp')
+	messages = Message.objects.order_by('-week', '-timestamp')
 
 	# Group messages by week
 	grouped_messages = {}
@@ -839,9 +839,11 @@ def submitverification(request):
 def player_list(request):
 	# Create a Subquery to count matching PastPick entries
 	past_pick_count = PastPick.objects.filter(
-		username=OuterRef('username'),
-		teamnumber=OuterRef('teamnumber')
-	).values('username').annotate(count=Count('id')).values('count')
+		username=OuterRef('username'), 
+    	teamnumber=OuterRef('teamnumber')
+	).values('username', 'teamnumber').annotate(
+		total_touchdowns=Sum(F('TD1_count') + F('TD2_count'))
+	).values('total_touchdowns')[:1]  # Use [:1] to limit to one value per group (Subquery requirement)
 
 
 	# Annotate the Picks queryset with the count of past picks

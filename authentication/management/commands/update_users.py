@@ -16,12 +16,14 @@ class Command(BaseCommand):
                 pick.save()
             else:
                 if pick.pick1_player_ID in scorers:
+                    scorer = Scorer.objects.get(player_ID = pick.pick1_player_ID)
                     past_pick = PastPick(username = pick.username,
                         team_name = pick.team_name,
                         week = week,
                         teamnumber = pick.teamnumber,
                         pick1 = pick.pick1_player_ID,
-                        pick1_name = pick.pick1)
+                        pick1_name = pick.pick1,
+                        TD1_count = scorer.total_touchdowns)
                     past_pick.save()
                     pick.pick1 = "N/A"
                     pick.pick1_team = "N/A"
@@ -30,12 +32,14 @@ class Command(BaseCommand):
                     pick.pick1_player_ID = "N/A"
                     pick.save()
                 if pick.pick2_player_ID in scorers:
+                    scorer = Scorer.objects.get(player_ID = pick.pick2_player_ID)
                     past_pick = PastPick(username = pick.username,
                         team_name = pick.team_name,
                         week = week,
                         teamnumber = pick.teamnumber,
                         pick2 = pick.pick2_player_ID,
-                        pick2_name = pick.pick2)
+                        pick2_name = pick.pick2,
+                        TD2_count = scorer.total_touchdowns)
                     past_pick.save()
                     pick.pick2 = "N/A"
                     pick.pick2_team = "N/A"

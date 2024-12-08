@@ -35,6 +35,7 @@ class Scorer(models.Model):
     player_ID = models.CharField(max_length= 100, default = "player ID")
     scored = models.BooleanField(default = False)
     not_scored = models.BooleanField(default = False)
+    total_touchdowns = models.IntegerField(default=0)
     def __str__(self):
         return f"{self.name}" 
 
@@ -45,8 +46,10 @@ class PastPick(models.Model):
     week = models.IntegerField(default = 1)
     pick1 = models.CharField(max_length = 100, default = "N/A")
     pick1_name = models.CharField(max_length = 100, default = "N/A")
+    TD1_count = models.IntegerField(default=0)
     pick2 = models.CharField(max_length = 100, default = "N/A")
     pick2_name = models.CharField(max_length = 100, default = "N/A")
+    TD2_count = models.IntegerField(default=0)
     def __str__(self):
         return f"{self.team_name}"
 

@@ -39,7 +39,7 @@ from django.db.models.functions import Lower
 
 def message_board(request):
     # Fetch all messages, ordered by week and timestamp
-    messages = MessageNW.objects.order_by('week', '-timestamp')
+    messages = MessageNW.objects.order_by('-week', '-timestamp')
 
     # Group messages by week
     grouped_messages = {}
