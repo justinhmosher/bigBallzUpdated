@@ -223,12 +223,17 @@ def playerboard(request):
     if (within_deadline) or not (start_datetime <= current_pst_time < end_datetime):
         return redirect('football:checking')  # Replace 'some_other_page' with the name of an appropriate view
     """
-    pick_counts = PickNW.objects.exclude(pick='N/A').values('pick').annotate(count=Count('pick')).order_by('-count')
+    pick_counts = PickNW.objects.exclude(pick='N/A').values('pick','pick_team', 'pick_position').annotate(count=Count('pick')).order_by('-count')
 
-    player_counts = defaultdict(int)
+    player_counts = defaultdict(lambda: {'count': 0, 'teams': None, 'positions': None})
+
     for players in pick_counts:
         player_name = players.get('pick')
-        player_counts[player_name] += players['count']
+        team = players.get('pick_team')
+        position = players.get('pick_position')
+        player_counts[player_name]['count'] += players['count']
+        player_counts[player_name]['teams'] = team
+        player_counts[player_name]['positions'] = position
 
     # Collect teams or users associated with each pick
     pick_teams = defaultdict(list)
@@ -246,7 +251,11 @@ def playerboard(request):
 
 
     # Sort players by the number of picks
-    sorted_player_counts = sorted(player_counts.items(), key=lambda x: x[1], reverse=True)
+    sorted_player_counts = sorted(
+        [{'player': player, **data} for player, data in player_counts.items()],
+        key=lambda x: x['count'],
+        reverse=True
+    )
 
     total_in = int(PickNW.objects.count()/10)
 
@@ -298,12 +307,17 @@ def leaderboard(request):
     if (within_deadline) or not (start_datetime <= current_pst_time < end_datetime):
         return redirect('football:checking')  # Replace 'some_other_page' with the name of an appropriate view
     """
-    pick_counts = PickNW.objects.exclude(pick='N/A').values('pick').annotate(count=Count('pick')).order_by('-count')
+    pick_counts = PickNW.objects.exclude(pick='N/A').values('pick','pick_team', 'pick_position').annotate(count=Count('pick')).order_by('-count')
 
-    player_counts = defaultdict(int)
+    player_counts = defaultdict(lambda: {'count': 0, 'teams': None, 'positions': None})
+
     for players in pick_counts:
         player_name = players.get('pick')
-        player_counts[player_name] += players['count']
+        team = players.get('pick_team')
+        position = players.get('pick_position')
+        player_counts[player_name]['count'] += players['count']
+        player_counts[player_name]['teams'] = team
+        player_counts[player_name]['positions'] = position
 
     # Collect teams or users associated with each pick
     pick_teams = defaultdict(list)
@@ -321,18 +335,20 @@ def leaderboard(request):
 
 
     # Sort players by the number of picks
-    sorted_player_counts = sorted(player_counts.items(), key=lambda x: x[1], reverse=True)
+    sorted_player_counts = sorted(
+        [{'player': player, **data} for player, data in player_counts.items()],
+        key=lambda x: x['count'],
+        reverse=True
+    )
 
     total_in = int(PickNW.objects.count()/10)
-
-
-    user_data = PickNW.objects.filter(username=request.user.username)
 
     # Paginate sorted_player_counts (show 10 players per page)
     paginator = Paginator(sorted_player_counts, 10)  # Show 10 players per page
     page_number = request.GET.get('page')  # Get the page number from the request URL
     page_obj = paginator.get_page(page_number)  # Get the paginated page
 
+    user_data= PickNW.objects.filter(username = request.user.username)
 
     # Pass both sorted_player_counts and player_teams to the template
     return render(request, 'NFL_weekly_view/leaderboard.html', {
