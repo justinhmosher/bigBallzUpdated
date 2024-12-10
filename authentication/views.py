@@ -888,6 +888,9 @@ def player_list(request):
 
 @login_required
 def game(request):
+	paid = Paid.objects.get(username = request.user.username)
+	if paid.paid_status == False:
+		return redirect('authentication:checking')
 	# Define the PST timezone
 	pst = pytz.timezone('America/Los_Angeles')
 

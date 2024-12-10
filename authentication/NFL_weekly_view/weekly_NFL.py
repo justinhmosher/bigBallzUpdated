@@ -505,6 +505,9 @@ def player_list(request):
 @login_required
 def game(request):
     # Define the PST timezone
+    paid = PaidNW.objects.get(username = request.user.username)
+    if paid.paid_status == False:
+        return redirect('authentication:checking')
     pst = pytz.timezone('America/Los_Angeles')
 
     # Get the current time in PST
