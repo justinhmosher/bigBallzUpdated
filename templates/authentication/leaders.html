@@ -52,6 +52,7 @@
             font-weight: 600;
             text-transform: uppercase;
             border-bottom: 4px solid #0056b3;
+            text-align: center;
         }
 
         .leaderboard-table tr {
@@ -65,6 +66,7 @@
 
         .leaderboard-table td {
             border-bottom: 1px solid #ddd;
+            text-align: center;
         }
 
         .team-name {
@@ -77,6 +79,7 @@
         .pick-count {
             text-align: center;
             font-weight: bold;
+            vertical-align: middle;
         }
 
         /* Tooltip Styling */
@@ -119,7 +122,7 @@
             <tr>
                 <th>Ranking</th>
                 <th>Team Name</th>
-                <th>Previous Scorers</th>
+                <th>Touchdowns</th>
             </tr>
             {% for pick in leaderboard %}
             <tr>

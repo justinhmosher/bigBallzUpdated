@@ -144,18 +144,19 @@
 <div class="container mt-5">
     <h4 class="text-center">Player Picks</h4>
     <div class="flex-container">
-        {% for player, count in page_obj %}
-            {% with status=player_status|get_item:player %}
+        {% for player_data in page_obj %}
+            {% with status=player_status|get_item:player_data.player %}
                 <div class="player-card 
                     {% if status.scored and not status.not_scored %}green-card{% elif not status.scored and status.not_scored %}red-card{% else %}yellow-card{% endif %}" 
                     data-player-id="{{ player }}" onclick="toggleTeamList(this)">
                     
-                    <h5 style="color: black;">{{ player }}</h5>
-                    <p style="color: black;">Number of Picks: {{ count }}</p>
+                    <h5 style="color: black;">{{ player_data.player }}</h5>
+                    <h6 style="color: black;">{{ player_data.teams }} - {{ player_data.positions }}</h6>
+                    <p style="color: black;">Number of Picks: {{ player_data.count }}</p>
                     <div class="team-list" id="team-list-{{ player }}">
                         <strong>Teams:</strong>
                         <ul>
-                            {% for team in player_teams|get_item:player %}
+                            {% for team in player_teams|get_item:player_data.player %}
                                 <li>{{ team }}</li>
                             {% endfor %}
                         </ul>
@@ -242,6 +243,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
     </script>
 </body>
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -485,7 +485,6 @@ def playerboard(request):
 
 	start_datetime = datetime.combine(start_date, time(17, 0))  # Combine date with 5:00 PM
 	start_datetime = pst.localize(start_datetime)  # Make it timezone-aware
-
 	current_pst_time = datetime.now(pst)
 	thursday_deadline = current_pst_time.replace(hour=17, minute=0, second=0, microsecond=0)
 
@@ -495,20 +494,26 @@ def playerboard(request):
 		within_deadline = True
 	else:
 		within_deadline = False
-	
+
 	if (within_deadline) or not (start_datetime <= current_pst_time < end_datetime):
 		return redirect('authentication:checking')  # Replace 'some_other_page' with the name of an appropriate view
+	
+	player_counts1 = Pick.objects.filter(isin=True).exclude(pick1='N/A').values('pick1','pick1_team', 'pick1_position').annotate(count=Count('pick1')).order_by('-count')
+	player_counts2 = Pick.objects.filter(isin=True).exclude(pick2='N/A').values('pick2','pick2_team', 'pick2_position').annotate(count=Count('pick2')).order_by('-count')
 
-	player_counts1 = Pick.objects.filter(isin=True).exclude(pick1='N/A').values('pick1').annotate(count=Count('pick1')).order_by('-count')
-	player_counts2 = Pick.objects.filter(isin=True).exclude(pick2='N/A').values('pick2').annotate(count=Count('pick2')).order_by('-count')
 
 	# Combine player counts
-	player_counts = defaultdict(int)
+	player_counts = defaultdict(lambda: {'count': 0, 'teams': None, 'positions': None})
 	player_teams = defaultdict(list)  # Collect teams per player
 
 	for player_count in chain(player_counts1, player_counts2):
 		player_name = player_count.get('pick1') or player_count.get('pick2')
-		player_counts[player_name] += player_count['count']
+		team = player_count.get('pick1_team') or player_count.get('pick2_team')
+		position = player_count.get('pick1_position') or player_count.get('pick2_position')
+
+		player_counts[player_name]['count'] += player_count['count']
+		player_counts[player_name]['teams'] = team
+		player_counts[player_name]['positions'] = position
 
 	for player_name in player_counts.keys():
 		for pick in Pick.objects.filter(isin = True):
@@ -516,7 +521,8 @@ def playerboard(request):
 				player_teams[player_name].append(pick.team_name)
 			if pick.pick2 == player_name:
 				player_teams[player_name].append(pick.team_name)
-		# Get player statuses
+
+	# Get player statuses
 	player_status = {}
 	for player in player_counts.keys():
 		scorer = Scorer.objects.filter(name=player).first()
@@ -532,7 +538,11 @@ def playerboard(request):
 			}
 
 	# Sort players by the number of picks
-	sorted_player_counts = sorted(player_counts.items(), key=lambda x: x[1], reverse=True)
+	sorted_player_counts = sorted(
+		[{'player': player, **data} for player, data in player_counts.items()],
+		key=lambda x: x['count'],
+		reverse=True
+	)
 
 	total_in = Pick.objects.filter(isin=True).count()
 
@@ -586,17 +596,22 @@ def leaderboard(request):
 	if (within_deadline) or not (start_datetime <= current_pst_time < end_datetime):
 		return redirect('authentication:checking')  # Replace 'some_other_page' with the name of an appropriate view
 	
-	player_counts1 = Pick.objects.filter(isin=True).exclude(pick1='N/A').values('pick1').annotate(count=Count('pick1')).order_by('-count')
-	player_counts2 = Pick.objects.filter(isin=True).exclude(pick2='N/A').values('pick2').annotate(count=Count('pick2')).order_by('-count')
+	player_counts1 = Pick.objects.filter(isin=True).exclude(pick1='N/A').values('pick1','pick1_team', 'pick1_position').annotate(count=Count('pick1')).order_by('-count')
+	player_counts2 = Pick.objects.filter(isin=True).exclude(pick2='N/A').values('pick2','pick2_team', 'pick2_position').annotate(count=Count('pick2')).order_by('-count')
 
 
 	# Combine player counts
-	player_counts = defaultdict(int)
+	player_counts = defaultdict(lambda: {'count': 0, 'teams': None, 'positions': None})
 	player_teams = defaultdict(list)  # Collect teams per player
 
 	for player_count in chain(player_counts1, player_counts2):
 		player_name = player_count.get('pick1') or player_count.get('pick2')
-		player_counts[player_name] += player_count['count']
+		team = player_count.get('pick1_team') or player_count.get('pick2_team')
+		position = player_count.get('pick1_position') or player_count.get('pick2_position')
+
+		player_counts[player_name]['count'] += player_count['count']
+		player_counts[player_name]['teams'] = team
+		player_counts[player_name]['positions'] = position
 
 	for player_name in player_counts.keys():
 		for pick in Pick.objects.filter(isin = True):
@@ -620,10 +635,12 @@ def leaderboard(request):
 				'not_scored': False,
 			}
 
-
-
 	# Sort players by the number of picks
-	sorted_player_counts = sorted(player_counts.items(), key=lambda x: x[1], reverse=True)
+	sorted_player_counts = sorted(
+		[{'player': player, **data} for player, data in player_counts.items()],
+		key=lambda x: x['count'],
+		reverse=True
+	)
 
 	total_in = Pick.objects.filter(isin=True).count()
 

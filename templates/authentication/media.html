@@ -140,7 +140,7 @@
                     <p class="card-text">{{ blog.summary }}</p>
                     <div class="d-flex justify-content-between align-items-center">
                       <div class="btn-group">
-                        <a href="{% url 'blog_detail' blog.slug %}" class="btn btn-sm btn-outline-secondary">View</a>
+                        <a href="{% url 'authentication:blog_detail' blog.slug %}" class="btn btn-sm btn-outline-secondary">View</a>
                       </div>
                       <small class="text-body-secondary">{{ blog.date }}</small>
                     </div>
