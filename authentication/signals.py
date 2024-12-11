@@ -1,6 +1,7 @@
 from django.db.models.signals import pre_save, post_save
 from django.dispatch import receiver
 from .models import Pick, Scorer, Message, Game
+from .utils import send_email_to_user
 
 # Signal for when a player is marked as out (`isin` = False)
 
@@ -44,5 +45,19 @@ def check_player_scored_pre_save(sender, instance, **kwargs):
                 # Only create the message if `scored` is changing from False to True
                 content = f"{instance.name} has scored!"
                 Message.objects.create(content=content, week= week)
+        except Scorer.DoesNotExist:
+            pass  # Handle the rare case where the instance doesn't exist (e.g., deleted)
+
+@receiver(pre_save, sender=Scorer)
+def check_player_scored_pre_save(sender, instance, **kwargs):
+    game = Game.objects.get(sport = 'Football')
+    week = game.week  # Example if there's a ForeignKey to Game
+    if instance.pk:  # Check if the object exists in the database
+        try:
+            # Fetch the previous state of the object
+            previous_instance = Scorer.objects.get(pk=instance.pk)
+            if not previous_instance.scored and instance.scored:
+                # Only create the message if `scored` is changing from False to True
+                send_email_to_user(instance.name)
         except Scorer.DoesNotExist:
             pass  # Handle the rare case where the instance doesn't exist (e.g., deleted)

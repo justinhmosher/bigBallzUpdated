@@ -6,4 +6,5 @@ class AuthenticationConfig(AppConfig):
 
     def ready(self):
         import authentication.signals  # Import signals related to the 'authentication' app
+        import authentication.utils
 
