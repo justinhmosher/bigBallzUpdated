@@ -222,13 +222,13 @@
                   {{ game.name|add_linebreaks }}
                 </div>
                 <div class="card-body">
-                    <p class="card-summary">
+                    <h4 class="card-summary">
                         {% for line in game.summary %}
                         {{ line }}<br>
                         {% endfor %}
-                    </p>
+                    </h4>
                     <div class="card-actions">
-                        <a href="{{ game.rules }}" class="btn btn-secondary">Rules</a>
+                        <a href="{% url 'authentication:rules' game.rules %}" class="btn btn-secondary">Rules</a>
                         {% if game.playable %}
                         <a href="{{ game.path }}" class="btn btn-primary">Play</a>
                         {% else %}

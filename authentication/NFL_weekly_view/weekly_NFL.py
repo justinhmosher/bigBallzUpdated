@@ -37,6 +37,7 @@ from django.db import models
 from ..views import tournaments
 from django.db.models.functions import Lower
 
+@login_required
 def message_board(request):
     # Fetch all messages, ordered by week and timestamp
     messages = MessageNW.objects.order_by('-week', '-timestamp')
@@ -119,7 +120,7 @@ def teamname(request):
 
 def signout(request):
     logout(request)
-    return redirect('football:homeNW')
+    return redirect('football:home')
 
 @login_required
 def teamcount(request):
@@ -191,6 +192,7 @@ def payment(request):
 
     return render(request, 'authentication/payment.html', context)
 
+@login_required
 def playerboard(request):
     # Define the PST timezone
     pst = pytz.timezone('America/Los_Angeles')
@@ -693,6 +695,7 @@ def game_search(username,playerdata):
             return [pick.teamnumber,pick.pick_number,pick.pick,pick.pick_team,pick.pick_position,pick.pick_color,pick.pick_player_ID]
     return [pick.teamnumber,pick.pick_number,pick.pick,pick.pick_team,pick.pick_position,pick.pick_color,pick.pick_player_ID]
 
+@login_required
 def picking(request):
     total_in = PickNW.objects.count()
     return render(request, 'authentication/picking.html', {'total_in': total_in})

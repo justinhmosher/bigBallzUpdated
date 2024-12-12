@@ -37,6 +37,7 @@ from django.db import models
 from authentication.NFL_weekly_view.models import PaidNW,PromoUserNW
 from django.urls import reverse
 
+@login_required
 def message_board(request):
 	# Fetch all messages, ordered by week and timestamp
 	messages = Message.objects.order_by('-week', '-timestamp')
@@ -103,10 +104,15 @@ def room(request, room_name):
 
 def terms(request):
 	return render(request,"authentication/terms.html")
+
 def privacy(request):
 	return render(request,"authentication/privacy.html")
-def rules(request):
-	return render(request,'authentication/rules.html')
+
+def rules(request,game):
+	if game == 1:
+		return render(request,'authentication/rules.html')
+	if game ==2:
+		return render(request,"authentication/rules_NW.html")
 
 def confirm_email(request, email):
 	user = User.objects.get(username = email)
@@ -251,8 +257,13 @@ def signin(request):
 			login(request, user)
 
 			request.session.set_expiry(2592000)  # 2 weeks (in seconds)
-			
-			return redirect('authentication:tournaments')
+
+			next_url = request.POST.get('next')
+			if next_url:
+				return HttpResponseRedirect(next_url)  # Redirect to the next URL
+
+			return redirect('authentication:tournaments')  # Default redirection
+		
 		else:
 			messages.error(request, "Invalid username or password.")
 			return redirect('authentication:signin')	
@@ -467,6 +478,7 @@ def coinbase_webhook(request):
 		messages.error('Payment was not received.')
 		return redirect('authentication:payment')
 
+@login_required
 def playerboard(request):
 	# Define the PST timezone
 	pst = pytz.timezone('America/Los_Angeles')
@@ -663,72 +675,54 @@ def leaderboard(request):
 		'user_data': user_data,
 	})
 
-@login_required
 def tournaments(request):
-	user = Paid.objects.get(username = request.user.username)
-	play = user.paid_status
+	"""
+	try:
+		user = username.objects.filter(username = username)
+	except user.DoesNotExist:
+		user = False
+	"""
 
 	games = {
 		"Football": [
 			{"name": "Touchdown Mainia/Season Long", 
 			"summary": "Each week, choose two players to score a touchdown./If one or both score, you advance, else you're out./Last man standing wins the pot!//Pot: $10K", 
-			"rules": "/rules", 
+			"rules": 1, 
 			"playable": True,
-			"path":"location"
-		},
-		{
-			"name": "Cumulative Touchdown Tournament/Season Long", 
-			"summary": "Each week, choose two players to score touchdowns./The user with the highest cumulative touchdown amount by week 18, wins the pot!//Pot: $10K", 
-			"rules": "/football-rules-2", 
-			"playable": False,
 			"path":"location"
 		},
 		{	
 			"name": "Touchdown Mainia/Weekly Game", 
 			"summary": "Select 10 NFL players to score touchdowns./The user with the most comultive touchdowns wins the pot!//Pot: $10k", 
-			"rules": "/football-rules-3", 
+			"rules": 2, 
 			"playable": True,
 			"path": reverse("football:location")},
 		],
 		"Baseball": [
 			{"name": "Game 1", 
 			"summary": "Pick 2 players to get a hit.", 
-			"rules": "/baseball-rules-1", 
-			"playable": False,
-			"path":"location"
-		},
-		{	
-			"name": "Game 2", 
-			"summary": "Custom rules for Game 2.", 
-			"rules": "/baseball-rules-2", 
+			"rules": 3, 
 			"playable": False,
 			"path":"location"
 		},
 		{
 			"name": "Game 3", 
 			"summary": "Custom rules for Game 3.", 
-			"rules": "/baseball-rules-3", 
+			"rules": 4, 
 			"playable": False,
 			"path":"location"},
 		],
 		"Basketball": [
 			{"name": "Game 1", 
 			"summary": "Pick 2 players to make a 3-pointer.", 
-			"rules": "/basketball-rules-1", 
-			"playable": False,
-			"path":"location"
-		},
-		{
-			"name": "Game 2", 
-			"summary": "Custom rules for Game 2.", 
-			"rules": "/basketball-rules-2", 
+			"rules": 5, 
 			"playable": False,
 			"path":"location"
 		},
 		{
 			"name": "Game 3", 
 			"summary": "Custom rules for Game 3.", 
-			"rules": "/basketball-rules-3", 
+			"rules": 6, 
 			"playable": False,
 			"path":"location"},
 		],
@@ -748,7 +742,6 @@ def tournaments(request):
 	context = {
 		"current_sport": current_sport,
 		"games": current_games,
-		"play": play
 	}
 	return render(request, 'authentication/tournaments.html', context)
 
@@ -852,7 +845,7 @@ def submitverification(request):
 	# If not a POST request, render the form page
 	return redirect('authentication:checking')
 
-#@login_required
+@login_required
 def player_list(request):
 	# Create a Subquery to count matching PastPick entries
 	past_pick_count = PastPick.objects.filter(
@@ -1137,6 +1130,7 @@ def game_search(username,playerdata):
 				return 2
 	return 2
 
+@login_required
 def picking(request):
 	total_in = Pick.objects.filter(isin = True).count()
 	return render(request, 'authentication/picking.html', {'total_in': total_in})
