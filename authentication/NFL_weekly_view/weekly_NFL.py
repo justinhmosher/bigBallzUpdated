@@ -496,10 +496,14 @@ def player_list(request):
         key=lambda x: x['total_touchdowns'],
         reverse=True
     )
+    paginator = Paginator(sorted_teams, 20)
+    page_number = request.GET.get('page', 1)
+    page_obj = paginator.get_page(page_number)
+
 
     # Pass the data to the template
     return render(request, 'NFL_weekly_view/leaders.html', {
-        'leaderboard': sorted_teams,
+        'leaderboard': page_obj,
     })
 
 
@@ -547,13 +551,14 @@ def game(request):
 
     if request.method == 'POST' and request.headers.get('x-requested-with') == 'XMLHttpRequest':
         selected_player = request.POST.get('selected_player')
+        page_num = request.POST.get('currentPage')
         if selected_player:
             try:
                 # Retrieve the selected player
                 player_data_selected = NFLPlayer.objects.get(name=selected_player)
 
                 # Use your existing game_search function
-                result = game_search(request.user.username, player_data_selected)
+                result = game_search(request.user.username, player_data_selected,page_num)
 
                 if result == 11:
                     return JsonResponse({'success': False, 'message': "Selected players cannot be on the same team."})
@@ -564,7 +569,6 @@ def game(request):
                         'success': True,
                         'message': 'Player selected successfully!',
                         'pick': {
-                            #[pick.teamnumber,pick.pick_number,pick.pick,pick.pick_team,pick.pick_position,pick.pick_color,pick.pick_player_ID]
                             'pick_number': result[1],
                             'team_number': result[0],
                             'pick_name': result[2],
@@ -655,8 +659,8 @@ def search_players(request):
             return JsonResponse({'players': player_list})
     return JsonResponse({'players': []})
 
-def game_search(username,playerdata):
-    user_pick_data = PickNW.objects.filter(username = username).order_by('teamnumber','pick_number')
+def game_search(username,playerdata,pagenum):
+    user_pick_data = PickNW.objects.filter(username = username,teamnumber = pagenum).order_by('pick_number')
     for pick in user_pick_data:
         if pick.pick == 'N/A':
             try:

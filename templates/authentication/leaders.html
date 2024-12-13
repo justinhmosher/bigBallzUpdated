@@ -118,6 +118,29 @@
 <body>
     <div class="container">
         <h1>Leaderboard</h1>
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center">
+                {% if leaderboard.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ leaderboard.previous_page_number }}" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+                {% endif %}
+                {% for num in leaderboard.paginator.page_range %}
+                <li class="page-item {% if num == leaderboard.number %}active{% endif %}">
+                    <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                </li>
+                {% endfor %}
+                {% if leaderboard.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ leaderboard.next_page_number }}" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
         <table class="leaderboard-table" id="leaderboardTable">
             <tr>
                 <th>Ranking</th>
@@ -126,15 +149,15 @@
             </tr>
             {% for pick in leaderboard %}
             <tr>
-                <td class="rank"></td> <!-- This will be populated by JavaScript -->
+                <td class="rank">{{ pick.rank }}</td> <!-- This will be populated by JavaScript -->
                 <td>
                     <div class="hover-container">
                         <span class="team-name">
-                        {{ pick.team_name }}
-                            {% if pick.isin %}
+                        {{ pick.team.team_name }}
+                            {% if pick.team.isin %}
                                 👑
                             {% endif %}</span>
-                        {% get_past_picks past_picks_map pick.username pick.teamnumber as past_picks %}
+                        {% get_past_picks past_picks_map pick.team.username pick.team.teamnumber as past_picks %}
                         <div class="hover-content">
                             <h4>Previous Scorers</h4>
                             <ul>
@@ -152,46 +175,37 @@
                         </div>
                     </div>
                 </td>
-                <td class="pick-count">{{ pick.pick_count|default:"0" }}</td>
+                <td class="pick-count">{{ pick.team.pick_count|default:"0" }}</td>
             </tr>
             {% endfor %}
         </table>
+        <br>
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center">
+                {% if leaderboard.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ leaderboard.previous_page_number }}" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+                {% endif %}
+                {% for num in leaderboard.paginator.page_range %}
+                <li class="page-item {% if num == leaderboard.number %}active{% endif %}">
+                    <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                </li>
+                {% endfor %}
+                {% if leaderboard.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ leaderboard.next_page_number }}" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
     </div>
 </body>
     <script>
-    window.onload = updateRankings;
-        // Function to calculate rankings and update the table
-        function updateRankings() {
-            const table = document.getElementById('leaderboardTable');
-            const rows = Array.from(table.rows).slice(1); // Skip the header row
-
-            // Extract rows with pick counts and store them in an array
-            const data = rows.map(row => {
-                const teamName = row.cells[1].innerText.trim();
-                const pickCount = parseInt(row.cells[2].innerText.trim()) || 0;
-                return { row, teamName, pickCount };
-            });
-
-            // Sort the rows by pick count in descending order
-            data.sort((a, b) => b.pickCount - a.pickCount);
-
-            // Assign rankings and update the rows
-            let currentRank = 1;
-            let previousCount = null;
-            let tieRank = 1;
-
-            data.forEach((entry, index) => {
-                const { row, pickCount } = entry;
-
-                // Check for ties
-                if (pickCount !== previousCount) {
-                    currentRank = index + 1;
-                    tieRank = currentRank;
-                }
-                row.cells[0].innerText = `T${tieRank}`; // Update the rank cell
-                previousCount = pickCount;
-            });
-        }
     document.addEventListener("DOMContentLoaded", function() {
         const logo = document.querySelector('.navbar-brand img');
         const dropdownMenu = document.querySelector('.dropdown-menu');

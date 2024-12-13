@@ -284,13 +284,15 @@ $(document).ready(function () {
     // Handle Player Selection from Search Results
     $(document).on('click', '.search-result-item', function () {
         const playerName = $(this).data('player-name');
+        const currentPage = parseInt(new URL(window.location.href).searchParams.get('page')) || 1;
         // AJAX request to select the player
         $.ajax({
             url: "{% url 'football:game' %}",
             method: "POST",
             data: {
                 'selected_player': playerName,
-                'csrfmiddlewaretoken': '{{ csrf_token }}'
+                'csrfmiddlewaretoken': '{{ csrf_token }}',
+                'currentPage':currentPage
             },
         success: function (response) {
             if (response.success) {

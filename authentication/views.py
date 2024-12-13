@@ -865,6 +865,33 @@ def player_list(request):
 		'team_name',  # Optional: Break ties by team_name
 	)
 
+	data = list(data)
+	standings = []
+	previous_count = None
+	current_rank = 1
+	tie_rank = 0
+	for index, item in enumerate(data):
+		pick_count = item.pick_count
+
+		next_pick_count = data[index + 1].pick_count if index + 1 < len(data) else None
+		is_tied_with_previous = pick_count == previous_count
+		is_tied_with_next = pick_count == next_pick_count
+
+		# Handle ties
+		if is_tied_with_previous or is_tied_with_next:
+			if is_tied_with_previous and is_tied_with_next:
+				standings.append({"rank": f"T{current_rank}", "team": item})
+			if is_tied_with_previous and not is_tied_with_next:
+				standings.append({"rank": f"T{current_rank}", "team": item})
+				current_rank = index + 2
+			if not is_tied_with_previous and is_tied_with_next:
+				standings.append({"rank": f"T{current_rank}", "team": item})
+		else:
+			standings.append({"rank": current_rank, "team": item})
+			current_rank += 1
+
+		previous_count = pick_count
+
 	# Fetch all past picks and group them by (username, teamnumber)
 	past_picks_map = {}
 	for pick in data:
@@ -872,9 +899,13 @@ def player_list(request):
 		past_picks = PastPick.objects.filter(username=pick.username, teamnumber=pick.teamnumber)
 		past_picks_map[(pick.username, pick.teamnumber)] = past_picks
 
+	paginator = Paginator(standings, 20)
+	page_number = request.GET.get('page', 1)
+	page_obj = paginator.get_page(page_number)
+
 	# Pass the data to the template
 	return render(request, 'authentication/leaders.html', {
-		'leaderboard': data,
+		'leaderboard': page_obj,
 		'past_picks_map': past_picks_map
 	})
 

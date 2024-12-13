@@ -117,6 +117,29 @@
 <body>
     <div class="container">
         <h1>Leaderboard</h1>
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center">
+                {% if leaderboard.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ leaderboard.previous_page_number }}" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+                {% endif %}
+                {% for num in leaderboard.paginator.page_range %}
+                <li class="page-item {% if num == leaderboard.number %}active{% endif %}">
+                    <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                </li>
+                {% endfor %}
+                {% if leaderboard.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ leaderboard.next_page_number }}" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
         <table class="leaderboard-table" id="leaderboardTable">
             <tr>
                 <th>Ranking</th>
@@ -148,6 +171,30 @@
             </tr>
             {% endfor %}
         </table>
+        <br>
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center">
+                {% if leaderboard.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ leaderboard.previous_page_number }}" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+                {% endif %}
+                {% for num in leaderboard.paginator.page_range %}
+                <li class="page-item {% if num == leaderboard.number %}active{% endif %}">
+                    <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                </li>
+                {% endfor %}
+                {% if leaderboard.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ leaderboard.next_page_number }}" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
     </div>
 </body>
     <script>
