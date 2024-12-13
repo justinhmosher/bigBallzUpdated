@@ -148,17 +148,17 @@
             </tr>
             {% for team in leaderboard %}
             <tr>
-                <td class="rank"></td> <!-- This will be populated by JavaScript -->
+                <td class="rank">{{ team.rank }}</td> <!-- This will be populated by JavaScript -->
                 <td>
                     <div class="hover-container">
                         <span class="team-name">
-                            {{ team.team_name }}
+                            {{ team.team.team_name }}
                         </span>
                         <!-- Hover content for displaying team picks -->
                         <div class="hover-content">
                             <h4>Picks</h4>
                             <ul>
-                                {% for pick in team.picks %}
+                                {% for pick in team.team.picks %}
                                     <li>{{ pick }}</li>
                                 {% empty %}
                                     <li>No picks</li>
@@ -167,7 +167,7 @@
                         </div>
                     </div>
                 </td>
-                <td class="pick-count">{{ team.total_touchdowns }}</td>
+                <td class="pick-count">{{ team.team.total_touchdowns }}</td>
             </tr>
             {% endfor %}
         </table>
@@ -198,50 +198,6 @@
     </div>
 </body>
     <script>
-window.onload = updateRankings;
-
-// Function to calculate rankings and update the table
-function updateRankings() {
-    const table = document.getElementById('leaderboardTable');
-    const rows = Array.from(table.rows).slice(1); // Skip the header row
-
-    // Extract rows with total touchdowns and store them in an array
-    const data = rows.map(row => {
-        const teamName = row.cells[1].innerText.trim(); // Team Name
-        const touchdownCount = parseInt(row.cells[2].innerText.trim()) || 0; // Total Touchdowns
-        return { row, teamName, touchdownCount };
-    });
-
-    // Sort the rows by total touchdowns in descending order
-    data.sort((a, b) => b.touchdownCount - a.touchdownCount);
-
-    // Assign rankings and update the rows
-    let currentRank = 1;
-    let previousCount = null;
-    let tieRank = null;
-
-    data.forEach((entry, index) => {
-        const { row, touchdownCount } = entry;
-
-        // Check for ties
-        if (touchdownCount === previousCount) {
-            row.cells[0].innerText = `T${tieRank}`; // Use the same tieRank for tied rows
-        } else {
-            currentRank = index + 1;
-            tieRank = currentRank; // Update the tieRank for new ranks
-            row.cells[0].innerText = currentRank; // Use normal rank
-        }
-        previousCount = touchdownCount; // Update the previous count
-    });
-
-    // Append sorted rows back to the table
-    const tbody = table.querySelector('tbody');
-    if (tbody) {
-        data.forEach(entry => tbody.appendChild(entry.row));
-    }
-}
-
-
     document.addEventListener("DOMContentLoaded", function() {
         const logo = document.querySelector('.navbar-brand img');
         const dropdownMenu = document.querySelector('.dropdown-menu');

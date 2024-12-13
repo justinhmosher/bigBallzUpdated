@@ -496,10 +496,36 @@ def player_list(request):
         key=lambda x: x['total_touchdowns'],
         reverse=True
     )
-    paginator = Paginator(sorted_teams, 20)
+
+    standings = []
+    previous_count = None
+    current_rank = 1
+    for index, item in enumerate(sorted_teams):
+        pick_count = item['total_touchdowns']
+
+        # Get the next team's pick count
+        next_pick_count = sorted_teams[index + 1]['total_touchdowns'] if index + 1 < len(sorted_teams) else None
+        is_tied_with_previous = pick_count == previous_count
+        is_tied_with_next = pick_count == next_pick_count
+
+        # Handle ties
+        if is_tied_with_previous or is_tied_with_next:
+            if is_tied_with_previous and is_tied_with_next:
+                standings.append({"rank": f"T{current_rank}", "team": item})
+            elif is_tied_with_previous and not is_tied_with_next:
+                standings.append({"rank": f"T{current_rank}", "team": item})
+                current_rank = index + 2
+            elif not is_tied_with_previous and is_tied_with_next:
+                standings.append({"rank": f"T{current_rank}", "team": item})
+        else:
+            standings.append({"rank": current_rank, "team": item})
+            current_rank += 1
+
+        previous_count = pick_count
+
+    paginator = Paginator(standings, 20)
     page_number = request.GET.get('page', 1)
     page_obj = paginator.get_page(page_number)
-
 
     # Pass the data to the template
     return render(request, 'NFL_weekly_view/leaders.html', {
