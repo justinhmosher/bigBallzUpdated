@@ -16,7 +16,7 @@ def check_player_out_pre_save(sender, instance, **kwargs):
         if previous_instance.isin and not instance.isin:
             # Trigger the message creation only if `isin` is changed to False
             content = f"Team {instance.team_name} is out!"
-            Message.objects.create(content=content, week= week)
+            Message.objects.create(content=content, week= week, league_number = instance.league_number)
 
 @receiver(pre_save, sender=Scorer)
 def check_player_scored_pre_save(sender, instance, **kwargs):
@@ -29,7 +29,7 @@ def check_player_scored_pre_save(sender, instance, **kwargs):
             if not previous_instance.not_scored and instance.not_scored:
                 # Only create the message if `scored` is changing from False to True
                 content = f"{instance.name} did not score."
-                Message.objects.create(content=content, week=week)
+                Message.objects.create(content=content, week=week, league_number = instance.league_number)
         except Scorer.DoesNotExist:
             pass  # Handle the rare case where the instance doesn't exist (e.g., deleted)
 
@@ -44,7 +44,7 @@ def check_player_scored_pre_save(sender, instance, **kwargs):
             if not previous_instance.scored and instance.scored:
                 # Only create the message if `scored` is changing from False to True
                 content = f"{instance.name} has scored!"
-                Message.objects.create(content=content, week= week)
+                Message.objects.create(content=content, week= week, league_number = instance.league_number)
         except Scorer.DoesNotExist:
             pass  # Handle the rare case where the instance doesn't exist (e.g., deleted)
 

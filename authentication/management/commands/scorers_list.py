@@ -2,46 +2,58 @@ from django.core.management.base import BaseCommand
 from authentication.models import Pick, Scorer, NFLPlayer
 
 class Command(BaseCommand):
-    help = 'Populates Scorer model with unique players from Pick model where isin is True'
+    help = 'Populates Scorer model with unique players from Pick model where isin is True, sorted by league numbers.'
 
     def handle(self, *args, **kwargs):
-        # Get all picks where isin is True
-        picks = Pick.objects.filter(isin=True)
+        # Get all league numbers
+        league_numbers = Pick.objects.filter(isin=True).values_list('league_number', flat=True).distinct()
 
-        Scorer.objects.all().delete()
+        Scorer.objects.all().delete()  # Clear existing Scorer entries
 
-        # Track the number of scorers added
-        scorers_list = []
-        for pick in picks:
-            if pick.pick1_player_ID != 'player ID' and pick.pick1_player_ID != 'N/A':
-                scorers_list.append(pick.pick1_player_ID)
-            if pick.pick2_player_ID != 'player ID' and pick.pick2_player_ID != 'N/A':
-                scorers_list.append(pick.pick2_player_ID)
+        total_count = 0  # Track the total number of scorers added across leagues
 
-        final_list = [] 
+        # Iterate through each league number
+        for league_number in league_numbers:
+            self.stdout.write(self.style.NOTICE(f"Processing league number: {league_number}"))
+        
+            # Get picks for the current league
+            picks = Pick.objects.filter(isin=True, league_number=league_number)
 
-        for scorer in scorers_list:
-            if scorer not in final_list:
-                final_list.append(scorer)
+            # Track unique player IDs
+            scorers_list = []
+            for pick in picks:
+                if pick.pick1_player_ID not in ['player ID', 'N/A']:
+                    scorers_list.append(pick.pick1_player_ID)
+                if pick.pick2_player_ID not in ['player ID', 'N/A']:
+                    scorers_list.append(pick.pick2_player_ID)
 
-        print(final_list)
+            # Remove duplicates
+            final_list = list(set(scorers_list))
 
-        count = 0
+            league_count = 0  # Track the number of scorers added for the current league
+            for ID in final_list:
+                try:
+                    # Attempt to retrieve the NFLPlayer instance
+                    player = NFLPlayer.objects.get(player_ID=ID)
 
-        for ID in final_list:
-            try:
-                # Attempt to retrieve the NFLPlayer instance
-                player = NFLPlayer.objects.get(player_ID=ID)
-                print(player)  # Optional: Print the player for debugging
+                    # Create a new Scorer entry
+                    scorer = Scorer(
+                        name=player.name,
+                        player_ID=player.player_ID,
+                        scored=False,
+                        league_number=league_number  # Include league number for tracking
+                    )
+                    scorer.save()
+                    league_count += 1
+                except NFLPlayer.DoesNotExist:
+                    # Print a message if the player is not found
+                    self.stdout.write(
+                        self.style.WARNING(f"Warning: NFLPlayer with player_ID '{ID}' does not exist in league {league_number}. Skipping.")
+                    )
 
-                # Create a new Scorer entry
-                scorer = Scorer(name=player.name, player_ID=player.player_ID, scored=False)
-                scorer.save()
-                count += 1
-            except NFLPlayer.DoesNotExist:
-                # Print a message if the player is not found
-                print(f"Warning: NFLPlayer with player_ID '{ID}' does not exist. Skipping.")
+            # Output the result for the current league
+            self.stdout.write(self.style.SUCCESS(f"Successfully added {league_count} new scorers for league {league_number}."))
+            total_count += league_count
 
-
-        # Output the result to the console
-        self.stdout.write(self.style.SUCCESS(f'Successfully added {count} new scorers.'))
+        # Output the final result
+        self.stdout.write(self.style.SUCCESS(f"Successfully added {total_count} new scorers across all leagues."))

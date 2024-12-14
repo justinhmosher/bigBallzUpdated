@@ -38,7 +38,11 @@ from ..views import tournaments
 from django.db.models.functions import Lower
 
 @login_required
-def message_board(request):
+def message_board(request, league_num):
+    username = request.user.username
+    player = PaidNW.objects.get(username = username)
+    if int(league_num) != player.league_number:
+        return redirect("football:message_board", league_num = player.league_number)
     # Fetch all messages, ordered by week and timestamp
     messages = MessageNW.objects.order_by('-week', '-timestamp')
 
@@ -65,7 +69,11 @@ def home(request):
 
     
 @login_required
-def room(request, room_name):
+def room(request, room_name, league_num):
+    username = request.user.username
+    player = PaidNW.objects.get(username = username)
+    if int(league_num) != player.league_number:
+        return redirect("football:room", room_name = "weekly-NFL", league_num = player.league_number)
     username = request.user.username
     try:
         paids = PickNW.objects.get(username=username, teamnumber=1,pick_number=1)
@@ -91,7 +99,11 @@ def rules(request):
     return render(request,'authentication/rules.html')
 
 @login_required
-def teamname(request):
+def teamname(request, league_num):
+    username = request.user.username
+    player = PaidNW.objects.get(username = username)
+    if int(league_num) != player.league_number:
+        return redirect("football:teamname", league_num = player.league_number)
 
     if request.method == "POST":
         form = CreateTeam(request.POST)
@@ -100,10 +112,10 @@ def teamname(request):
             username = request.user.username
             if PickNW.objects.filter(team_name = team_name).exists():
                 messages.error(request,"Team name already exists.")
-                return redirect('football:teamname')
+                return redirect('football:teamname' , league_num = league_num)
             elif len(team_name) > 15 or len(team_name) < 6:
                 messages.error(request,"Team name need to be between 5-14 characters.")
-                return redirect("football:teamname")
+                return redirect("football:teamname" , league_num = league_num)
             else:
                 paid = PaidNW.objects.get(username = request.user.username)
                 teamcount = paid.numteams
@@ -111,36 +123,16 @@ def teamname(request):
                     for j in range(10):
                         new_pick = PickNW(team_name=team_name,username= request.user.username,pick_number = j+1,teamnumber = i+1)
                         new_pick.save()
-                return redirect('football:checking')
+                return redirect('football:checking', league_num = league_num)
         else:
             messages.error(request,"Please submit a valid teamname.")
-            return redirect('football:teamname')
+            return redirect('football:teamname', league_num = league_num)
     return render(request,"authentication/teamname.html")
 
 
 def signout(request):
     logout(request)
     return redirect('football:home')
-
-@login_required
-def teamcount(request):
-    team = PaidNW.objects.get(username = request.user.username)
-    if request.method == 'POST':
-        num_teams = request.POST.get('num_teams')
-        if int(num_teams) > 20:
-            messages.error(request,'Maximum of 20 teams allowed.')
-            return redirect('football:teamcount')
-        elif int(num_teams) < 1:
-            messages.error(request,'Minimum of 1 team.')
-            return redirect('football:teamcount')
-        else:
-            team.numteams = num_teams
-            team.save()
-            return redirect('football:checking')
-    return render(request,'authentication/teamcount.html')
-
-
-logger = logging.getLogger(__name__)
 
 @login_required
 def payment(request):
@@ -193,7 +185,11 @@ def payment(request):
     return render(request, 'authentication/payment.html', context)
 
 @login_required
-def playerboard(request):
+def playerboard(request, league_num):
+    username = request.user.username
+    player = PaidNW.objects.get(username = username)
+    if int(league_num) != player.league_number:
+        return redirect("football:playerboard", league_num = player.league_number)
     # Define the PST timezone
     pst = pytz.timezone('America/Los_Angeles')
 
@@ -223,7 +219,7 @@ def playerboard(request):
         within_deadline = False
     
     if (within_deadline) or not (start_datetime <= current_pst_time < end_datetime):
-        return redirect('football:checking')  # Replace 'some_other_page' with the name of an appropriate view
+        return redirect('football:checking', league_num = league_num)  # Replace 'some_other_page' with the name of an appropriate view
     """
     pick_counts = PickNW.objects.exclude(pick='N/A').values('pick','pick_team', 'pick_position').annotate(count=Count('pick')).order_by('-count')
 
@@ -277,7 +273,11 @@ def playerboard(request):
     })
 
 @login_required
-def leaderboard(request):
+def leaderboard(request, league_num):
+    username = request.user.username
+    player = PaidNW.objects.get(username = username)
+    if int(league_num) != player.league_number:
+        return redirect("football:leaderboard", league_num = player.league_number)
     # Define the PST timezone
     pst = pytz.timezone('America/Los_Angeles')
 
@@ -307,7 +307,7 @@ def leaderboard(request):
         within_deadline = False
     
     if (within_deadline) or not (start_datetime <= current_pst_time < end_datetime):
-        return redirect('football:checking')  # Replace 'some_other_page' with the name of an appropriate view
+        return redirect('football:checking', league_num = league_num)  # Replace 'some_other_page' with the name of an appropriate view
     """
     pick_counts = PickNW.objects.exclude(pick='N/A').values('pick','pick_team', 'pick_position').annotate(count=Count('pick')).order_by('-count')
 
@@ -364,8 +364,11 @@ def leaderboard(request):
 
 
 @login_required
-def location(request):
+def location(request, league_num):    
     username = request.user.username
+    player = PaidNW.objects.get(username = username)
+    if int(league_num) != player.league_number:
+        return redirect("football:location", league_num = player.league_number)
     user_ip_address = request.META.get('HTTP_X_FORWARDED_FOR') or request.META.get('REMOTE_ADDR')
 
     access_key = config('API_KEY')
@@ -400,10 +403,10 @@ def location(request):
                 return redirect('football:tournaments')
         else:
             if (start_date <= current_day < end_date):
-                return redirect('football:checking')
+                return redirect('football:checking', league_num = league_num)
             else:
                 if paid.paid_status == True:
-                    return redirect("football:checking")
+                    return redirect("football:checking", league_num = league_num)
                 else:
                     if total_numteams >= 200:
                         try:
@@ -424,7 +427,7 @@ def location(request):
                             messages.error(request,"You are too young to participate.")
                             return redirect("football:tournaments")
                         else:
-                            return redirect('football:checking')
+                            return redirect('football:checking', league_num = league_num)
 
     else:
         messages.error(request,"Failed to register location data.")
@@ -434,6 +437,9 @@ def location(request):
 @csrf_exempt  # Use cautiously, ensure your site is protected against CSRF attacks
 def submitverification(request):
     username = request.user.username
+    player = PaidNW.objects.get(username = username)
+    if int(league_num) != player.league_number:
+        return redirect("football:submitverification", league_num = player.league_number)
     compliance = OfAge.objects.get(username=username)
     # Prepare data for the AgeChecker API
     headers = {
@@ -453,17 +459,21 @@ def submitverification(request):
         if verification_status in ['accepted', 'verified']:
             compliance.old = True
             compliance.save()
-            return redirect('football:checking')
+            return redirect('football:checking', league_num = league_num)
         else:
             compliance.young = True
             compliance.save()
-            return redirect('football:location')
+            return redirect('football:location', league_num = league_num)
 
     # If not a POST request, render the form page
-    return redirect('football:checking')
+    return redirect('football:checking', league_num = league_num)
 
 @login_required
-def player_list(request):
+def player_list(request, league_num):
+    username = request.user.username
+    player = PaidNW.objects.get(username = username)
+    if int(league_num) != player.league_number:
+        return redirect("football:player_list", league_num = player.league_number)
     # Fetch all PickNW entries
     all_picks = PickNW.objects.all()
 
@@ -535,11 +545,15 @@ def player_list(request):
 
 
 @login_required
-def game(request):
+def game(request, league_num):
+    username = request.user.username
+    player = PaidNW.objects.get(username = username)
+    if int(league_num) != player.league_number:
+        return redirect("football:game", league_num = player.league_number)
     # Define the PST timezone
     paid = PaidNW.objects.get(username = request.user.username)
     if paid.paid_status == False:
-        return redirect('authentication:checking')
+        return redirect('authentication:checking', league_num = player.league_number)
     pst = pytz.timezone('America/Los_Angeles')
 
     # Get the current time in PST
@@ -567,7 +581,7 @@ def game(request):
     else:
         within_deadline = False
     if (not within_deadline and (start_datetime <= current_pst_time < end_datetime)):
-        return redirect('football:checking')  # Replace 'some_other_page' with the name of an appropriate view
+        return redirect('football:checking', league_num = player.league_number)  # Replace 'some_other_page' with the name of an appropriate view
     """
     user_data = PickNW.objects.filter(username = request.user.username)
     user_pick_data = PickNW.objects.filter(username = request.user.username).order_by('teamnumber','pick_number')
@@ -726,12 +740,20 @@ def game_search(username,playerdata,pagenum):
     return [pick.teamnumber,pick.pick_number,pick.pick,pick.pick_team,pick.pick_position,pick.pick_color,pick.pick_player_ID]
 
 @login_required
-def picking(request):
-    total_in = PickNW.objects.count()
+def picking(request, league_num):
+    username = request.user.username
+    player = PaidNW.objects.get(username = username)
+    if int(league_num) != player.league_number:
+        return redirect("football:picking", league_num = player.league_number)
+    total_in = PickNW.objects.filter(league_number = league_num).count()
     return render(request, 'authentication/picking.html', {'total_in': total_in})
 
 @login_required
-def checking(request):
+def checking(request, league_num):
+    username = request.user.username
+    player = PaidNW.objects.get(username = username)
+    if int(league_num) != player.league_number:
+        return redirect("football:checking", league_num = player.league_number)
     if not PaidNW.objects.filter(username=request.user.username).exists():
         new_user = PaidNW(username=request.user.username)
         new_user.save()
@@ -771,10 +793,10 @@ def checking(request):
     
     # Check if the current date is within the game's start and end dates
     if paid.paid_status == False and (start_datetime <= current_pst_time < end_datetime) and within_deadline:
-        return redirect('football:picking')
+        return redirect('football:picking', league_num = league_num)
     
     elif paid.paid_status == False and (start_datetime <= current_pst_time < end_datetime) and not within_deadline:
-        return redirect('football:playerboard')
+        return redirect('football:playerboard', league_num = league_num)
     
     elif paid.paid_status == False:
         return redirect('football:payment')
@@ -782,8 +804,8 @@ def checking(request):
     elif (paid.paid_status == True) and not (start_datetime <= current_pst_time < end_datetime):
         username = request.user.username
         if not PickNW.objects.filter(username=username).exists():
-            return redirect('football:teamname')
-        return redirect('football:game')
+            return redirect('football:teamname', league_num = league_num)
+        return redirect('football:game', league_num = league_num)
     
     else:
         username = request.user.username
@@ -792,6 +814,6 @@ def checking(request):
         else:
             user_data = PickNW.objects.filter(username=username)
             if within_deadline:
-                return redirect('football:game')
+                return redirect('football:game', league_num = league_num)
             else:
-                return redirect('football:leaderboard')
+                return redirect('football:leaderboard', league_num = league_num)

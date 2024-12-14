@@ -15,6 +15,7 @@ class Pick(models.Model):
     username = models.CharField(max_length = 100, default = "username")
     email = models.EmailField(max_length = 100, default = "useremail@gamil.com")
     isin = models.BooleanField(default = True)
+    league_number = models.IntegerField(default=1)
     pick1 = models.CharField(max_length = 100, default = "N/A")
     pick1_team = models.CharField(max_length = 100, default = "N/A")
     pick1_position = models.CharField(max_length = 100, default = "N/A")
@@ -36,8 +37,9 @@ class Scorer(models.Model):
     scored = models.BooleanField(default = False)
     not_scored = models.BooleanField(default = False)
     total_touchdowns = models.IntegerField(default=0)
+    league_number = models.IntegerField(default=1)
     def __str__(self):
-        return f"{self.name}" 
+        return f"{self.name} {self.league_number}" 
 
 class PastPick(models.Model):
     username = models.CharField(max_length = 100, default = "username")
@@ -50,6 +52,7 @@ class PastPick(models.Model):
     pick2 = models.CharField(max_length = 100, default = "N/A")
     pick2_name = models.CharField(max_length = 100, default = "N/A")
     TD2_count = models.IntegerField(default=0)
+    league_number = models.IntegerField(default=1)
     def __str__(self):
         return f"{self.team_name}"
 
@@ -59,6 +62,7 @@ class Paid(models.Model):
     paid_status = models.BooleanField(default = False)
     numteams = models.IntegerField(default = 0)
     price = models.IntegerField(default = 0)
+    league_number = models.IntegerField(default=1)
     def __str__(self):
         return f"{self.username}"
 
@@ -159,6 +163,7 @@ class ChatMessage(models.Model):
     team_name = models.CharField(max_length=100, default="Team")
     likes_count = models.IntegerField(default=0)
     dislikes_count = models.IntegerField(default=0)
+    league_number = models.IntegerField(default=1)
     def __str__(self):
         return f"{self.room_name} - {self.message[:50]}"
 
@@ -179,6 +184,7 @@ class MessageReaction(models.Model):
         unique_together = ('user', 'message')
 
 class Message(models.Model):
+    league_number = models.IntegerField(default=1)
     timestamp = models.DateTimeField(auto_now_add=True)
     content = models.TextField()
     week = models.IntegerField(null=True, blank=True)
