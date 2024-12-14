@@ -10,9 +10,9 @@ from email.mime.text import MIMEText
 from django.template.loader import render_to_string
 from django.contrib.staticfiles import finders
 
-def send_email_to_user(scorer):
-    emails1 = Pick.objects.filter(pick1 = scorer)
-    emails2 = Pick.objects.filter(pick2 = scorer)
+def send_email_to_user(scorer,league_num):
+    emails1 = Pick.objects.filter(pick1 = scorer, league_number = league_num)
+    emails2 = Pick.objects.filter(pick2 = scorer, league_number = league_num)
     email_list = []
     for i in emails1:
         if i.username not in email_list:
@@ -68,8 +68,8 @@ def send_email_to_user(scorer):
             finally:
                 server.quit()
 
-def send_email_to_user_NW(scorer):
-    emails = PickNW.objects.filter(pick = scorer)
+def send_email_to_user_NW(scorer, league_num):
+    emails = PickNW.objects.filter(pick = scorer, league_number = league_num)
     email_list = []
     for i in emails:
         if i.username not in email_list:

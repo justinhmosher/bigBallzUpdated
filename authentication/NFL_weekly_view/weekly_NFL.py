@@ -44,7 +44,7 @@ def message_board(request, league_num):
     if int(league_num) != player.league_number:
         return redirect("football:message_board", league_num = player.league_number)
     # Fetch all messages, ordered by week and timestamp
-    messages = MessageNW.objects.order_by('-week', '-timestamp')
+    messages = MessageNW.objects.filter(league_number = league_num).order_by('-week', '-timestamp')
 
     # Group messages by week
     grouped_messages = {}
@@ -221,7 +221,7 @@ def playerboard(request, league_num):
     if (within_deadline) or not (start_datetime <= current_pst_time < end_datetime):
         return redirect('football:checking', league_num = league_num)  # Replace 'some_other_page' with the name of an appropriate view
     """
-    pick_counts = PickNW.objects.exclude(pick='N/A').values('pick','pick_team', 'pick_position').annotate(count=Count('pick')).order_by('-count')
+    pick_counts = PickNW.objects.filter(league_number = league_num).exclude(pick='N/A').values('pick','pick_team', 'pick_position').annotate(count=Count('pick')).order_by('-count')
 
     player_counts = defaultdict(lambda: {'count': 0, 'teams': None, 'positions': None})
 
@@ -309,7 +309,7 @@ def leaderboard(request, league_num):
     if (within_deadline) or not (start_datetime <= current_pst_time < end_datetime):
         return redirect('football:checking', league_num = league_num)  # Replace 'some_other_page' with the name of an appropriate view
     """
-    pick_counts = PickNW.objects.exclude(pick='N/A').values('pick','pick_team', 'pick_position').annotate(count=Count('pick')).order_by('-count')
+    pick_counts = PickNW.objects.filter(league_number = league_num).exclude(pick='N/A').values('pick','pick_team', 'pick_position').annotate(count=Count('pick')).order_by('-count')
 
     player_counts = defaultdict(lambda: {'count': 0, 'teams': None, 'positions': None})
 
@@ -475,7 +475,7 @@ def player_list(request, league_num):
     if int(league_num) != player.league_number:
         return redirect("football:player_list", league_num = player.league_number)
     # Fetch all PickNW entries
-    all_picks = PickNW.objects.all()
+    all_picks = PickNW.objects.filter(league_number = league_num)
 
     # Build a dictionary to store team data
     teams_data = defaultdict(lambda: {'team_name': '', 'total_touchdowns': 0, 'picks': []})

@@ -14,6 +14,6 @@ def check_player_scored_pre_save(sender, instance, **kwargs):
             previous_instance = ScorerNW.objects.get(pk=instance.pk)
             if not previous_instance.scored and instance.scored:
                 # Only create the message if `scored` is changing from False to True
-                send_email_to_user_NW(instance.name)
+                send_email_to_user_NW(instance.name, instance.league_number)
         except ScorerNW.DoesNotExist:
             pass  # Handle the rare case where the instance doesn't exist (e.g., deleted)
