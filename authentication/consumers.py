@@ -6,8 +6,12 @@ from .models import ChatMessage, MessageReaction
 
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
+        print("Room name:", self.scope['url_route']['kwargs'].get('room_name'))
+        print("League number:", self.scope['url_route']['kwargs'].get('league_number'))
         self.room_name = self.scope['url_route']['kwargs']['room_name']
-        self.room_group_name = f'chat_{self.room_name}'
+        self.league_number = self.scope['url_route']['kwargs']['league_number']
+        self.room_group_name = f'chat_{self.room_name}_{self.league_number}'
+
         await self.channel_layer.group_add(self.room_group_name, self.channel_name)
         await self.accept()
 
@@ -23,7 +27,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
         if action == 'message' and message:
             # Save the new message
-            chat_message = await self.save_message(self.room_name, message, team_name)
+            chat_message = await self.save_message(self.room_name, self.league_number, message, team_name)
             
             # Broadcast the new message to the group
             await self.channel_layer.group_send(
@@ -67,10 +71,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
         }))
 
     @database_sync_to_async
-    def save_message(self, room_name, message, team_name):
+    def save_message(self, room_name, league_number, message, team_name):
         """ Save a new chat message to the database """
         return ChatMessage.objects.create(
             room_name=room_name,
+            league_number = league_number,
             message=message,
             team_name=team_name,
             likes_count=0,
