@@ -94,7 +94,7 @@ def room(request,room_name,league_num):
 		team = "No Team"
 
 	# Fetch all chat messages for the room, including their likes and dislikes count
-	messages = ChatMessage.objects.filter(room_name=room_name).order_by('timestamp').values(
+	messages = ChatMessage.objects.filter(room_name=room_name, league_number = league_num).order_by('timestamp').values(
 		'id', 'message', 'team_name', 'timestamp', 'likes_count', 'dislikes_count'
 	)
 
@@ -104,7 +104,8 @@ def room(request,room_name,league_num):
 	return render(request, 'authentication/room.html', {
 		'room_name': room_name,
 		'team': team,
-		'messages': messages
+		'messages': messages,
+		'league_number': league_num,
 	})
 
 def terms(request):

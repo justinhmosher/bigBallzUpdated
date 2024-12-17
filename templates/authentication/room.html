@@ -166,6 +166,7 @@
 
         const roomName = "{{ room_name }}";
         const teamName = "{{ team }}";
+        const leagueNumber = "{{ league_number }}"
         const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
         const chatSocket = new WebSocket(
             `${protocol}${window.location.hostname}:${window.location.port}/ws/chat/${roomName}/${leagueNumber}/`
