@@ -454,7 +454,7 @@ def coinbase_webhook(request):
 		return redirect('authentication:payment')
 
 @login_required
-def playerboard(request):
+def playerboard(request, league_num):
 	username = request.user.username
 	player = Paid.objects.get(username = username)
 	if int(league_num) != player.league_number:

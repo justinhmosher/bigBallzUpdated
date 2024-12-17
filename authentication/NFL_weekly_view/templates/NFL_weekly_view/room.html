@@ -123,7 +123,7 @@
                     <div>
                         <b>{{ message.team_name }}</b><br>
                         <span class="message-content">{{ message.message }}</span><br>
-                        <span class="timestamp" data-timestamp="{{ message.timestamp|date:c }}">
+                        <span class="timestamp" data-timestamp="{{ message.timestamp|date:'c' }}">
                             {{ message.timestamp|date:"Y-m-d H:i" }}
                         </span>
                     </div>
