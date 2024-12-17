@@ -875,6 +875,7 @@ def player_list(request,league_num):
 		pick_count = item.pick_count
 
 		next_pick_count = data[index + 1].pick_count if index + 1 < len(data) else None
+		print(next_pick_count)
 		is_tied_with_previous = pick_count == previous_count
 		is_tied_with_next = pick_count == next_pick_count
 

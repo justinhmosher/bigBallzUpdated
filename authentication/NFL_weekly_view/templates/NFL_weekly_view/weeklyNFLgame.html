@@ -169,7 +169,7 @@
               </svg>
             {% endif %}
             <div class="card-body d-flex justify-content-center">
-            <form method="post" action="{% url 'football:game' %}">
+            <form method="post" action="{% url 'football:game' 1 %}">
                 {% csrf_token %}
                 <input type="hidden" name="change_pick" value='{"picknumber":"{{ pick.pick_number }}", "teamnumber":"{{ pick.teamnumber }}"}'>
                 <p class="text-center">Team #{{ pick.teamnumber }}</p>
@@ -287,7 +287,7 @@ $(document).ready(function () {
         const currentPage = parseInt(new URL(window.location.href).searchParams.get('page')) || 1;
         // AJAX request to select the player
         $.ajax({
-            url: "{% url 'football:game' %}",
+            url: "{% url 'football:game' 1 %}",
             method: "POST",
             data: {
                 'selected_player': playerName,

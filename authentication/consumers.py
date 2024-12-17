@@ -143,5 +143,3 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     'dislikes': message.dislikes_count
                 }
             )
-
-
