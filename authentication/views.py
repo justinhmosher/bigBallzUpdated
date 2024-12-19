@@ -218,7 +218,6 @@ def create_email(request, myuser):
 
 @login_required
 def teamname(request,league_num):
-
 	if request.method == "POST":
 		form = CreateTeam(request.POST)
 		if form.is_valid():
@@ -226,20 +225,24 @@ def teamname(request,league_num):
 			username = request.user.username
 			if Pick.objects.filter(team_name = team_name).exists():
 				messages.error(request,"Team name already exists.")
-				return redirect('authentication:teamname', league_num = player.league_number)
+				return redirect('authentication:teamname', league_num = league_num)
 			elif len(team_name) > 15 or len(team_name) < 6:
 				messages.error(request,"Team name need to be between 5-14 characters.")
-				return redirect("authentication:teamname", league_num = player.league_number)
+				return redirect("authentication:teamname", league_num = league_num)
 			else:
 				paid = Paid.objects.get(username = request.user.username)
-				teamcount = paid.numteams
-				for i in range(teamcount):
-					new_pick = Pick(team_name=team_name,username= request.user.username,teamnumber = i+1)
+				if paid.paid_status == False:
+					new_pick = Pick(team_name=team_name,username= request.user.username,paid = False, teamnumber = 1)
 					new_pick.save()
-				return redirect('authentication:checking', league_num = player.league_number)
+				else: 
+					teamcount = paid.numteams
+					for i in range(teamcount):
+						new_pick = Pick(team_name=team_name,username= request.user.username,paid = True, teamnumber = i+1)
+						new_pick.save()
+				return redirect('authentication:checking', league_num = league_num)
 		else:
 			messages.error(request,"Please submit a valid teamname.")
-			return redirect('authentication:teamname', league_num = player.league_number)
+			return redirect('authentication:teamname', league_num = league_num)
 	return render(request,"authentication/teamname.html")
 
 
@@ -393,7 +396,11 @@ def activate(request, uidb64, token):
 logger = logging.getLogger(__name__)
 
 @login_required
-def payment(request):
+def payment(request, league_num):
+	username = request.user.username
+	player = Paid.objects.get(username = username)
+	if int(league_num) != player.league_number:
+		return redirect("authentication:payment", league_num = player.league_number)
 	user = PromoUser.objects.get(username = request.user.username)
 	code = user.code
 	codeuser = False
@@ -490,8 +497,8 @@ def playerboard(request, league_num):
 	if (within_deadline) or not (start_datetime <= current_pst_time < end_datetime):
 		return redirect('authentication:checking', league_num = player.league_number)  # Replace 'some_other_page' with the name of an appropriate view
 	
-	player_counts1 = Pick.objects.filter(isin=True, league_number = league_num).exclude(pick1='N/A').values('pick1','pick1_team', 'pick1_position').annotate(count=Count('pick1')).order_by('-count')
-	player_counts2 = Pick.objects.filter(isin=True, league_number = league_num).exclude(pick2='N/A').values('pick2','pick2_team', 'pick2_position').annotate(count=Count('pick2')).order_by('-count')
+	player_counts1 = Pick.objects.filter(isin=True, paid = True, league_number = league_num).exclude(pick1='N/A').values('pick1','pick1_team', 'pick1_position').annotate(count=Count('pick1')).order_by('-count')
+	player_counts2 = Pick.objects.filter(isin=True, paid = True, league_number = league_num).exclude(pick2='N/A').values('pick2','pick2_team', 'pick2_position').annotate(count=Count('pick2')).order_by('-count')
 
 
 	# Combine player counts
@@ -593,8 +600,8 @@ def leaderboard(request, league_num):
 	if (within_deadline) or not (start_datetime <= current_pst_time < end_datetime):
 		return redirect('authentication:checking', league_num = player.league_number)  # Replace 'some_other_page' with the name of an appropriate view
 	
-	player_counts1 = Pick.objects.filter(isin=True, league_number = league_num).exclude(pick1='N/A').values('pick1','pick1_team', 'pick1_position').annotate(count=Count('pick1')).order_by('-count')
-	player_counts2 = Pick.objects.filter(isin=True, league_number = league_num).exclude(pick2='N/A').values('pick2','pick2_team', 'pick2_position').annotate(count=Count('pick2')).order_by('-count')
+	player_counts1 = Pick.objects.filter(isin=True, paid = True, league_number = league_num).exclude(pick1='N/A').values('pick1','pick1_team', 'pick1_position').annotate(count=Count('pick1')).order_by('-count')
+	player_counts2 = Pick.objects.filter(isin=True, paid = True, league_number = league_num).exclude(pick2='N/A').values('pick2','pick2_team', 'pick2_position').annotate(count=Count('pick2')).order_by('-count')
 
 
 	# Combine player counts
@@ -740,7 +747,7 @@ def tournaments(request):
 @login_required
 def location(request,league_num):
 	username = request.user.username
-	player = Paid.objects.get(username = username)
+	player = Paid.objects.get(username = request.user.username)
 	if int(league_num) != player.league_number:
 		return redirect("authentication:location", league_num = player.league_number)
 	user_ip_address = request.META.get('HTTP_X_FORWARDED_FOR') or request.META.get('REMOTE_ADDR')
@@ -859,7 +866,7 @@ def player_list(request,league_num):
 
 
 	# Annotate the Picks queryset with the count of past picks
-	data = Pick.objects.annotate(
+	data = Pick.objects.filter(paid = True).annotate(
 		pick_count=Subquery(past_pick_count, output_field=IntegerField())
 	).order_by(
 		'-isin',  # Order by `isin` (True first)
@@ -920,8 +927,6 @@ def game(request,league_num):
 	if int(league_num) != player.league_number:
 		return redirect("authentication:game", league_num = player.league_number)
 	paid = Paid.objects.get(username = request.user.username)
-	if paid.paid_status == False:
-		return redirect('authentication:checking', league_num = player.league_number)
 	# Define the PST timezone
 	pst = pytz.timezone('America/Los_Angeles')
 
@@ -957,6 +962,7 @@ def game(request,league_num):
 	pick2_data = None
 
 	if request.method == 'POST':
+
 		search = request.POST.get('searched')
 
 		if search is not None:
@@ -969,11 +975,14 @@ def game(request,league_num):
 			player_data_selected = None
 
 		if player_data_selected is not None:
-			num = game_search(request.user.username,player_data_selected)
-			if num == 1:
-				messages.error(request,"Selected players cannot be on the same team.")
-			elif num ==3:
-				messages.error(request,"Your selected player has already scored a TD.")
+			if paid.paid_status == False:
+				messages.error(request, "Features activate after payment")
+			else:
+				num = game_search(request.user.username,player_data_selected)
+				if num == 1:
+					messages.error(request,"Selected players cannot be on the same team.")
+				elif num ==3:
+					messages.error(request,"Your selected player has already scored a TD.")
 
 		change_pick = request.POST.get('change_pick','{}')
 		try:
@@ -1223,10 +1232,7 @@ def checking(request,league_num):
     elif paid.paid_status == False and (start_datetime <= current_pst_time < end_datetime) and not within_deadline:
         return redirect('authentication:playerboard', league_num = player.league_number)
     
-    elif paid.paid_status == False:
-        return redirect('authentication:payment', league_num = player.league_number)
-    
-    elif (paid.paid_status == True) and not (start_datetime <= current_pst_time < end_datetime):
+    elif paid.paid_status == False and not (start_datetime <= current_pst_time < end_datetime):
         username = request.user.username
         if not Pick.objects.filter(username=username).exists():
             return redirect('authentication:teamname', league_num = player.league_number)

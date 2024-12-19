@@ -15,6 +15,7 @@ class Pick(models.Model):
     username = models.CharField(max_length = 100, default = "username")
     email = models.EmailField(max_length = 100, default = "useremail@gamil.com")
     isin = models.BooleanField(default = True)
+    paid = models.BooleanField(default = True)
     league_number = models.IntegerField(default=1)
     pick1 = models.CharField(max_length = 100, default = "N/A")
     pick1_team = models.CharField(max_length = 100, default = "N/A")

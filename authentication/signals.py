@@ -1,6 +1,6 @@
 from django.db.models.signals import pre_save, post_save
 from django.dispatch import receiver
-from .models import Pick, Scorer, Message, Game
+from .models import Pick, Scorer, Message, Game, Paid
 from .utils import send_email_to_user
 
 # Signal for when a player is marked as out (`isin` = False)
@@ -15,7 +15,8 @@ def check_player_out_pre_save(sender, instance, **kwargs):
         previous_instance = Pick.objects.get(pk=instance.pk)
         if previous_instance.isin and not instance.isin:
             # Trigger the message creation only if `isin` is changed to False
-            content = f"Team {instance.team_name} is out!"
+            if instance.paid == True:
+                content = f"Team {instance.team_name} is out!"
             Message.objects.create(content=content, week= week, league_number = instance.league_number)
 
 @receiver(pre_save, sender=Scorer)
@@ -61,3 +62,12 @@ def check_player_scored_pre_save(sender, instance, **kwargs):
                 send_email_to_user(instance.name, instance.league_number)
         except Scorer.DoesNotExist:
             pass  # Handle the rare case where the instance doesn't exist (e.g., deleted)
+
+@receiver(pre_save, sender=Paid)
+def delete_unpaid_players(sender, instance, **kwargs):
+    if instance.pk:
+        # Get the previous value of the object from the database
+        previous_instance = Paid.objects.get(pk=instance.pk)
+        if instance.paid_status and not previous_instance.paid_status:
+            # Trigger the message creation only if `isin` is changed to False
+            Pick.objects.filter(username = instance.username, paid=False).delete()

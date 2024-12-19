@@ -3,8 +3,11 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
 from django.contrib.auth.models import User
 from .models import ChatMessage, MessageReaction
+import re
 
 class ChatConsumer(AsyncWebsocketConsumer):
+    with open('badwords.txt') as f:  
+        BAD_WORDS = [line.strip() for line in f]
     async def connect(self):
         print("Room name:", self.scope['url_route']['kwargs'].get('room_name'))
         print("League number:", self.scope['url_route']['kwargs'].get('league_number'))
@@ -18,6 +21,10 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def disconnect(self, close_code):
         await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
 
+    async def contains_forbidden_words(self, message):
+        pattern = r'\b(?:' + '|'.join(ChatConsumer.BAD_WORDS) + r')\b'
+        return re.search(pattern, message, re.IGNORECASE)
+
     async def receive(self, text_data):
         data = json.loads(text_data)
         action = data.get('action')
@@ -26,6 +33,13 @@ class ChatConsumer(AsyncWebsocketConsumer):
         team_name = data.get('team_name')
 
         if action == 'message' and message:
+            if await self.contains_forbidden_words(message):
+                # Reject the message
+                await self.send(text_data=json.dumps({
+                    'action': 'error',
+                    'message': 'Your message contains inappropriate content.'
+                }))
+                return
             # Save the new message
             chat_message = await self.save_message(self.room_name, self.league_number, message, team_name)
             

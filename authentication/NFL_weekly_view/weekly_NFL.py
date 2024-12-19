@@ -119,16 +119,21 @@ def teamname(request, league_num):
                 return redirect("football:teamname" , league_num = league_num)
             else:
                 paid = PaidNW.objects.get(username = request.user.username)
-                teamcount = paid.numteams
-                for i in range(teamcount):
+                if paid.paid_status == False:
                     for j in range(10):
-                        new_pick = PickNW(team_name=team_name,username= request.user.username,pick_number = j+1,teamnumber = i+1)
+                        new_pick = PickNW(team_name=team_name,username= request.user.username,paid = False,pick_number = j+1, teamnumber = 1)
                         new_pick.save()
+                else:
+                    teamcount = paid.numteams
+                    for i in range(teamcount):
+                        for j in range(10):
+                            new_pick = PickNW(team_name=team_name,username= request.user.username,paid = True,pick_number = j+1,teamnumber = i+1)
+                            new_pick.save()
                 return redirect('football:checking', league_num = league_num)
         else:
             messages.error(request,"Please submit a valid teamname.")
             return redirect('football:teamname', league_num = league_num)
-    return render(request,"authentication/teamname.html")
+    return render(request,"NFL_weekly_view/teamname.html")
 
 
 def signout(request):
@@ -420,7 +425,7 @@ def location(request, league_num):
                             messages.error(request,"Max number of teams entered, we are adding you to a waitlist.")
                             return redirect('football:tournaments')
                     else:
-                        return redirect('football:checking') #needs to be removed to check age
+                        return redirect('football:checking', league_num = league_num) #needs to be removed to check age
                         if compliance.old == False and compliance.young == False:
                             age_api_key = config('AGE_API')
                             return render(request,'authentication/agechecking.html',{'api':age_api_key})
@@ -476,7 +481,7 @@ def player_list(request, league_num):
     if int(league_num) != player.league_number:
         return redirect("football:player_list", league_num = player.league_number)
     # Fetch all PickNW entries
-    all_picks = PickNW.objects.filter(league_number = league_num)
+    all_picks = PickNW.objects.filter(league_number = league_num, paid = True)
 
     # Build a dictionary to store team data
     teams_data = defaultdict(lambda: {'team_name': '', 'total_touchdowns': 0, 'picks': []})
@@ -553,8 +558,6 @@ def game(request, league_num):
         return redirect("football:game", league_num = player.league_number)
     # Define the PST timezone
     paid = PaidNW.objects.get(username = request.user.username)
-    if paid.paid_status == False:
-        return redirect('authentication:checking', league_num = player.league_number)
     pst = pytz.timezone('America/Los_Angeles')
 
     # Get the current time in PST
@@ -565,6 +568,7 @@ def game(request, league_num):
     game = Game.objects.get(sport="Football")
     start_date = game.startDate
     end_date = game.endDate
+    paid = PaidNW.objects.get(username = request.user.username)
 
     end_datetime = datetime.combine(end_date, time(23, 59, 59))
     end_datetime = pst.localize(end_datetime)
@@ -597,27 +601,28 @@ def game(request, league_num):
             try:
                 # Retrieve the selected player
                 player_data_selected = NFLPlayer.objects.get(name=selected_player)
-
-                # Use your existing game_search function
-                result = game_search(request.user.username, player_data_selected,page_num)
-
-                if result == 11:
-                    return JsonResponse({'success': False, 'message': "Selected players cannot be on the same team."})
-                elif result == 13:
-                     return JsonResponse({'success': False, 'message': "Player already selected."})
+                if paid.paid_status == False:
+                    return JsonResponse({'success': False, 'message': "Features activate after payment"})
                 else:
-                    return JsonResponse({
-                        'success': True,
-                        'message': 'Player selected successfully!',
-                        'pick': {
-                            'pick_number': result[1],
-                            'team_number': result[0],
-                            'pick_name': result[2],
-                            'pick_team': result[3],
-                            'pick_position': result[4],
-                            'pick_color': result[5],
-                        }
-                    })
+                    # Use your existing game_search function
+                    result = game_search(request.user.username, player_data_selected,page_num)
+                    if result == 11:
+                        return JsonResponse({'success': False, 'message': "Selected players cannot be on the same team."})
+                    elif result == 13:
+                        return JsonResponse({'success': False, 'message': "Player already selected."})
+                    else:
+                        return JsonResponse({
+                            'success': True,
+                            'message': 'Player selected successfully!',
+                            'pick': {
+                                'pick_number': result[1],
+                                'team_number': result[0],
+                                'pick_name': result[2],
+                                'pick_team': result[3],
+                                'pick_position': result[4],
+                                'pick_color': result[5],
+                            }
+                        })
 
             except NFLPlayer.DoesNotExist:
                 return JsonResponse({'success': False, 'message': 'Player not found!'})
@@ -799,10 +804,7 @@ def checking(request, league_num):
     elif paid.paid_status == False and (start_datetime <= current_pst_time < end_datetime) and not within_deadline:
         return redirect('football:playerboard', league_num = league_num)
     
-    elif paid.paid_status == False:
-        return redirect('football:payment')
-    
-    elif (paid.paid_status == True) and not (start_datetime <= current_pst_time < end_datetime):
+    elif not (start_datetime <= current_pst_time < end_datetime):
         username = request.user.username
         if not PickNW.objects.filter(username=username).exists():
             return redirect('football:teamname', league_num = league_num)
