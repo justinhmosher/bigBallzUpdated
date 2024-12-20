@@ -869,7 +869,7 @@ def player_list(request,league_num):
 	username = request.user.username
 	player = Paid.objects.get(username = username)
 	if int(league_num) != player.league_number:
-		return redirect("authentication:leaders", league_num = player.league_number)
+		return redirect("authentication:player_list", league_num = player.league_number)
 	# Create a Subquery to count matching PastPick entries
 	past_pick_count = PastPick.objects.filter(
 		username=OuterRef('username'), 
@@ -910,7 +910,10 @@ def player_list(request,league_num):
 				standings.append({"rank": f"T{current_rank}", "team": item})
 				current_rank = index + 2
 			if not is_tied_with_previous and is_tied_with_next:
-				standings.append({"rank": f"T{current_rank}", "team": item})
+				if index + 1 == len(data):
+					standings.append({"rank": f"{current_rank}", "team": item})
+				else:
+					standings.append({"rank": f"T{current_rank}", "team": item})
 		else:
 			standings.append({"rank": current_rank, "team": item})
 			current_rank += 1
