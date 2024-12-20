@@ -91,7 +91,6 @@
 
         .card-body {
             padding: 15px;
-            text-align: center;
         }
 
         .card-actions {
@@ -143,6 +142,9 @@
             text-align: center;
             padding: 15px 0;
             margin-top: auto;
+        }
+        .card-pot-nums{
+            text-align: center;
         }
 
         footer a {
@@ -222,8 +224,13 @@
                   {{ game.name|add_linebreaks }}
                 </div>
                 <div class="card-body">
-                    <h4 class="card-summary">
+                    <h4>
                         {% for line in game.summary %}
+                        {{ line }}<br>
+                        {% endfor %}
+                    </h4>
+                    <h4 class="card-pot-nums">
+                        {% for line in game.money %}
                         {{ line }}<br>
                         {% endfor %}
                     </h4>

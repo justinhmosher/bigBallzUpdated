@@ -53,7 +53,10 @@ def message_board(request, league_num):
             grouped_messages[message.week] = []
         grouped_messages[message.week].append(message)
 
-    return render(request, 'NFL_weekly_view/messages.html', {'grouped_messages': grouped_messages})
+    return render(request, 'NFL_weekly_view/messages.html', {
+        'grouped_messages': grouped_messages,
+        'pay_status':player.paid_status
+        })
 
 def custom_csrf_failure_view(request, reason=""):
     # Set an error message to be displayed on the login page
@@ -94,6 +97,7 @@ def room(request, room_name, league_num):
         'team': team,
         'messages': messages,
         'league_number': league_num,
+        'pay_status':player.paid_status
     })
 
 def rules(request):
@@ -141,7 +145,11 @@ def signout(request):
     return redirect('football:home')
 
 @login_required
-def payment(request):
+def payment(request, league_num):
+    username = request.user.username
+    player = PaidNW.objects.get(username = username)
+    if int(league_num) != player.league_number:
+        return redirect("football:payment", league_num = player.league_number)
     user = PromoUserNW.objects.get(username = request.user.username)
     code = user.code
     codeuser = False
@@ -184,11 +192,12 @@ def payment(request):
     context = {
         'team_count': team_count,
         'total_amount': total_amount,
-        'promo':codeuser
+        'promo':codeuser,
+        'pay_status':player.paid_status
         } 
     print(context)
 
-    return render(request, 'authentication/payment.html', context)
+    return render(request, 'NFL_weekly_view/payment.html', context)
 
 @login_required
 def playerboard(request, league_num):
@@ -275,8 +284,7 @@ def playerboard(request, league_num):
         'sorted_player_counts': sorted_player_counts,
         'player_teams': dict(pick_teams),
         'player_status': player_status,
-        'total_in': total_in,
-    })
+        'total_in': total_in, })
 
 @login_required
 def leaderboard(request, league_num):
@@ -546,6 +554,7 @@ def player_list(request, league_num):
     # Pass the data to the template
     return render(request, 'NFL_weekly_view/leaders.html', {
         'leaderboard': page_obj,
+        'pay_status':player.paid_status
     })
 
 
@@ -664,6 +673,7 @@ def game(request, league_num):
         'start':start,
         'team':name,
         'total':total_in,
+        'pay_status':player.paid_status
         })
 
 @csrf_exempt

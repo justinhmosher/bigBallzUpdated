@@ -53,7 +53,10 @@ def message_board(request,league_num):
 			grouped_messages[message.week] = []
 		grouped_messages[message.week].append(message)
 
-	return render(request, 'authentication/messages.html', {'grouped_messages': grouped_messages})
+	return render(request, 'authentication/messages.html', {
+		'grouped_messages': grouped_messages,
+		'pay_status':player.paid_status
+		})
 
 def testing(request):
 	return render(request,'authentication/testing.html')
@@ -106,6 +109,7 @@ def room(request,room_name,league_num):
 		'team': team,
 		'messages': messages,
 		'league_number': league_num,
+		'pay_status' : player.paid_status
 	})
 
 def terms(request):
@@ -443,7 +447,8 @@ def payment(request, league_num):
 	context = {
 		'team_count': team_count,
 		'total_amount': total_amount,
-		'promo':codeuser
+		'promo':codeuser,
+		'pay_status':player.paid_status
 		} 
 
 	return render(request, 'authentication/payment.html', context)
@@ -678,7 +683,8 @@ def tournaments(request):
 	games = {
 		"Football": [
 			{"name": "Touchdown Mainia/Season Long", 
-			"summary": "Each week, choose two players to score a touchdown./If one or both score, you advance, else you're out./Last man standing wins the pot!//Pot: $10K", 
+			"summary": "Each week, choose two players to score a touchdown and get one or more offensive yards./If one or both score and have one or more offensive yards, you advance, else you're out./Last man standing wins the pot!", 
+			"money": "Max Entries per Tournament: 110/Buy In: $50/Pot: $5K",
 			"rules": 1, 
 			"playable": True,
 			"app": "authentication",
@@ -686,7 +692,8 @@ def tournaments(request):
 		},
 		{	
 			"name": "Touchdown Mainia/Weekly Game", 
-			"summary": "Select 10 NFL players to score touchdowns./The user with the most comultive touchdowns wins the pot!//Pot: $10k", 
+			"summary": "Select 10 NFL players to score touchdowns and accumulate one or more offensive yards./The user with the most comultive touchdowns wins the pot!", 
+			"money": "Max Entries per Tournament: 110/Buy In: $50/Pot: $5K",
 			"rules": 2, 
 			"playable": True,
 			"app" : "football",
@@ -695,6 +702,7 @@ def tournaments(request):
 		"Baseball": [
 			{"name": "Game 1", 
 			"summary": "Pick 2 players to get a hit.", 
+			"money": "",
 			"rules": 3, 
 			"playable": False,
 			"app" : "football",
@@ -703,6 +711,7 @@ def tournaments(request):
 		{
 			"name": "Game 3", 
 			"summary": "Custom rules for Game 3.", 
+			"money": "",
 			"rules": 4, 
 			"playable": False,
 			"app" : "football",
@@ -711,6 +720,7 @@ def tournaments(request):
 		"Basketball": [
 			{"name": "Game 1", 
 			"summary": "Pick 2 players to make a 3-pointer.", 
+			"money": "",
 			"rules": 5, 
 			"playable": False,
 			"app" : "football",
@@ -719,6 +729,7 @@ def tournaments(request):
 		{
 			"name": "Game 3", 
 			"summary": "Custom rules for Game 3.", 
+			"money": "",
 			"rules": 6, 
 			"playable": False,
 			"app" : "football",
@@ -728,6 +739,10 @@ def tournaments(request):
 	for sport, sport_games in games.items():
 		for game in sport_games:
 			game["summary"] = game["summary"].split('/')
+
+	for sport, sport_games in games.items():
+		for game in sport_games:
+			game["money"] = game["money"].split('/')
 	"""
 	game = Game.objects.get(sport = "Football")
 	start_date = game.startDate
@@ -916,7 +931,8 @@ def player_list(request,league_num):
 	# Pass the data to the template
 	return render(request, 'authentication/leaders.html', {
 		'leaderboard': page_obj,
-		'past_picks_map': past_picks_map
+		'past_picks_map': past_picks_map,
+		'pay_status':player.paid_status
 	})
 
 
@@ -1019,7 +1035,7 @@ def game(request,league_num):
 	team = Pick.objects.get(username = request.user.username, teamnumber = 1)
 	name = team.team_name
 
-	total_in = Pick.objects.filter(isin = True).count()
+	total_in = Pick.objects.filter(isin = True, league_number = league_num).count()
 
 	active_teams = Pick.objects.filter(username=request.user.username, isin=True).values_list('teamnumber', flat=True)
 
@@ -1057,7 +1073,8 @@ def game(request,league_num):
 	user_pick_data = in_paginator.get_page(page_number) if isin else out_paginator.get_page(page_number)
 
 	return render(request, 'authentication/game.html', 
-		{'player_data': player_data, 
+		{'player_data': player_data,
+		'pay_status': player.paid_status,
 		'user_pick_data' : user_pick_data,
 		'has_started' : has_started,
 		'isin': isin,

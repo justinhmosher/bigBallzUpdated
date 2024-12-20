@@ -31,14 +31,14 @@
     </style>
 </head>
 {% if pay_status == True %}
-{% include 'authentication/partials/header_game.html' %}
+{% include 'authentication/partials/header_game_NW.html' %}
 {% block trophy %}
       <a class="navbar-brand"  href="javascript:void(0);">
         <img src="{% static 'Trophy-logo.svg' %}" alt="The Chosen Fantasy Games">
       </a>
 {% endblock %}
 {% else %}
-{% include 'authentication/partials/No_pay.html' %}
+{% include 'authentication/partials/No_pay_NW.html' %}
       <a class="navbar-brand"  href="javascript:void(0);">
         <img src="{% static 'Trophy-logo.svg' %}" alt="The Chosen Fantasy Games">
       </a>
@@ -50,7 +50,7 @@
                 <i class="fas fa-users"></i>
             </div>
             <h2 class="text-center mb-4">Team Payment</h2>
-            <form method="post" action="{% url 'authentication:payment' 1 %}">
+            <form method="post" action="{% url 'football:payment' 1 %}">
                 {% csrf_token %}
                 <div class="mb-3">
                     <label for="teamCount" class="form-label">Number of Entries:</label>
