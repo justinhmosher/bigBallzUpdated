@@ -19,7 +19,7 @@
         <h5 class="modal-title" id="exampleModalLongTitle">Please check your EMAIL AND JUNK MAIL to verify your account.  Email: {{ email }}</h5>
       </div>
       <div class="modal-body">
-        <form action="{% url 'confirm_forgot_email' email=email %}" method="post">
+        <form action="{% url 'authentication:confirm_forgot_email' email=email %}" method="post">
           {% csrf_token %}  
           <button id="resendEmail" type="submit" class="btn btn-primary">Resend Email</button>
           <p id="timer">Please wait 30 seconds before resending.</p>

@@ -21,6 +21,7 @@ urlpatterns = [
     path('playerboard/<int:league_num>',views.playerboard,name = 'playerboard'),
     path('forgotPassEmail',views.forgotPassEmail,name='forgotPassEmail'),
     path('passreset/<uidb64>/<token>',views.passreset,name='passreset'),
+    path('activate/<uidb64>/<token>',views.activate,name='activate'),
     path('tournaments',views.tournaments,name='tournaments'),
     path('payment/<int:league_num>',views.payment,name='payment'),
     path('terms',views.terms,name='terms'),

@@ -1,7 +1,7 @@
 from django.db.models.signals import pre_save, post_save
 from django.dispatch import receiver
 from .models import Pick, Scorer, Message, Game, Paid
-from .utils import send_email_to_user
+from .utils import send_email_to_user, send_paid_email
 
 # Signal for when a player is marked as out (`isin` = False)
 
@@ -70,4 +70,11 @@ def delete_unpaid_players(sender, instance, **kwargs):
         previous_instance = Paid.objects.get(pk=instance.pk)
         if instance.paid_status and not previous_instance.paid_status:
             # Trigger the message creation only if `isin` is changed to False
+            paid = Paid.objects.get(username = instance.username)
+            Pick = Pick.objects.get(username = instance.username)
+            teamcount = paid.numteams
+            for i in range(teamcount):
+                new_pick = Pick(team_name=team_name,username= instance.username,paid = True, teamnumber = i+1)
+                new_pick.save()
             Pick.objects.filter(username = instance.username, paid=False).delete()
+            send_paid_email(instance.username, instance.league_number)

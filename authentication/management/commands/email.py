@@ -1,6 +1,6 @@
 import requests
 from django.core.management.base import BaseCommand
-from authentication.models import Paid
+from authentication.models import Paid, Email
 from decouple import config
 import smtplib
 from email.mime.multipart import MIMEMultipart
@@ -13,7 +13,7 @@ class Command(BaseCommand):
     help = 'Fetch NFLPlayers from API and save to the database'
 
     def handle(self, *args, **options):
-        emails = Paid.objects.values_list('username', flat=True)
+        emails = Email.objects.filter(blocked = False).values_list('email', flat=True)
         sender_email = config('SENDER_EMAIL')
         sender_name = "The Chosen Fantasy Games"
         sender_password = config('SENDER_PASSWORD')

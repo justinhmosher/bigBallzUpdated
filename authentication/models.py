@@ -32,6 +32,12 @@ class Pick(models.Model):
     def __str__(self):
         return f"{self.team_name}"
 
+class Email(models.Model):
+    email = models.CharField(max_length = 100, default = "email")
+    blocked = models.BooleanField(default = False)
+    def __str__(self):
+        return f"{self.email}" 
+
 class Scorer(models.Model):
     name = models.CharField(max_length = 100, default = "name")
     player_ID = models.CharField(max_length= 100, default = "player ID")

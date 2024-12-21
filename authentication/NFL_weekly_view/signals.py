@@ -2,7 +2,7 @@ from django.db.models.signals import pre_save, post_save
 from django.dispatch import receiver
 from .models import PickNW, ScorerNW, MessageNW, PaidNW
 from authentication.models import Game
-from authentication.utils import send_email_to_user_NW
+from authentication.utils import send_email_to_user_NW, send_paid_email
 
 @receiver(pre_save, sender=ScorerNW)
 def check_player_scored_pre_save(sender, instance, **kwargs):
@@ -23,6 +23,14 @@ def delete_unpaid_players(sender, instance, **kwargs):
         previous_instance = PaidNW.objects.get(pk=instance.pk)
         if instance.paid_status and not previous_instance.paid_status:
             # Trigger the message creation only if `isin` is changed to False
+            paid = PaidNW.objects.get(username = instance.username)
+            pick = PickNW.objects.get(username = instance.username)
+            teamcount = paid.numteams
+            for i in range(teamcount):
+                for j in range(10):
+                    new_pick = PickNW(team_name=pick.team_name,username= instance.username,paid = True,pick_number = j+1,teamnumber = i+1)
+                    new_pick.save()
             PickNW.objects.filter(username = instance.username, paid=False).delete()
+            send_paid_email(instance.username, instance.league_number)
 
 

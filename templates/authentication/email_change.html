@@ -66,7 +66,7 @@
         <div class="content">
             <p>Please confirm your email by clicking the following link:</p>
             <div style="text-align: center;">
-                <a href="http://{{ domain }}{% url 'passreset' uidb64=uid token=token %}" class="cta">Confirm Email</a>
+                <a href="http://{{ domain }}{% url 'authentication:passreset' uidb64=uid token=token %}" class="cta">Confirm Email</a>
             </div>
         </div>
         <div class="footer">

@@ -31,11 +31,6 @@
         .content p {
             margin: 0 0 20px;
         }
-        .teams {
-            font-weight: bold;
-            color: #333333;
-            text-align: center;
-        }
         .cta {
             display: inline-block;
             padding: 12px 25px;
@@ -64,16 +59,17 @@
             <h1> The Chosen Fantasy Games </h1>
         </div>
         <div class="content">
-            <p>Please confirm your email by clicking the following link:</p>
+            <p>Thank you for purchasing a team!  We wish you the best of luck!</p>
             <div style="text-align: center;">
-                <a href="http://{{ domain }}{% url 'authentication:activate' uidb64=uid token=token %}" class="cta">Confirm Email</a>
+                <a href="https://thechosenfg.com/tournaments" class="cta">Play Now</a>
             </div>
+            <br>
+            <p>Sincerely,</p>
+            <p>The Chosen Fantasy Games Team</p>
         </div>
         <div class="footer">
             <p>&copy; 2024 The Chosen Fantasy Games</p>
         </div>
     </div>
 </body>
-</html>
-
 </html>

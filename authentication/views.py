@@ -18,7 +18,7 @@ from decouple import config
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from .forms import PlayerSearchForm, Pickform, Pick1Form, CreateTeam
-from .models import Pick,Scorer,Paid,NFLPlayer,Game,PastPick,PromoCode,PromoUser,OfAge,UserVerification,Blog,ChatMessage,Waitlist,MessageReaction,Message
+from .models import Pick,Scorer,Paid,NFLPlayer,Game,PastPick,PromoCode,PromoUser,OfAge,UserVerification,Blog,ChatMessage,Waitlist,MessageReaction,Message,Email
 from django.db.models import Count,F,ExpressionWrapper,fields,OuterRef,Subquery
 from datetime import datetime, time
 from itertools import chain
@@ -389,6 +389,8 @@ def activate(request, uidb64, token):
 			NW_paid.save()
 			NW_promo = PromoUserNW(username = myuser.username)
 			NW_promo.save()
+			email = Email(email = myuser.username)
+			email.save()
 		except ObjectDoesNotExist:
 			pass
 		login(request, myuser)
@@ -548,7 +550,7 @@ def playerboard(request, league_num):
 		reverse=True
 	)
 
-	total_in = Pick.objects.filter(isin=True).count()
+	total_in = Pick.objects.filter(isin = True,paid = True, league_number = league_num).count()
 
 	# Paginate sorted_player_counts (show 10 players per page)
 	paginator = Paginator(sorted_player_counts, 10)  # Show 10 players per page
@@ -651,7 +653,7 @@ def leaderboard(request, league_num):
 		reverse=True
 	)
 
-	total_in = Pick.objects.filter(isin=True).count()
+	total_in = Pick.objects.filter(isin = True,paid = True, league_number = league_num).count()
 
 
 	user_data = Pick.objects.filter(username=request.user.username, isin=True)
@@ -898,7 +900,6 @@ def player_list(request,league_num):
 		pick_count = item.pick_count
 
 		next_pick_count = data[index + 1].pick_count if index + 1 < len(data) else None
-		print(next_pick_count)
 		is_tied_with_previous = pick_count == previous_count
 		is_tied_with_next = pick_count == next_pick_count
 
@@ -1038,7 +1039,7 @@ def game(request,league_num):
 	team = Pick.objects.get(username = request.user.username, teamnumber = 1)
 	name = team.team_name
 
-	total_in = Pick.objects.filter(isin = True, league_number = league_num).count()
+	total_in = Pick.objects.filter(isin = True,paid = True, league_number = league_num).count()
 
 	active_teams = Pick.objects.filter(username=request.user.username, isin=True).values_list('teamnumber', flat=True)
 
@@ -1199,7 +1200,7 @@ def game_search(username,playerdata):
 
 @login_required
 def picking(request,league_num):
-	total_in = Pick.objects.filter(isin = True).count()
+	total_in = Pick.objects.filter(isin = True,paid = True, league_number = league_num).count()
 	return render(request, 'authentication/picking.html', {'total_in': total_in})
 
 @login_required
@@ -1252,12 +1253,11 @@ def checking(request,league_num):
     elif paid.paid_status == False and (start_datetime <= current_pst_time < end_datetime) and not within_deadline:
         return redirect('authentication:playerboard', league_num = player.league_number)
     
-    elif paid.paid_status == False and not (start_datetime <= current_pst_time < end_datetime):
+    elif  not (start_datetime <= current_pst_time < end_datetime):
         username = request.user.username
         if not Pick.objects.filter(username=username).exists():
             return redirect('authentication:teamname', league_num = player.league_number)
         return redirect('authentication:game', league_num = player.league_number)
-    
     else:
         username = request.user.username
         if not Pick.objects.filter(username=username).exists():

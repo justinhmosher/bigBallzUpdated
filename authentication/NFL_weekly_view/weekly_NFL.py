@@ -178,7 +178,7 @@ def payment(request, league_num):
         info.price = total_amount
         info.save()
         username = request.user.username
-        note = f"Entry-for-{username}"
+        note = f"Entry-for-{username}-minigame"
 
         venmo_url = f"https://venmo.com/thechosenfantasy?txn=pay&amount={total_amount}&note={note}"
 
@@ -270,7 +270,7 @@ def playerboard(request, league_num):
         reverse=True
     )
 
-    total_in = int(PickNW.objects.count()/10)
+    total_in = int(PickNW.objects.filter(paid = True,league_number = league_num).count() / 10)
 
     # Paginate sorted_player_counts (show 10 players per page)
     paginator = Paginator(sorted_player_counts, 10)  # Show 10 players per page
@@ -357,7 +357,7 @@ def leaderboard(request, league_num):
         reverse=True
     )
 
-    total_in = int(PickNW.objects.count()/10)
+    total_in = int(PickNW.objects.filter(paid = True,league_number = league_num).count() / 10)
 
     # Paginate sorted_player_counts (show 10 players per page)
     paginator = Paginator(sorted_player_counts, 10)  # Show 10 players per page
@@ -666,7 +666,7 @@ def game(request, league_num):
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
-    total_in = int(PickNW.objects.count() / 10)
+    total_in = int(PickNW.objects.filter(paid = True,league_number = league_num).count() / 10)
 
 
     return render(request, 'NFL_weekly_view/weeklyNFLgame.html', 
@@ -764,7 +764,7 @@ def picking(request, league_num):
     player = PaidNW.objects.get(username = username)
     if int(league_num) != player.league_number:
         return redirect("football:picking", league_num = player.league_number)
-    total_in = PickNW.objects.filter(league_number = league_num).count()
+    total_in = int(PickNW.objects.filter(paid = True,league_number = league_num).count() / 10)
     return render(request, 'authentication/picking.html', {'total_in': total_in})
 
 @login_required

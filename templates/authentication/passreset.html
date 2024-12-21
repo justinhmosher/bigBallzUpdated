@@ -104,7 +104,7 @@
 <div class="text-center">
 <h2>Reset Your Password!</h2>
 </div>
-<form action="{% url 'passreset' uidb64=uidb64 token=token %}" method="post">
+<form action="{% url 'authentication:passreset' uidb64=uidb64 token=token %}" method="post">
 {% csrf_token %}  
   <div class="mb-3">
     <label class="form-label">Password</label>
