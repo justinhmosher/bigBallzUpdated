@@ -19,6 +19,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from .forms import PlayerSearchForm, Pickform, Pick1Form, CreateTeam
 from .models import Pick,Scorer,Paid,NFLPlayer,Game,PastPick,PromoCode,PromoUser,OfAge,UserVerification,Blog,ChatMessage,Waitlist,MessageReaction,Message,Email
+from authentication.NFL_weekly_view.models import PickNW
 from django.db.models import Count,F,ExpressionWrapper,fields,OuterRef,Subquery
 from datetime import datetime, time
 from itertools import chain
@@ -221,32 +222,40 @@ def create_email(request, myuser):
 
 
 @login_required
-def teamname(request,league_num):
-	if request.method == "POST":
-		form = CreateTeam(request.POST)
-		if form.is_valid():
-			team_name = form.cleaned_data['team_name']
-			username = request.user.username
-			if Pick.objects.filter(team_name = team_name).exists():
-				messages.error(request,"Team name already exists.")
-				return redirect('authentication:teamname', league_num = league_num)
-			elif len(team_name) > 15 or len(team_name) < 6:
-				messages.error(request,"Team name need to be between 5-14 characters.")
-				return redirect("authentication:teamname", league_num = league_num)
-			else:
-				paid = Paid.objects.get(username = request.user.username)
-				if paid.paid_status == False:
-					new_pick = Pick(team_name=team_name,username= request.user.username,paid = False, teamnumber = 1)
-					new_pick.save()
-				else: 
-					teamcount = paid.numteams
-					for i in range(teamcount):
-						new_pick = Pick(team_name=team_name,username= request.user.username,paid = True, teamnumber = i+1)
+def teamname(request):
+	if not PickNW.objects.filter(username=request.user.username).exists():
+		if request.method == "POST":
+			form = CreateTeam(request.POST)
+			if form.is_valid():
+				team_name = form.cleaned_data['team_name']
+				username = request.user.username
+				if Pick.objects.filter(team_name = team_name).exists():
+					messages.error(request,"Team name already exists.")
+					return redirect('authentication:teamname')
+				elif len(team_name) > 16:
+					messages.error(request,"Team names need to be less than 15 characters.")
+					return redirect("authentication:teamname")
+				else:
+					paid = Paid.objects.get(username = request.user.username)
+					if paid.paid_status == False:
+						new_pick = Pick(team_name=team_name,username= request.user.username,paid = False, teamnumber = 1)
 						new_pick.save()
-				return redirect('authentication:checking', league_num = league_num)
-		else:
-			messages.error(request,"Please submit a valid teamname.")
-			return redirect('authentication:teamname', league_num = league_num)
+					else: 
+						teamcount = paid.numteams
+						for i in range(teamcount):
+							new_pick = Pick(team_name=team_name,username= request.user.username,paid = True, teamnumber = i+1)
+							new_pick.save()
+					return redirect('authentication:checking', league_num = new_pick.league_number)
+			else:
+				messages.error(request,"Please submit a valid teamname.")
+				return redirect('authentication:teamname')
+	else:
+		pick = PickNW.objects.get(username = request.user.username, teamnumber = 1, pick_number = 1)
+		paid = Paid.objects.get(username = request.user.username)
+		if paid.paid_status == False:
+			new_pick = Pick(team_name= pick.team_name,username= request.user.username,paid = False, teamnumber = 1)
+			new_pick.save()
+		return redirect('authentication:checking', league_num = new_pick.league_number)
 	return render(request,"authentication/teamname.html")
 
 
@@ -1256,12 +1265,12 @@ def checking(request,league_num):
     elif  not (start_datetime <= current_pst_time < end_datetime):
         username = request.user.username
         if not Pick.objects.filter(username=username).exists():
-            return redirect('authentication:teamname', league_num = player.league_number)
+            return redirect('authentication:teamname')
         return redirect('authentication:game', league_num = player.league_number)
     else:
         username = request.user.username
         if not Pick.objects.filter(username=username).exists():
-            return redirect('authentication:teamname', league_num = player.league_number)
+            return redirect('authentication:teamname')
         else:
             user_data = Pick.objects.filter(username=username)
             count_ins = 0

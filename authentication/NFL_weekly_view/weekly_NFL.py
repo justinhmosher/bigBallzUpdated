@@ -17,7 +17,7 @@ from decouple import config
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from .models import PickNW,ScorerNW,PaidNW,PromoCodeNW,PromoUserNW,WaitlistNW,MessageNW
-from authentication.models import OfAge,Game,NFLPlayer,ChatMessage
+from authentication.models import OfAge,Game,NFLPlayer,ChatMessage, Pick
 from authentication.forms import CreateTeam
 from django.db.models import Count,F,ExpressionWrapper,fields,OuterRef,Subquery
 from datetime import datetime, time
@@ -104,39 +104,44 @@ def rules(request):
     return render(request,'authentication/rules.html')
 
 @login_required
-def teamname(request, league_num):
-    username = request.user.username
-    player = PaidNW.objects.get(username = username)
-    if int(league_num) != player.league_number:
-        return redirect("football:teamname", league_num = player.league_number)
-
-    if request.method == "POST":
-        form = CreateTeam(request.POST)
-        if form.is_valid():
-            team_name = form.cleaned_data['team_name']
-            username = request.user.username
-            if PickNW.objects.filter(team_name = team_name).exists():
-                messages.error(request,"Team name already exists.")
-                return redirect('football:teamname' , league_num = league_num)
-            elif len(team_name) > 15 or len(team_name) < 6:
-                messages.error(request,"Team name need to be between 5-14 characters.")
-                return redirect("football:teamname" , league_num = league_num)
-            else:
-                paid = PaidNW.objects.get(username = request.user.username)
-                if paid.paid_status == False:
-                    for j in range(10):
-                        new_pick = PickNW(team_name=team_name,username= request.user.username,paid = False,pick_number = j+1, teamnumber = 1)
-                        new_pick.save()
+def teamname(request):
+    if not Pick.objects.filter(username=request.user.username).exists():
+        if request.method == "POST":
+            form = CreateTeam(request.POST)
+            if form.is_valid():
+                team_name = form.cleaned_data['team_name']
+                username = request.user.username
+                if PickNW.objects.filter(team_name = team_name).exists() or Pick.objects.filter(team_name = team_name).exists():
+                    messages.error(request,"Team name already exists.")
+                    return redirect('football:teamname' , league_num = league_num)
+                elif len(team_name) > 16:
+                    messages.error(request,"Team name needs to be less than 15 characters.")
+                    return redirect("football:teamname" , league_num = league_num)
                 else:
-                    teamcount = paid.numteams
-                    for i in range(teamcount):
+                    paid = PaidNW.objects.get(username = request.user.username)
+                    if paid.paid_status == False:
                         for j in range(10):
-                            new_pick = PickNW(team_name=team_name,username= request.user.username,paid = True,pick_number = j+1,teamnumber = i+1)
+                            new_pick = PickNW(team_name=team_name,username= request.user.username,paid = False,pick_number = j+1, teamnumber = 1)
                             new_pick.save()
-                return redirect('football:checking', league_num = league_num)
-        else:
-            messages.error(request,"Please submit a valid teamname.")
-            return redirect('football:teamname', league_num = league_num)
+                    else:
+                        teamcount = paid.numteams
+                        for i in range(teamcount):
+                            for j in range(10):
+                                new_pick = PickNW(team_name=team_name,username= request.user.username,paid = True,pick_number = j+1,teamnumber = i+1)
+                                new_pick.save()
+                    return redirect('football:checking', league_num = new_pick.league_number)
+            else:
+                messages.error(request,"Please submit a valid teamname.")
+                return redirect('football:teamname', league_num = league_num)
+    else:
+        pick = Pick.objects.get(username = request.user.username, teamnumber = 1)
+        paid = PaidNW.objects.get(username = request.user.username)
+        if paid.paid_status == False:
+            for j in range(10):
+                new_pick = PickNW(team_name=pick.team_name,username= request.user.username,paid = False,pick_number = j+1, teamnumber = 1)
+                new_pick.save()
+        return redirect('football:checking', league_num = new_pick.league_number)
+
     return render(request,"NFL_weekly_view/teamname.html")
 
 
@@ -820,7 +825,7 @@ def checking(request, league_num):
     elif not (start_datetime <= current_pst_time < end_datetime):
         username = request.user.username
         if not PickNW.objects.filter(username=username).exists():
-            return redirect('football:teamname', league_num = league_num)
+            return redirect('football:teamname')
         return redirect('football:game', league_num = league_num)
     
     else:
