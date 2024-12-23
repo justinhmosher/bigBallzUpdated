@@ -109,7 +109,10 @@ class ChatConsumer(AsyncWebsocketConsumer):
         try:
             print(f"Processing LIKE action - Message ID: {message_id}, User: {user}")
             message = ChatMessage.objects.get(id=message_id)
-            reaction, created = MessageReaction.objects.get_or_create(user=user, message=message)
+            reaction, created = MessageReaction.objects.get_or_create(
+                user=user, 
+                message=message,
+                defaults={'reaction_type': 'like'})
 
             if created:
                 print(f"Created new reaction for user {user} and message {message_id}. Reaction: LIKE")
@@ -143,7 +146,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         try:
             print(f"Processing DISLIKE action - Message ID: {message_id}, User: {user}")
             message = ChatMessage.objects.get(id=message_id)
-            reaction, created = MessageReaction.objects.get_or_create(user=user, message=message)
+            reaction, created = MessageReaction.objects.get_or_create(user=user, message=message, defaults={'reaction_type': 'dislike'})
 
             if created:
                 print(f"Created new reaction for user {user} and message {message_id}. Reaction: DISLIKE")
