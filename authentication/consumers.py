@@ -5,6 +5,10 @@ from django.contrib.auth.models import User
 from .models import ChatMessage, MessageReaction
 import re
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 class ChatConsumer(AsyncWebsocketConsumer):
     with open('badwords.txt') as f:  
         BAD_WORDS = [line.strip() for line in f]
@@ -17,6 +21,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
         await self.channel_layer.group_add(self.room_group_name, self.channel_name)
         await self.accept()
+
+        logger.info(f"Connecting to room: {self.room_group_name}")
+        print(f"Connecting to room: {self.room_group_name}")
 
     async def disconnect(self, close_code):
         await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
@@ -99,50 +106,70 @@ class ChatConsumer(AsyncWebsocketConsumer):
     @database_sync_to_async
     def handle_like(self, message_id, user):
         """ Handle toggling like for a message """
-        message = ChatMessage.objects.get(id=message_id)
-        reaction, created = MessageReaction.objects.get_or_create(user=user, message=message)
+        try:
+            print(f"Processing LIKE action - Message ID: {message_id}, User: {user}")
+            message = ChatMessage.objects.get(id=message_id)
+            reaction, created = MessageReaction.objects.get_or_create(user=user, message=message)
 
-        if created:
-            reaction.reaction_type = 'like'
-            reaction.save()
-            message.likes_count += 1
-        else:
-            if reaction.reaction_type == 'like':
-                reaction.delete()
-                message.likes_count -= 1
-            else:
+            if created:
+                print(f"Created new reaction for user {user} and message {message_id}. Reaction: LIKE")
                 reaction.reaction_type = 'like'
                 reaction.save()
                 message.likes_count += 1
-                message.dislikes_count -= 1
+            else:
+                print(f"Existing reaction found for user {user} and message {message_id}. Reaction type: {reaction.reaction_type}")
+                if reaction.reaction_type == 'like':
+                    reaction.delete()
+                    print(f"Deleted LIKE reaction for user {user} and message {message_id}")
+                    message.likes_count -= 1
+                else:
+                    reaction.reaction_type = 'like'
+                    reaction.save()
+                    print(f"Changed reaction to LIKE for user {user} and message {message_id}")
+                    message.likes_count += 1
+                    message.dislikes_count -= 1
 
-        message.likes_count = max(0, message.likes_count)
-        message.dislikes_count = max(0, message.dislikes_count)
-        message.save()
+            # Ensure counts are non-negative
+            message.likes_count = max(0, message.likes_count)
+            message.dislikes_count = max(0, message.dislikes_count)
+            message.save()
+            print(f"Updated message like count: {message.likes_count}, dislike count: {message.dislikes_count}")
+        except Exception as e:
+            print(f"Error handling like action: {e}")
 
     @database_sync_to_async
     def handle_dislike(self, message_id, user):
         """ Handle toggling dislike for a message """
-        message = ChatMessage.objects.get(id=message_id)
-        reaction, created = MessageReaction.objects.get_or_create(user=user, message=message)
+        try:
+            print(f"Processing DISLIKE action - Message ID: {message_id}, User: {user}")
+            message = ChatMessage.objects.get(id=message_id)
+            reaction, created = MessageReaction.objects.get_or_create(user=user, message=message)
 
-        if created:
-            reaction.reaction_type = 'dislike'
-            reaction.save()
-            message.dislikes_count += 1
-        else:
-            if reaction.reaction_type == 'dislike':
-                reaction.delete()
-                message.dislikes_count -= 1
-            else:
+            if created:
+                print(f"Created new reaction for user {user} and message {message_id}. Reaction: DISLIKE")
                 reaction.reaction_type = 'dislike'
                 reaction.save()
                 message.dislikes_count += 1
-                message.likes_count -= 1
+            else:
+                print(f"Existing reaction found for user {user} and message {message_id}. Reaction type: {reaction.reaction_type}")
+                if reaction.reaction_type == 'dislike':
+                    reaction.delete()
+                    print(f"Deleted DISLIKE reaction for user {user} and message {message_id}")
+                    message.dislikes_count -= 1
+                else:
+                    reaction.reaction_type = 'dislike'
+                    reaction.save()
+                    print(f"Changed reaction to DISLIKE for user {user} and message {message_id}")
+                    message.dislikes_count += 1
+                    message.likes_count -= 1
 
-        message.likes_count = max(0, message.likes_count)
-        message.dislikes_count = max(0, message.dislikes_count)
-        message.save()
+            # Ensure counts are non-negative
+            message.likes_count = max(0, message.likes_count)
+            message.dislikes_count = max(0, message.dislikes_count)
+            message.save()
+            print(f"Updated message like count: {message.likes_count}, dislike count: {message.dislikes_count}")
+        except Exception as e:
+            print(f"Error handling dislike action: {e}")
 
     @database_sync_to_async
     def get_message(self, message_id):
