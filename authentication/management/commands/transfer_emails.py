@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from authentication.models import Paid, Email
+from authentication.models import Paid, Email, PastPick
 from authentication.NFL_weekly_view.models import PaidNW,PromoUserNW
 
 class Command(BaseCommand):
@@ -8,6 +8,7 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         Email.objects.all().delete()
         PaidNW.objects.all().delete()
+        PastPick.objects.all().delete()
         PromoUserNW.objects.all().delete()
         paid_list = Paid.objects.all()
         for paid in paid_list:
