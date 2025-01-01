@@ -92,12 +92,17 @@
     background-color: #ffd700; /* Yellow for undecided or both true/false */
     color: #343a40;
 }
+@media (max-width: 576px) {
+          .navbar .nav-link {
+           font-size: .9rem !important;
+        }
+        }
 
 
 </style>
 {% include 'authentication/partials/header_game_NW.html' %}
 {% block trophy %}
-      <a class="navbar-brand"  href="javascript:void(0);">
+      <a class="navbar-brand" style="position: absolute; top: 10px; left: 3px;"  href="javascript:void(0);">
         <img src="{% static 'Trophy-logo.svg' %}" alt="The Chosen Fantasy Games">
       </a>
 {% endblock %}

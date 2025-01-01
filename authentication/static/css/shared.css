@@ -41,7 +41,7 @@
 .navbar-brand {
     position: absolute !important;
     top: 10px !important; /* Adjust as needed to align on the header */
-    left: 20px; /* Adjust as needed to align it to the left */
+    left: 1px !important; /* Adjust as needed to align it to the left */
     margin: 0; /* Remove default margin */
     z-index: 10;
     display: flex;
@@ -73,4 +73,10 @@
 }
 .dropdown-item:hover {
     background-color: #444;
+}
+@media (max-width: 576px) {
+    .navbar .nav-link {
+        color: red;
+        font-size: .3rem !important;
+    }
 }

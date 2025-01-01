@@ -101,18 +101,23 @@
             color: #333333;
             opacity: 0.8;
         }
+        @media (max-width: 576px) {
+          .navbar .nav-link {
+           font-size: .9rem !important;
+        }
+        }
     </style>
 </head>
 {% if pay_status == True %}
 {% include 'authentication/partials/header_game.html' %}
 {% block trophy %}
-      <a class="navbar-brand"  href="javascript:void(0);">
+      <a class="navbar-brand" style="position: absolute; top: 10px; left: 3px;" href="javascript:void(0);">
         <img src="{% static 'Trophy-logo.svg' %}" alt="The Chosen Fantasy Games">
       </a>
 {% endblock %}
 {% else %}
 {% include 'authentication/partials/No_pay.html' %}
-      <a class="navbar-brand"  href="javascript:void(0);">
+      <a class="navbar-brand" style="position: absolute; top: 10px; left: 3px;" href="javascript:void(0);">
         <img src="{% static 'Trophy-logo.svg' %}" alt="The Chosen Fantasy Games">
       </a>
 {% endif %}

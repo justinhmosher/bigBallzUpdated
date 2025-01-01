@@ -119,15 +119,15 @@
     </style>
 </head>
 {% if pay_status == True %}
-{% include 'authentication/partials/header_game.html' %}
+{% include 'authentication/partials/header_game_NW.html' %}
 {% block trophy %}
-      <a class="navbar-brand" style="position: absolute; top: 10px; left: 3px;" href="javascript:void(0);">
+      <a class="navbar-brand" style="position: absolute; top: 10px; left: 3px;"  href="javascript:void(0);">
         <img src="{% static 'Trophy-logo.svg' %}" alt="The Chosen Fantasy Games">
       </a>
 {% endblock %}
 {% else %}
-{% include 'authentication/partials/No_pay.html' %}
-      <a class="navbar-brand" style="position: absolute; top: 10px; left: 3px;" href="javascript:void(0);">
+{% include 'authentication/partials/No_pay_NW.html' %}
+      <a class="navbar-brand" style="position: absolute; top: 10px; left: 3px;"  href="javascript:void(0);">
         <img src="{% static 'Trophy-logo.svg' %}" alt="The Chosen Fantasy Games">
       </a>
 {% endif %}

@@ -24,7 +24,7 @@
 
     <style>
 .bd-placeholder-img { font-size: 1.125rem; text-anchor: middle; user-select: none; }
-@media (min-width: 768px) { .bd-placeholder-img-lg { font-size: 3.5rem; } }
+@media (min-width: 768px) { .bd-placeholder-img-lg { font-size: 3.5rem; } { .navbar .nav-link {font-size: .9rem !important; } } }
 .b-example-divider { width: 100%; height: 3rem; background-color: rgba(0, 0, 0, .1); }
 .btn-bd-primary { --bd-violet-bg: #712cf9; --bd-violet-rgb: 112.520718, 44.062154, 249.437846; --bs-btn-color: var(--bs-white); --bs-btn-bg: var(--bd-violet-bg); }
 .form-container { background-color: #55595c; border-radius: 10px; width: 100%; max-width: 600px; margin: auto; }
@@ -38,6 +38,7 @@
 #search-results button:focus { outline: none; }
 .bubble-alert .close { color: #000000; font-size: 25px; background: none; border: none; outline: none; padding: 0; cursor: pointer; margin-left: 10px; font-weight: bold; }
 .pagination { margin: 20px 0; }
+@media (max-width: 576px) { .navbar .nav-link { font-size: .9rem !important; } }
 
 
     </style>
@@ -70,13 +71,13 @@
 {% if pay_status == True %}
 {% include 'authentication/partials/header_game.html' %}
 {% block trophy %}
-      <a class="navbar-brand"  href="javascript:void(0);">
+      <a class="navbar-brand" style="position: absolute; top: 10px; left: 3px;" href="javascript:void(0);">
         <img src="{% static 'Trophy-logo.svg' %}" alt="The Chosen Fantasy Games">
       </a>
 {% endblock %}
 {% else %}
 {% include 'authentication/partials/No_pay.html' %}
-      <a class="navbar-brand"  href="javascript:void(0);">
+      <a class="navbar-brand" style="position: absolute; top: 10px; left: 3px;" href="javascript:void(0);">
         <img src="{% static 'Trophy-logo.svg' %}" alt="The Chosen Fantasy Games">
       </a>
 {% endif %}

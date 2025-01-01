@@ -44,7 +44,10 @@
         flex: 1 1 calc(100% - 20px); /* One card per row, full width */
         max-width: none;
         }
-    }
+      .navbar .nav-link {
+        font-size: .9rem !important;
+        }
+      }
     .player-card:hover {
         transform: translateY(-5px);
         box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
@@ -97,7 +100,7 @@
 </style>
 {% include 'authentication/partials/header_game.html' %}
 {% block trophy %}
-      <a class="navbar-brand"  href="javascript:void(0);">
+      <a class="navbar-brand"  style="position: absolute; top: 10px; left: 3px;" href="javascript:void(0);">
         <img src="{% static 'Trophy-logo.svg' %}" alt="The Chosen Fantasy Games">
       </a>
 {% endblock %}

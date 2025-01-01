@@ -40,6 +40,7 @@
 #search-results button:focus { outline: none; }
 .bubble-alert .close { color: #000000; font-size: 25px; background: none; border: none; outline: none; padding: 0; cursor: pointer; margin-left: 10px; font-weight: bold; }
 .pagination { margin: 20px 0; }
+@media (max-width: 576px) { .navbar .nav-link { font-size: .9rem !important; } }
 
 
     </style>
@@ -72,13 +73,13 @@
 {% if pay_status == True %}
 {% include 'authentication/partials/header_game_NW.html' %}
 {% block trophy %}
-      <a class="navbar-brand"  href="javascript:void(0);">
+      <a class="navbar-brand" style="position: absolute; top: 10px; left: 3px;"  href="javascript:void(0);">
         <img src="{% static 'Trophy-logo.svg' %}" alt="The Chosen Fantasy Games">
       </a>
 {% endblock %}
 {% else %}
 {% include 'authentication/partials/No_pay_NW.html' %}
-      <a class="navbar-brand"  href="javascript:void(0);">
+      <a class="navbar-brand" style="position: absolute; top: 10px; left: 3px;"  href="javascript:void(0);">
         <img src="{% static 'Trophy-logo.svg' %}" alt="The Chosen Fantasy Games">
       </a>
 {% endif %}

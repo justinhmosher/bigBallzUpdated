@@ -25,5 +25,6 @@ urlpatterns = [
     path('update-pick', weekly_NFL.update_pick, name = 'update_pick'),
     path('search-players', weekly_NFL.search_players, name = 'search_players'),
     path('chat/<str:room_name>/<int:league_num>', weekly_NFL.room, name='room'),
+    path('picking', weekly_NFL.picking, name='picking'),
 ]+static(settings.MEDIA_URL,document_root = settings.MEDIA_ROOT)
 

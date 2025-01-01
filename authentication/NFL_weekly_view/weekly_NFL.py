@@ -545,7 +545,7 @@ def player_list(request, league_num):
                 standings.append({"rank": f"T{current_rank}", "team": item})
                 current_rank = index + 2
             elif not is_tied_with_previous and is_tied_with_next:
-                if index + 1 == len(data):
+                if index + 1 == len(sorted_teams):
                     standings.append({"rank": f"{current_rank}", "team": item})
                 else:
                     standings.append({"rank": f"T{current_rank}", "team": item})
@@ -770,7 +770,7 @@ def picking(request, league_num):
     if int(league_num) != player.league_number:
         return redirect("football:picking", league_num = player.league_number)
     total_in = int(PickNW.objects.filter(paid = True,league_number = league_num).count() / 10)
-    return render(request, 'authentication/picking.html', {'total_in': total_in})
+    return render(request, 'NFL_weekly_view/picking.html', {'total_in': total_in})
 
 @login_required
 def checking(request, league_num):
