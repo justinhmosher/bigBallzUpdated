@@ -6,6 +6,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&display=swap" rel="stylesheet">
     <title>Tournaments</title>
     <style>
         /* General Styles */
@@ -25,6 +26,11 @@
             justify-content: center;
             align-items: center; /* Center content horizontally */
             height: -200vh; /* Make main take up full viewport height */
+        }
+        .archivo-black {
+            font-family: 'Archivo Black', sans-serif;
+            margin: 0;
+            line-height: 1;
         }
 
         .tabs-container {
@@ -206,12 +212,19 @@
         <a href="?sport=Baseball" class="tab {% if current_sport == 'Baseball' %}active{% endif %}">Baseball</a>
         <a href="?sport=Basketball" class="tab {% if current_sport == 'Basketball' %}active{% endif %}">Basketball</a>
     </div>
-
-<div class="text-center">
-        <a href="/">
-            <img src="{% static 'Words-new-black.svg' %}" alt="logo"  style="width: auto; height: 210px;" />
-        </a>
-</div>
+<a href="/" style="text-decoration: none; color: inherit;">
+    <h1 class="text-center archivo-black" style="font-size: 2.5rem;">THE CHOSEN</h1>
+    <p class="text-center archivo-black" style="margin-top: 0px; font-size: 0.8rem;">FANTASY GAMES</p>
+</a>
+<br>
+<br>
+{% if current_sport == 'Football' %}
+<h3 class="text-center archivo-black" style="font-size: 1.3rem;">TOUCHDOWN MANEA</h3>
+{% elif current_sport == 'Baseball' %}
+<h3 class="text-center archivo-black" style="font-size: 1.3rem;">BEAT THE STREAK</h3>
+{% elif current_sport == 'Basketball' %}
+<h3 class="text-center archivo-black" style="font-size: 1.3rem;">THREE POINT CONTEST</h3>
+{% endif %}
 <br>
 <br>
 

@@ -69,10 +69,26 @@ def custom_csrf_failure_view(request, reason=""):
 	return redirect('authentication:signin')  # 'login' should be the name of your login URL
 
 def home(request):
-	total_numteams = Paid.objects.filter(paid_status=True).aggregate(Sum('numteams'))['numteams__sum']
-	if total_numteams is None:
-		total_numteams = 0
-	return render(request, "authentication/homepage.html",{'total': 200 - total_numteams})
+    tournaments = [
+        {
+            'name': 'NFL - Touchdown Manea',
+            'description': 'Each week, choose two players to score a touchdown and get one or more offensive yards./If one or both score and have one or more offensive yards, you advance, else you are out./Last man standing wins the pot!',
+            'deadline': 'Deadline: January 15, 2025',
+        },
+        {
+            'name': 'MLB - Beat The Streak',
+            'description': 'Pick hitters to build the longest hitting streak and win big!',
+            'deadline': 'Deadline: April 1, 2025',
+        },
+        {
+            'name': 'NBA - Three Point Contest',
+            'description': 'Pick hitters to build the longest hitting streak and win big!',
+            'deadline': 'Deadline: March 10, 2025',
+        },
+    ]
+    return render(request, "authentication/homepage.html", {'tournaments': tournaments})
+
+
 
 def blog_detail(request,slug):
 	blog_post = get_object_or_404(Blog, slug=slug)
@@ -693,7 +709,7 @@ def tournaments(request):
 
 	games = {
 		"Football": [
-			{"name": "Touchdown Mainia/Season Long", 
+			{"name": "SEASON LONG GAME", 
 			"summary": "Each week, choose two players to score a touchdown and get one or more offensive yards./If one or both score and have one or more offensive yards, you advance, else you're out./Last man standing wins the pot!", 
 			"money": "Max Entries per Tournament: 110/Buy In: $50/Pot: $5K",
 			"rules": 1, 
@@ -702,9 +718,9 @@ def tournaments(request):
 			"path": reverse("authentication:location", args=[1])
 		},
 		{	
-			"name": "Touchdown Mainia/Weekly Game", 
+			"name": "WEEKLY GAME", 
 			"summary": "Select 10 NFL players to score touchdowns and accumulate one or more offensive yards./The user with the most comultive touchdowns wins the pot!", 
-			"money": "Max Entries per Tournament: 110/Buy In: $50/Pot: $5K",
+			"money": "Max Entries per Tournament: 30/Buy In: $20/Pot: $500",
 			"rules": 2, 
 			"playable": True,
 			"app" : "football",

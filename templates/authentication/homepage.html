@@ -60,31 +60,6 @@ body {
 .logo-subtext {
     font-size: 1.5rem;
 }
-.bd-placeholder-img {
-    font-size: 1.125rem;
-    text-anchor: middle;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    user-select: none;
-}
-.btn-bd-primary {
-    --bd-violet-bg: #712cf9;
-    --bd-violet-rgb: 112.520718, 44.062154, 249.437846;
-    --bs-btn-font-weight: 600;
-    --bs-btn-color: var(--bs-white);
-    --bs-btn-bg: var(--bd-violet-bg);
-    --bs-btn-border-color: var(--bd-violet-bg);
-    --bs-btn-hover-color: var(--bs-white);
-    --bs-btn-hover-bg: #6528e0;
-    --bs-btn-hover-border-color: #6528e0;
-    --bs-btn-focus-shadow-rgb: var(--bd-violet-rgb);
-    --bs-btn-active-color: var(--bs-btn-hover-color);
-    --bs-btn-active-bg: #5a23c8;
-    --bs-btn-active-border-color: #5a23c8;
-}
-.text-yellow {
-    color: #ffde59;
-}
 .layout-container {
     margin-top: 20px;
     display: flex;
@@ -162,10 +137,6 @@ body {
     bottom: 0;
     width: 100%;
 }
-.footer p {
-    margin: 0; /* Removes default paragraph margin */
-    color: #333; /* Dark text color; adjust as needed */
-}
 .footer a {
     color: #ffffff; /* Link color; adjust as needed */
 }
@@ -183,25 +154,12 @@ body {
         transform: translatey(0px);
     }
 }
-.btn-play {
-    display: inline-block;
-    font-size: 1rem; /* Adjusted font size for flexibility */
-    padding: 15px 30px;
-    background-color: #007bff;
-    color: #fff;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    text-align: center;
-    transition: background-color 0.3s ease;
-    max-width: 100%; /* Ensures button doesn't exceed the screen width */
-    white-space: nowrap; /* Prevents text from breaking lines */
-    overflow: hidden;
+.archivo-black {
+    font-family: 'Archivo Black', sans-serif;
+    margin: 0;
+    line-height: 1;
 }
 
-.btn-play:hover {
-    background-color: #0056b3;
-} 
 
 #typing-text {
     white-space: nowrap;
@@ -211,6 +169,66 @@ body {
     font-size: 1.2rem;
     color: #fff;
 }
+.tournament-button {
+    background-color: #007bff;
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+#tournament-description {
+    text-align: left;
+    margin: 0 auto;
+    max-width: 600px;
+    padding: 10px;
+}
+
+.tournament-button:hover {
+    background-color: #0056b3;
+}
+
+.tournament-button.active {
+    background-color: #ffde59;
+    color: black;
+    font-weight: bold;
+}
+#description-list li {
+    color: #ffde59; /* Gold color */
+    font-size: 1.5rem; /* Larger font size for excitement */
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+#deadline {
+    color: red;
+    text-align: center;
+    margin-top: 10px;
+}
+#play-button {
+    background-color: #007bff;
+    border: none;
+    color: black;
+    text-align: center;
+    display: inline-block;
+    font-size: 1.2rem;
+    padding: 10px 40px;
+    text-decoration: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+     width: 200px; /* Ensures the button is visibly long */
+}
+
+#play-button:hover {
+    background-color: #0056b3;
+}
+@media (max-width: 768px) {
+    .tournament-button {
+        width: 90%; /* Adjust width to fit smaller screens */
+        padding: 10px 15px; /* Adjust padding for smaller screens */
+    }
 </style>
 </head>
 {% include 'authentication/partials/header.html' %}
@@ -240,7 +258,9 @@ body {
                     <img src="{% static 'Simple.svg' %}" alt="The Chosen Fantasy Games Logo" style="width: 400px; height: auto;" class="img-fluid animated-logo"/>
                 </a>
             </div>
-            <h2 class="text-center logo-font">THE CHOSEN FANTASY GAMES<br></h2>
+            <h1 class="text-center archivo-black" style="font-size: 2.5rem; color: #ffc107;">THE CHOSEN</h1>
+            <p class="text-center archivo-black" style="margin-top: 0px; font-size: 0.8rem; color: #ffc107;">FANTASY GAMES</p>
+            <br>
             <p class="lead text-white">Enter the fantasy sports arena: Season-long battles, key stats, one champion. Are you The Chosen?</p>
             <section class="text-center">
                 <a href="{% url 'authentication:tournaments' %}" class="btn btn-primary btn-play">
@@ -265,18 +285,39 @@ body {
         <div class="feature-title">Season Long Games!</div>
     </div>
 </div>
+<br>
 
-
-<div class="button-container">
-    <div style="text-align: center; margin-top: 20px;"> <!-- Centers the buttons and adds space above -->
-        <button onclick="switchMap('{% static 'Rules-NFLs.svg' %}')" style="background: linear-gradient(145deg, #6db3f2, #1e69de); border: none; color: white; padding: 10px 20px; border-radius: 5px; box-shadow: 3px 3px 10px rgba(0,0,0,0.2); cursor: pointer; margin: 5px; transition: transform 0.2s, box-shadow 0.2s;">NFL - BIG TD TOURNAMENT</button>
-        <button onclick="switchMap('{% static 'Rules-MLB.svg' %}')" style="background: linear-gradient(145deg, #f2994a, #f2c94c); border: none; color: white; padding: 10px 20px; border-radius: 5px; box-shadow: 3px 3px 10px rgba(0,0,0,0.2); cursor: pointer; margin: 5px; transition: transform 0.2s, box-shadow 0.2s;">MLB - BEAT THE STREAK</button>
-        <button onclick="switchMap('{% static 'Rules-NBA.svg' %}')" style="background: linear-gradient(145deg, #56ab2f, #a8e063); border: none; color: white; padding: 10px 20px; border-radius: 5px; box-shadow: 3px 3px 10px rgba(0,0,0,0.2); cursor: pointer; margin: 5px; transition: transform 0.2s, box-shadow 0.2s;">NBA - THREE POINT CONTEST</button>
-    </div>
+<div class="button-container text-center" style="display: flex; justify-content: center; gap: 10px;">
+    {% for tournament in tournaments %}
+    <button
+        class="btn btn-primary tournament-button {% if forloop.first %}active{% endif %}"
+        data-description="{{ tournament.description }}"
+        data-deadline="{{ tournament.deadline }}"
+        onclick="highlightButton(this)"
+    >
+        {{ tournament.name }}
+    </button>
+    {% endfor %}
 </div>
 
-<!-- Container for the map image -->
-<img id="map-image" class="map-image" src="{% static 'Rules-NFLs.svg' %}" alt="Interactive Map">
+
+<!-- Description Container -->
+<div id="tournament-description" class="text-white mt-3">
+    <ul id="description-list" style="list-style-type: none; padding-left: 0;">
+        <!-- The first description will be rendered as bullet points on page load -->
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                const firstDescription = "{{ tournaments.0.description }}";
+                const firstDeadline = "{{ tournaments.0.deadline }}";
+                updateDescription(firstDescription, firstDeadline);
+            });
+        </script>
+    </ul>
+    <div class="text-center mt-3">
+        <a id="play-button" href="/tournaments" class="btn btn-primary" style="font-size: 1.2rem; padding: 10px 20px;"><strong>Play</strong></a>
+    </div>
+    <p id="deadline" class="text-danger" style="font-size: 1.2rem; font-weight: bold;"></p>
+</div>
 
 <div class="layout-container">
     <div class="svg-container">
@@ -344,6 +385,36 @@ body {
         const logo = document.querySelector('.navbar-brand img');
         logo.classList.toggle('active');
     }
+function highlightButton(button) {
+    // Remove active class from all buttons
+    const buttons = document.querySelectorAll('.tournament-button');
+    buttons.forEach(btn => btn.classList.remove('active'));
+
+    // Add active class to the clicked button
+    button.classList.add('active');
+
+    // Update the description and deadline
+    const description = button.getAttribute('data-description');
+    const deadline = button.getAttribute('data-deadline');
+    updateDescription(description, deadline);
+}
+
+function updateDescription(description, deadline) {
+    // Split description by "/" and create bullet points
+    const descriptionList = document.getElementById('description-list');
+    descriptionList.innerHTML = ""; // Clear existing content
+
+    const items = description.split('/');
+    items.forEach(item => {
+        const li = document.createElement('li');
+        li.textContent = item.trim(); // Trim whitespace
+        descriptionList.appendChild(li);
+    });
+
+    // Update the deadline
+    const deadlineElement = document.getElementById('deadline');
+    deadlineElement.textContent = deadline;
+}
 </script>
 </body>
 </html>

@@ -146,6 +146,11 @@
 
 
 <main class="container mt-5">
+    {% if blog_post.image %}
+        <div class="text-center mb-4">
+            <img src="{{ blog_post.image.url }}" alt="{{ blog_post.title }}" class="img-fluid rounded">
+        </div>
+    {% endif %}
     <h1 class="text-center">{{ blog_post.title }}</h1>
     <p class="text-center text-muted">{{ blog_post.date }} by <strong>{{ blog_post.author }}</strong></p>
     <div class="content mb-5">
