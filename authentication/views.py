@@ -82,7 +82,7 @@ def home(request):
         },
         {
             'name': 'NBA - Three Point Contest',
-            'description': "Each week, choose two players to record a double-double (double digit numbers in two or more statistical categories)./If one or both players record a double-doubles, you advance, else you are out./Last man standing wins the pot!",
+            'description': "Each week, choose two players to record a double-double (double digit numbers in two or more statistical categories)./If one or both players record a double-double, you advance, else you are out./Last man standing wins the pot!",
             'deadline': 'Deadline: October 14, 2025',
         },
     ]
@@ -746,7 +746,7 @@ def tournaments(request):
 		],
 		"Basketball": [
 			{"name": "SEASON LONG GAME", 
-			"summary": "Each week, choose two players to record a double-double (double digit numbers in two or more statistical categories)./If one or both players record a double-doubles, you advance, else you're out./Last man standing wins the pot!", 
+			"summary": "Each week, choose two players to record a double-double (double digit numbers in two or more statistical categories)./If one or both players record a double-double, you advance, else you're out./Last man standing wins the pot!", 
 			"money": "",
 			"rules": 5, 
 			"playable": False,
