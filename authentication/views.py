@@ -76,8 +76,8 @@ def home(request):
             'deadline': 'Deadline: September 11, 2025',
         },
         {
-            'name': 'MLB - Beat The Streak',
-            'description': "Each week, choose two players to hit a homerun and reach one or more bases./If one or both players hit a homerun and reach one or more bases, you advance, else you are out./Last man standing wins the pot!",
+            'name': 'MLB - Home Run Derby',
+            'description': "Each week, choose two players to hit a homerun./If one or both players hit a homerun, you advance, else you are out./Last man standing wins the pot!",
             'deadline': 'Deadline: March 27, 2025',
         },
         {
@@ -728,7 +728,7 @@ def tournaments(request):
 		],
 		"Baseball": [
 			{"name": "SEASON LONG GAME", 
-			"summary": "Each week, choose two players to hit a homerun and reach one or more bases./If one or both players hit a homerun and reach one or more bases, you advance, else you're out./Last man standing wins the pot!", 
+			"summary": "Each week, choose two players to hit a homerun./If one or both players hit a homerun, you advance, else you're out./Last man standing wins the pot!", 
 			"money": "",
 			"rules": 3, 
 			"playable": False,
@@ -737,7 +737,7 @@ def tournaments(request):
 		},
 		{
 			"name": "WEEKLY GAME", 
-			"summary": "Select 10 players to hit a homerun and reach one or more bases./The user with the most comultive homeruns and players to reach bases wins the pot!", 
+			"summary": "Select 10 players to hit a homerun./The user with the most comultive homeruns wins the pot!", 
 			"money": "",
 			"rules": 4, 
 			"playable": False,
