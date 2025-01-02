@@ -30,14 +30,14 @@ class Command(BaseCommand):
             message['Subject'] = "WE HAVE A WINNER"
             body = render_to_string('authentication/emarketing.html')
 
-            """
-            image_path = finders.find('Simple.png')
+            image_path = finders.find('Charlie.jpg')
             print(f"Image path: {image_path}")
             with open(image_path, 'rb') as img:
-                image = MIMEImage(img.read(), _subtype="png")
-                image.add_header('Content-ID', '<logo_image>')  # Content-ID must match the CID in your HTML
+                image = MIMEImage(img.read(), _subtype="jpg")
+                image['Content-ID'] = '<logo_image>'  # Set the Content-ID header directly
+                del image['Content-Disposition']
                 message.attach(image)
-            """
+            
             message.attach(MIMEText(body, "html"))
             text = message.as_string()
             

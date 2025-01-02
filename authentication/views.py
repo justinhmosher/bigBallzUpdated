@@ -73,17 +73,17 @@ def home(request):
         {
             'name': 'NFL - Touchdown Manea',
             'description': 'Each week, choose two players to score a touchdown and get one or more offensive yards./If one or both score and have one or more offensive yards, you advance, else you are out./Last man standing wins the pot!',
-            'deadline': 'Deadline: January 15, 2025',
+            'deadline': 'Deadline: September 11, 2025',
         },
         {
             'name': 'MLB - Beat The Streak',
-            'description': 'Pick hitters to build the longest hitting streak and win big!',
-            'deadline': 'Deadline: April 1, 2025',
+            'description': "Each week, choose two players to hit a homerun and reach one or more bases./If one or both players hit a homerun and reach one or more bases, you advance, else you are out./Last man standing wins the pot!",
+            'deadline': 'Deadline: March 27, 2025',
         },
         {
             'name': 'NBA - Three Point Contest',
-            'description': 'Pick hitters to build the longest hitting streak and win big!',
-            'deadline': 'Deadline: March 10, 2025',
+            'description': "Each week, choose two players to record a double-double (double digit numbers in two or more statistical categories)./If one or both players record a double-doubles, you advance, else you are out./Last man standing wins the pot!",
+            'deadline': 'Deadline: October 14, 2025',
         },
     ]
     return render(request, "authentication/homepage.html", {'tournaments': tournaments})
@@ -727,8 +727,8 @@ def tournaments(request):
 			"path": reverse("football:location", args=[1]) }
 		],
 		"Baseball": [
-			{"name": "Game 1", 
-			"summary": "Pick 2 players to get a hit.", 
+			{"name": "SEASON LONG GAME", 
+			"summary": "Each week, choose two players to hit a homerun and reach one or more bases./If one or both players hit a homerun and reach one or more bases, you advance, else you're out./Last man standing wins the pot!", 
 			"money": "",
 			"rules": 3, 
 			"playable": False,
@@ -736,8 +736,8 @@ def tournaments(request):
 			"path":reverse("authentication:location", args=[1])
 		},
 		{
-			"name": "Game 3", 
-			"summary": "Custom rules for Game 3.", 
+			"name": "WEEKLY GAME", 
+			"summary": "Select 10 players to hit a homerun and reach one or more bases./The user with the most comultive homeruns and players to reach bases wins the pot!", 
 			"money": "",
 			"rules": 4, 
 			"playable": False,
@@ -745,8 +745,8 @@ def tournaments(request):
 			"path":reverse("authentication:location", args=[1])},
 		],
 		"Basketball": [
-			{"name": "Game 1", 
-			"summary": "Pick 2 players to make a 3-pointer.", 
+			{"name": "SEASON LONG GAME", 
+			"summary": "Each week, choose two players to record a double-double (double digit numbers in two or more statistical categories)./If one or both players record a double-doubles, you advance, else you're out./Last man standing wins the pot!", 
 			"money": "",
 			"rules": 5, 
 			"playable": False,
@@ -754,8 +754,8 @@ def tournaments(request):
 			"path":reverse("authentication:location", args=[1])
 		},
 		{
-			"name": "Game 3", 
-			"summary": "Custom rules for Game 3.", 
+			"name": "WEEKLY GAME", 
+			"summary": "Select 10 players to record a double-double (double digit numbers in two or more statistical categories)./The user with the most comultive double-doubles wins the pot!", 
 			"money": "",
 			"rules": 6, 
 			"playable": False,
