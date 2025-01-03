@@ -77,7 +77,7 @@ def home(request):
         },
         {
             'name': 'MLB - Home Run Derby',
-            'description': "Each week, choose two players to hit a homerun./If one or both players hit a homerun, you advance, else you are out./Last man standing wins the pot!",
+            'description': "Each week, choose three players to hit a homerun./If any player hits a homerun, you advance, else you are out./If a selected player hits a homerun, you cannot reselect that same player the following week./Last man standing wins the pot!",
             'deadline': 'Deadline: March 27, 2025',
         },
         {
@@ -728,7 +728,7 @@ def tournaments(request):
 		],
 		"Baseball": [
 			{"name": "SEASON LONG GAME", 
-			"summary": "Each week, choose two players to hit a homerun./If one or both players hit a homerun, you advance, else you're out./Last man standing wins the pot!", 
+			"summary": "Each week, choose three players to hit a homerun./If any player hits a homerun, you advance, else you are out./If a selected player hits a homerun, you cannot reselect that same player the following week./Last man standing wins the pot!", 
 			"money": "",
 			"rules": 3, 
 			"playable": False,
