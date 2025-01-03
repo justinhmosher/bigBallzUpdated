@@ -74,8 +74,3 @@
 .dropdown-item:hover {
     background-color: #444;
 }
-@media (max-width: 576px) {
-    .navbar .nav-link {
-        font-size: .3rem !important;
-    }
-}
