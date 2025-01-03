@@ -923,8 +923,13 @@ def player_list(request,league_num):
 	tie_rank = 0
 	for index, item in enumerate(data):
 		pick_count = item.pick_count
-
+		if pick_count == 0:
+			pick_count = None
+		if previous_count == 0:
+			previous_count = None
 		next_pick_count = data[index + 1].pick_count if index + 1 < len(data) else None
+		if next_pick_count == 0:
+			next_pick_count = None
 		is_tied_with_previous = pick_count == previous_count
 		is_tied_with_next = pick_count == next_pick_count
 

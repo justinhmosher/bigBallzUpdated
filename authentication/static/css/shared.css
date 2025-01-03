@@ -76,7 +76,6 @@
 }
 @media (max-width: 576px) {
     .navbar .nav-link {
-        color: red;
         font-size: .3rem !important;
     }
 }

@@ -1,0 +1,126 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete Your Payment</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/shared.css' %}">
+    <style>
+        .center-container{
+            padding-top: 200px;
+        }
+        .payment-container {
+            width: 100%;
+            max-width: 500px;
+            padding: 25px;
+            background-color: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,.1);
+        }
+        .icon-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .icon-container i {
+            font-size: 70px;
+            color: #0056b3;
+        }
+        @media (max-width: 576px) {
+          .navbar .nav-link {
+           font-size: .9rem !important;
+        }
+        }
+    </style>
+</head>
+{% if pay_status == True %}
+{% include 'authentication/partials/header_game_NW.html' %}
+{% block trophy %}
+      <a class="navbar-brand" style="position: absolute; top: 10px; left: 3px;"  href="javascript:void(0);">
+        <img src="{% static 'Trophy-logo.svg' %}" alt="The Chosen Fantasy Games">
+      </a>
+{% endblock %}
+{% else %}
+{% include 'authentication/partials/No_pay_NW.html' %}
+      <a class="navbar-brand" style="position: absolute; top: 10px; left: 3px;"  href="javascript:void(0);">
+        <img src="{% static 'Trophy-logo.svg' %}" alt="The Chosen Fantasy Games">
+      </a>
+{% endif %}
+<body>
+    <div class="center-container">
+        <div class="container payment-container">
+            <div class="icon-container">
+                <i class="fas fa-users"></i>
+            </div>
+            <h2 class="text-center mb-4">Team Payment</h2>
+            <form method="post" action="{% url 'football:payment' 1 %}">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label for="teamCount" class="form-label">Number of Entries:</label>
+                    <select class="form-select" id="teamCount" name="teamCount" onchange="updateTotal()">
+                        <option value="1" selected>1</option>
+                        <!-- Generating options dynamically -->
+                        <script>
+                            for (let i = 2; i <= 20; i++) {
+                                document.write(`<option value="${i}">${i}</option>`);
+                            }
+                        </script>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Who referred you?</label>
+                    <input type="text" class="form-control" id="referral" name="referral">
+                </div>
+                <div class="mb-3 text-center">
+                    <p>Total Amount: <span id="totalAmount"></span></p>
+                </div>
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-primary">Confirm</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const pricePerTeam = 50;
+
+        function updateTotal() {
+            const teamCount = parseInt(document.getElementById('teamCount').value);
+            const totalAmount = teamCount * pricePerTeam;
+            document.getElementById('totalAmount').innerText = `$${totalAmount.toFixed(2)}`;
+        }
+
+        document.getElementById('teamCount').addEventListener('change', updateTotal);
+        updateTotal(); // Initial update when the page loads
+    });
+    </script>
+    <script type="text/javascript">
+      document.addEventListener("DOMContentLoaded", function() {
+        const logo = document.querySelector('.navbar-brand img');
+        const dropdownMenu = document.querySelector('.dropdown-menu');
+
+        function toggleDropdown() {
+            console.log("Toggle function triggered"); // For debugging
+            dropdownMenu.classList.toggle("show");
+        }
+
+        logo.addEventListener("click", toggleDropdown);
+
+        document.addEventListener("click", function(event) {
+            if (!logo.contains(event.target) && !dropdownMenu.contains(event.target)) {
+                dropdownMenu.classList.remove("show");
+            }
+        });
+    });
+</script>
+
+</body>
+<footer class="footer text-center">
+    <div class="container text-center">
+        <p><a href="terms">Terms and Conditions</a> <a href="privacy">Privacy Policy</a> <a href="tel:+18053776155">Contact Us!</a></p>
+    </div>
+</footer>
+</html>

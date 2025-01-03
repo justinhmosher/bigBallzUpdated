@@ -1,0 +1,231 @@
+{% load custom_tags %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css">
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+    <title>Leaderboard</title>
+    <link rel="stylesheet" href="{% static 'css/shared.css' %}">
+    <style>
+        body {
+            background-color: #f5f7fa;
+            margin: 0;
+            padding: 0;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 20px auto;
+            background-color: #ffffff;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 40px;
+        }
+
+        .leaderboard-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .leaderboard-table th, .leaderboard-table td {
+            text-align: left;
+            padding: 16px;
+        }
+
+        .leaderboard-table th {
+            background-color: #ffd700;
+            color: #000000;
+            font-weight: 600;
+            text-transform: uppercase;
+            border-bottom: 4px solid #0056b3;
+            text-align: center;
+        }
+
+        .leaderboard-table tr {
+            background-color: #f9f9f9;
+            transition: background-color 0.3s ease;
+        }
+
+        .leaderboard-table tr:hover {
+            background-color: #e0f0ff;
+        }
+
+        .leaderboard-table td {
+            border-bottom: 1px solid #ddd;
+            text-align: center;
+        }
+
+        .team-name {
+            position: relative;
+            cursor: pointer;
+            color: #007bff;
+            font-weight: 600;
+        }
+
+        .pick-count {
+            text-align: center;
+            font-weight: bold;
+        }
+
+        /* Tooltip Styling */
+        .hover-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        .hover-content {
+            display: none;
+            position: absolute;
+            top: 120%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #ffffff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            white-space: nowrap;
+            z-index: 100;
+            min-width: 200px;
+        }
+
+        .hover-container:hover .hover-content {
+            display: block;
+        }
+        @media (max-width: 576px) {
+          .navbar .nav-link {
+           font-size: .9rem !important;
+        }
+        }
+
+    </style>
+</head>
+{% if pay_status == True %}
+{% include 'authentication/partials/header_game_NW.html' %}
+{% block trophy %}
+      <a class="navbar-brand" style="position: absolute; top: 10px; left: 3px;"  href="javascript:void(0);">
+        <img src="{% static 'Trophy-logo.svg' %}" alt="The Chosen Fantasy Games">
+      </a>
+{% endblock %}
+{% else %}
+{% include 'authentication/partials/No_pay_NW.html' %}
+      <a class="navbar-brand" style="position: absolute; top: 10px; left: 3px;"  href="javascript:void(0);">
+        <img src="{% static 'Trophy-logo.svg' %}" alt="The Chosen Fantasy Games">
+      </a>
+{% endif %}
+<body>
+    <div class="container">
+        <h1>Leaderboard</h1>
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center">
+                {% if leaderboard.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ leaderboard.previous_page_number }}" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+                {% endif %}
+                {% for num in leaderboard.paginator.page_range %}
+                <li class="page-item {% if num == leaderboard.number %}active{% endif %}">
+                    <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                </li>
+                {% endfor %}
+                {% if leaderboard.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ leaderboard.next_page_number }}" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        <table class="leaderboard-table" id="leaderboardTable">
+            <tr>
+                <th>Ranking</th>
+                <th>Team Name</th>
+                <th>Total Touchdowns</th>
+            </tr>
+            {% for team in leaderboard %}
+            <tr>
+                <td class="rank">{{ team.rank }}</td> <!-- This will be populated by JavaScript -->
+                <td>
+                    <div class="hover-container">
+                        <span class="team-name">
+                            {{ team.team.team_name }}
+                        </span>
+                        <!-- Hover content for displaying team picks -->
+                        <div class="hover-content">
+                            <h4>Picks</h4>
+                            <ul>
+                                {% for pick in team.team.picks %}
+                                    <li>{{ pick }}</li>
+                                {% empty %}
+                                    <li>No picks</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </td>
+                <td class="pick-count">{{ team.team.total_touchdowns }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+        <br>
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center">
+                {% if leaderboard.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ leaderboard.previous_page_number }}" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+                {% endif %}
+                {% for num in leaderboard.paginator.page_range %}
+                <li class="page-item {% if num == leaderboard.number %}active{% endif %}">
+                    <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                </li>
+                {% endfor %}
+                {% if leaderboard.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ leaderboard.next_page_number }}" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+</body>
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const logo = document.querySelector('.navbar-brand img');
+        const dropdownMenu = document.querySelector('.dropdown-menu');
+
+        function toggleDropdown() {
+            console.log("Toggle function triggered"); // For debugging
+            dropdownMenu.classList.toggle("show");
+        }
+
+        logo.addEventListener("click", toggleDropdown);
+
+        document.addEventListener("click", function(event) {
+            if (!logo.contains(event.target) && !dropdownMenu.contains(event.target)) {
+                dropdownMenu.classList.remove("show");
+            }
+        });
+    });
+    </script>
+</html>
