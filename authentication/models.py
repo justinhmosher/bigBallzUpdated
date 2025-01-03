@@ -39,7 +39,10 @@ class Email(models.Model):
         return f"{self.email}"
 
 class Group(models.Model):
+    username = models.CharField(max_length = 100, blank = True)
     email = models.CharField(max_length = 100, blank = True)
+    def __str__(self):
+        return f"{self.username}" 
 
 class Scorer(models.Model):
     name = models.CharField(max_length = 100, default = "name")
