@@ -18,6 +18,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from .models import PickNW,ScorerNW,PaidNW,PromoCodeNW,PromoUserNW,WaitlistNW,MessageNW
 from authentication.models import OfAge,Game,NFLPlayer,ChatMessage, Pick
+from authentication.baseball_SL.models import PickBL
 from authentication.forms import CreateTeam
 from django.db.models import Count,F,ExpressionWrapper,fields,OuterRef,Subquery
 from datetime import datetime, time
@@ -105,13 +106,13 @@ def rules(request):
 
 @login_required
 def teamname(request):
-    if not Pick.objects.filter(username=request.user.username).exists():
+    if not Pick.objects.filter(username=request.user.username).exists() or not PickBL.objects.filter(username=request.user.username).exists():
         if request.method == "POST":
             form = CreateTeam(request.POST)
             if form.is_valid():
                 team_name = form.cleaned_data['team_name']
                 username = request.user.username
-                if PickNW.objects.filter(team_name = team_name).exists() or Pick.objects.filter(team_name = team_name).exists():
+                if PickNW.objects.filter(team_name = team_name).exists() or PickBL.objects.filter(team_name = team_name).exists() or Pick.objects.filter(team_name = team_name).exists():
                     messages.error(request,"Team name already exists.")
                     return redirect('football:teamname' , league_num = league_num)
                 elif len(team_name) > 16:

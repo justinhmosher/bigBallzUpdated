@@ -20,6 +20,7 @@ from django.http import JsonResponse
 from .forms import PlayerSearchForm, Pickform, Pick1Form, CreateTeam
 from .models import Pick,Scorer,Paid,NFLPlayer,Game,PastPick,PromoCode,PromoUser,OfAge,UserVerification,Blog,ChatMessage,Waitlist,MessageReaction,Message,Email
 from authentication.NFL_weekly_view.models import PickNW
+from authentication.baseball_SL.models import PickBL
 from django.db.models import Count,F,ExpressionWrapper,fields,OuterRef,Subquery
 from datetime import datetime, time
 from itertools import chain
@@ -239,13 +240,13 @@ def create_email(request, myuser):
 
 @login_required
 def teamname(request):
-	if not PickNW.objects.filter(username=request.user.username).exists():
+	if not PickNW.objects.filter(username=request.user.username).exists() or not PickBL.objects.filter(username=request.user.username).exists():
 		if request.method == "POST":
 			form = CreateTeam(request.POST)
 			if form.is_valid():
 				team_name = form.cleaned_data['team_name']
 				username = request.user.username
-				if Pick.objects.filter(team_name = team_name).exists():
+				if PickBL.objects.filter(team_name = team_name).exists() or PickNW.objects.filter(team_name = team_name).exists() or Pick.objects.filter(team_name = team_name).exists():
 					messages.error(request,"Team name already exists.")
 					return redirect('authentication:teamname')
 				elif len(team_name) > 16:
@@ -731,9 +732,9 @@ def tournaments(request):
 			"summary": "Each week, choose three players to hit a homerun./If any player hits a homerun, you advance, else you are out./If a selected player hits a homerun, you cannot reselect that same player the following week./Last man standing wins the pot!", 
 			"money": "",
 			"rules": 3, 
-			"playable": False,
+			"playable": True,
 			"app" : "football",
-			"path":reverse("authentication:location", args=[1])
+			"path":reverse("baseballSL:location", args=[1])
 		},
 		{
 			"name": "WEEKLY GAME", 

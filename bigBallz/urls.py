@@ -11,6 +11,7 @@ from django.urls import get_resolver
 
 app_name = 'authentication'
 app_name = 'football'
+app_name = "baseballSL"
 
 sitemaps = {
     'blogs': BlogSitemap,
@@ -25,4 +26,5 @@ urlpatterns = [
     path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='sitemap'),
     path('ckeditor5/', include('django_ckeditor_5.urls')),
     path('football/', include('authentication.NFL_weekly_view.urls', namespace='football')),
+    path('baseballSL/', include('authentication.baseball_SL.urls', namespace='baseballSL')),
 ]+static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

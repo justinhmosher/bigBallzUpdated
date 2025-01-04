@@ -17,7 +17,8 @@ from decouple import config
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from .models import PickBL,ScorerBL,PaidBL,PromoCodeBL,PromoUserBL,WaitlistBL,MessageBL
-from authentication.models import OfAge,Game,NFLPlayer,ChatMessage, Pick
+from authentication.models import OfAge,Game,BaseballPlayer,ChatMessage, Pick
+from authentication.NFL_weekly_view.models import PickNW
 from authentication.forms import CreateTeam
 from django.db.models import Count,F,ExpressionWrapper,fields,OuterRef,Subquery
 from datetime import datetime, time
@@ -42,7 +43,7 @@ def message_board(request, league_num):
     username = request.user.username
     player = PaidBL.objects.get(username = username)
     if int(league_num) != player.league_number:
-        return redirect("football:message_board", league_num = player.league_number)
+        return redirect("baseballSL:message_board", league_num = player.league_number)
     # Fetch all messages, ordered by week and timestamp
     messages = MessageBL.objects.filter(league_number = league_num).order_by('-week', '-timestamp')
 
@@ -53,7 +54,7 @@ def message_board(request, league_num):
             grouped_messages[message.week] = []
         grouped_messages[message.week].append(message)
 
-    return render(request, 'NFL_weekly_view/messages.html', {
+    return render(request, 'baseball_SL/messages.html', {
         'grouped_messages': grouped_messages,
         'pay_status':player.paid_status
         })
@@ -62,7 +63,7 @@ def custom_csrf_failure_view(request, reason=""):
     # Set an error message to be displayed on the login page
     messages.error(request, "There was an issue with your request. Please sign in again.")
     # Redirect the user back to the login page
-    return redirect('football:signin')  # 'login' should be the name of your login URL
+    return redirect('baseballSL:signin')  # 'login' should be the name of your login URL
 
 def home(request):
     total_numteams = PaidBL.objects.filter(paid_status=True).aggregate(Sum('numteams'))['numteams__sum']
@@ -76,7 +77,7 @@ def room(request, room_name, league_num):
     username = request.user.username
     player = PaidBL.objects.get(username = username)
     if int(league_num) != player.league_number:
-        return redirect("football:room", room_name = "weekly-NFL", league_num = player.league_number)
+        return redirect("baseballSL:room", room_name = "baseball-SL", league_num = player.league_number)
     username = request.user.username
     try:
         paids = PickBL.objects.get(username=username, teamnumber=1,pick_number=1)
@@ -92,7 +93,7 @@ def room(request, room_name, league_num):
     # Convert the QuerySet to a list of dictionaries
     messages = list(messages)
     
-    return render(request, 'NFL_weekly_view/room.html', {
+    return render(request, 'baseball_SL/room.html', {
         'room_name': room_name,
         'team': team,
         'messages': messages,
@@ -105,56 +106,57 @@ def rules(request):
 
 @login_required
 def teamname(request):
-    if not Pick.objects.filter(username=request.user.username).exists():
+    print("hi")
+    if not Pick.objects.filter(username=request.user.username).exists() or not PickNW.objects.filter(username=request.user.username).exists():
         if request.method == "POST":
             form = CreateTeam(request.POST)
             if form.is_valid():
                 team_name = form.cleaned_data['team_name']
                 username = request.user.username
-                if PickBL.objects.filter(team_name = team_name).exists() or Pick.objects.filter(team_name = team_name).exists():
+                if PickBL.objects.filter(team_name = team_name).exists() or PickNW.objects.filter(team_name = team_name).exists() or Pick.objects.filter(team_name = team_name).exists():
                     messages.error(request,"Team name already exists.")
-                    return redirect('football:teamname' , league_num = league_num)
+                    return redirect('baseballSL:teamname' , league_num = league_num)
                 elif len(team_name) > 16:
                     messages.error(request,"Team name needs to be less than 15 characters.")
-                    return redirect("football:teamname" , league_num = league_num)
+                    return redirect("baseballSL:teamname" , league_num = league_num)
                 else:
                     paid = PaidBL.objects.get(username = request.user.username)
                     if paid.paid_status == False:
-                        for j in range(10):
+                        for j in range(3):
                             new_pick = PickBL(team_name=team_name,username= request.user.username,paid = False,pick_number = j+1, teamnumber = 1)
                             new_pick.save()
                     else:
                         teamcount = paid.numteams
                         for i in range(teamcount):
-                            for j in range(10):
+                            for j in range(3):
                                 new_pick = PickBL(team_name=team_name,username= request.user.username,paid = True,pick_number = j+1,teamnumber = i+1)
                                 new_pick.save()
-                    return redirect('football:checking', league_num = new_pick.league_number)
+                    return redirect('baseballSL:checking', league_num = new_pick.league_number)
             else:
                 messages.error(request,"Please submit a valid teamname.")
-                return redirect('football:teamname', league_num = league_num)
+                return redirect('baseballSL:teamname', league_num = league_num)
     else:
         pick = Pick.objects.get(username = request.user.username, teamnumber = 1)
         paid = PaidBL.objects.get(username = request.user.username)
         if paid.paid_status == False:
-            for j in range(10):
+            for j in range(3):
                 new_pick = PickBL(team_name=pick.team_name,username= request.user.username,paid = False,pick_number = j+1, teamnumber = 1)
                 new_pick.save()
-        return redirect('football:checking', league_num = new_pick.league_number)
+        return redirect('baseballSL:checking', league_num = new_pick.league_number)
 
-    return render(request,"NFL_weekly_view/teamname.html")
+    return render(request,"baseball_SL/teamname.html")
 
 
 def signout(request):
     logout(request)
-    return redirect('football:home')
+    return redirect('baseballSL:home')
 
 @login_required
 def payment(request, league_num):
     username = request.user.username
     player = PaidBL.objects.get(username = username)
     if int(league_num) != player.league_number:
-        return redirect("football:payment", league_num = player.league_number)
+        return redirect("baseballSL:payment", league_num = player.league_number)
     user = PromoUserBL.objects.get(username = request.user.username)
     code = user.code
     codeuser = False
@@ -202,14 +204,14 @@ def payment(request, league_num):
         } 
     print(context)
 
-    return render(request, 'NFL_weekly_view/payment.html', context)
+    return render(request, 'baseball_SL/payment.html', context)
 
 @login_required
 def playerboard(request, league_num):
     username = request.user.username
     player = PaidBL.objects.get(username = username)
     if int(league_num) != player.league_number:
-        return redirect("football:playerboard", league_num = player.league_number)
+        return redirect("baseballSL:playerboard", league_num = player.league_number)
     # Define the PST timezone
     pst = pytz.timezone('America/Los_Angeles')
 
@@ -239,7 +241,7 @@ def playerboard(request, league_num):
         within_deadline = False
     
     if (within_deadline) or not (start_datetime <= current_pst_time < end_datetime):
-        return redirect('football:checking', league_num = league_num)  # Replace 'some_other_page' with the name of an appropriate view
+        return redirect('baseballSL:checking', league_num = league_num)  # Replace 'some_other_page' with the name of an appropriate view
     """
     pick_counts = PickBL.objects.filter(league_number = league_num).exclude(pick='N/A').values('pick','pick_team', 'pick_position').annotate(count=Count('pick')).order_by('-count')
 
@@ -284,7 +286,7 @@ def playerboard(request, league_num):
 
 
     # Pass both sorted_player_counts and player_teams to the template
-    return render(request, 'NFL_weekly_view/playerboard.html', {
+    return render(request, 'baseball_SL/playerboard.html', {
         'page_obj': page_obj,
         'sorted_player_counts': sorted_player_counts,
         'player_teams': dict(pick_teams),
@@ -296,7 +298,7 @@ def leaderboard(request, league_num):
     username = request.user.username
     player = PaidBL.objects.get(username = username)
     if int(league_num) != player.league_number:
-        return redirect("football:leaderboard", league_num = player.league_number)
+        return redirect("baseballSL:leaderboard", league_num = player.league_number)
     # Define the PST timezone
     pst = pytz.timezone('America/Los_Angeles')
 
@@ -326,7 +328,7 @@ def leaderboard(request, league_num):
         within_deadline = False
     
     if (within_deadline) or not (start_datetime <= current_pst_time < end_datetime):
-        return redirect('football:checking', league_num = league_num)  # Replace 'some_other_page' with the name of an appropriate view
+        return redirect('baseballSL:checking', league_num = league_num)  # Replace 'some_other_page' with the name of an appropriate view
     """
     pick_counts = PickBL.objects.filter(league_number = league_num).exclude(pick='N/A').values('pick','pick_team', 'pick_position').annotate(count=Count('pick')).order_by('-count')
 
@@ -372,7 +374,7 @@ def leaderboard(request, league_num):
     user_data= PickBL.objects.filter(username = request.user.username)
 
     # Pass both sorted_player_counts and player_teams to the template
-    return render(request, 'NFL_weekly_view/leaderboard.html', {
+    return render(request, 'baseball_SL/leaderboard.html', {
         'page_obj': page_obj,
         'sorted_player_counts': sorted_player_counts,
         'player_teams': dict(pick_teams),
@@ -387,7 +389,7 @@ def location(request, league_num):
     username = request.user.username
     player = PaidBL.objects.get(username = username)
     if int(league_num) != player.league_number:
-        return redirect("football:location", league_num = player.league_number)
+        return redirect("baseballSL:location", league_num = player.league_number)
     user_ip_address = request.META.get('HTTP_X_FORWARDED_FOR') or request.META.get('REMOTE_ADDR')
 
     access_key = config('API_KEY')
@@ -416,41 +418,41 @@ def location(request, league_num):
         if not ((user_state in allowed_states and not is_proxy) or True):
             if is_proxy:
                 messages.error(request,"You cannot use a VPN.")
-                return redirect('football:tournaments')
+                return redirect('baseballSL:tournaments')
             else:
                 messages.error(request,"You are in a disallowed state.")
-                return redirect('football:tournaments')
+                return redirect('baseballSL:tournaments')
         else:
             if (start_date <= current_day < end_date):
-                return redirect('football:checking', league_num = league_num)
+                return redirect('baseballSL:checking', league_num = league_num)
             else:
                 if paid.paid_status == True:
-                    return redirect("football:checking", league_num = league_num)
+                    return redirect("baseballSL:checking", league_num = league_num)
                 else:
                     if total_numteams >= 200:
                         try:
                             Waitlist.objects.get(username = username)
                             messages.error(request,"You are already added to the waitlist.")
-                            return redirect('football:tournaments')
+                            return redirect('baseballSL:tournaments')
                         except Waitlist.DoesNotExist:
                             waiter = Waitlist(username = username)
                             waiter.save()
                             messages.error(request,"Max number of teams entered, we are adding you to a waitlist.")
-                            return redirect('football:tournaments')
+                            return redirect('baseballSL:tournaments')
                     else:
-                        return redirect('football:checking', league_num = league_num) #needs to be removed to check age
+                        return redirect('baseballSL:checking', league_num = league_num) #needs to be removed to check age
                         if compliance.old == False and compliance.young == False:
                             age_api_key = config('AGE_API')
                             return render(request,'authentication/agechecking.html',{'api':age_api_key})
                         elif compliance.young == True:
                             messages.error(request,"You are too young to participate.")
-                            return redirect("football:tournaments")
+                            return redirect("baseballSL:tournaments")
                         else:
-                            return redirect('football:checking', league_num = league_num)
+                            return redirect('baseballSL:checking', league_num = league_num)
 
     else:
         messages.error(request,"Failed to register location data.")
-        return redirect('football:tournaments')
+        return redirect('baseballSL:tournaments')
 
 @login_required
 @csrf_exempt  # Use cautiously, ensure your site is protected against CSRF attacks
@@ -458,7 +460,7 @@ def submitverification(request):
     username = request.user.username
     player = PaidBL.objects.get(username = username)
     if int(league_num) != player.league_number:
-        return redirect("football:submitverification", league_num = player.league_number)
+        return redirect("baseballSL:submitverification", league_num = player.league_number)
     compliance = OfAge.objects.get(username=username)
     # Prepare data for the AgeChecker API
     headers = {
@@ -478,21 +480,21 @@ def submitverification(request):
         if verification_status in ['accepted', 'verified']:
             compliance.old = True
             compliance.save()
-            return redirect('football:checking', league_num = league_num)
+            return redirect('baseballSL:checking', league_num = league_num)
         else:
             compliance.young = True
             compliance.save()
-            return redirect('football:location', league_num = league_num)
+            return redirect('baseballSL:location', league_num = league_num)
 
     # If not a POST request, render the form page
-    return redirect('football:checking', league_num = league_num)
+    return redirect('baseballSL:checking', league_num = league_num)
 
 @login_required
 def player_list(request, league_num):
     username = request.user.username
     player = PaidBL.objects.get(username = username)
     if int(league_num) != player.league_number:
-        return redirect("football:player_list", league_num = player.league_number)
+        return redirect("baseballSL:player_list", league_num = player.league_number)
     # Fetch all PickBL entries
     all_picks = PickBL.objects.filter(league_number = league_num, paid = True)
 
@@ -569,7 +571,7 @@ def player_list(request, league_num):
     page_obj = paginator.get_page(page_number)
 
     # Pass the data to the template
-    return render(request, 'NFL_weekly_view/leaders.html', {
+    return render(request, 'baseball_SL/leaders.html', {
         'leaderboard': page_obj,
         'pay_status':player.paid_status
     })
@@ -581,7 +583,7 @@ def game(request, league_num):
     username = request.user.username
     player = PaidBL.objects.get(username = username)
     if int(league_num) != player.league_number:
-        return redirect("football:game", league_num = player.league_number)
+        return redirect("baseballSL:game", league_num = player.league_number)
     # Define the PST timezone
     paid = PaidBL.objects.get(username = request.user.username)
     pst = pytz.timezone('America/Los_Angeles')
@@ -612,7 +614,7 @@ def game(request, league_num):
     else:
         within_deadline = False
     if (not within_deadline and (start_datetime <= current_pst_time < end_datetime)):
-        return redirect('football:checking', league_num = player.league_number)  # Replace 'some_other_page' with the name of an appropriate view
+        return redirect('baseballSL:checking', league_num = player.league_number)  # Replace 'some_other_page' with the name of an appropriate view
     """
     user_data = PickBL.objects.filter(username = request.user.username)
     user_pick_data = PickBL.objects.filter(username = request.user.username).order_by('teamnumber','pick_number')
@@ -626,7 +628,7 @@ def game(request, league_num):
         if selected_player:
             try:
                 # Retrieve the selected player
-                player_data_selected = NFLPlayer.objects.get(name=selected_player)
+                player_data_selected = BaseballPlayer.objects.get(name=selected_player)
                 if paid.paid_status == False:
                     return JsonResponse({'success': False, 'message': "Features activate after payment"})
                 else:
@@ -650,7 +652,7 @@ def game(request, league_num):
                             }
                         })
 
-            except NFLPlayer.DoesNotExist:
+            except BaseballPlayer.DoesNotExist:
                 return JsonResponse({'success': False, 'message': 'Player not found!'})
             except PickBL.DoesNotExist:
                 return JsonResponse({'success': False, 'message': 'Pick not found!'})
@@ -683,7 +685,7 @@ def game(request, league_num):
     total_in = int(PickBL.objects.filter(paid = True,league_number = league_num).count() / 10)
 
 
-    return render(request, 'NFL_weekly_view/weeklyNFLgame.html', 
+    return render(request, 'baseball_SL/game.html', 
         {'page_obj': page_obj,
         'user_pick_data' : user_pick_data,
         'has_started' : has_started,
@@ -727,7 +729,7 @@ def search_players(request):
     if request.headers.get('x-requested-with') == 'XMLHttpRequest' and request.method == 'GET':
         search_query = request.GET.get('search', '')
         if search_query:
-            players = NFLPlayer.objects.filter(name__icontains=search_query)[:5]
+            players = BaseballPlayer.objects.filter(name__icontains=search_query)[:5]
             player_list = [{'name': player.name} for player in players]
             return JsonResponse({'players': player_list})
     return JsonResponse({'players': []})
@@ -752,7 +754,7 @@ def game_search(username,playerdata,pagenum):
                     pick.pick_player_ID = playerdata.player_ID
                     pick.save()
                     return [pick.teamnumber,pick.pick_number,pick.pick,pick.pick_team,pick.pick_position,pick.pick_color,pick.pick_player_ID]
-            except NFLPlayer.DoesNotExist:
+            except BaseballPlayer.DoesNotExist:
                 return [pick.teamnumber,pick.pick_number,pick.pick,pick.pick_team,pick.pick_position,pick.pick_color,pick.pick_player_ID]
     for pick in user_pick_data:
         team_list = PickBL.objects.filter(username=username, teamnumber=pick.teamnumber).values_list('pick_team', flat=True)
@@ -777,16 +779,16 @@ def picking(request, league_num):
     username = request.user.username
     player = PaidBL.objects.get(username = username)
     if int(league_num) != player.league_number:
-        return redirect("football:picking", league_num = player.league_number)
+        return redirect("baseballSL:picking", league_num = player.league_number)
     total_in = int(PickBL.objects.filter(paid = True,league_number = league_num).count() / 10)
-    return render(request, 'NFL_weekly_view/picking.html', {'total_in': total_in})
+    return render(request, 'baseball_SL/picking.html', {'total_in': total_in})
 
 @login_required
 def checking(request, league_num):
     username = request.user.username
     player = PaidBL.objects.get(username = username)
     if int(league_num) != player.league_number:
-        return redirect("football:checking", league_num = player.league_number)
+        return redirect("baseballSL:checking", league_num = player.league_number)
     if not PaidBL.objects.filter(username=request.user.username).exists():
         new_user = PaidBL(username=request.user.username)
         new_user.save()
@@ -811,7 +813,7 @@ def checking(request, league_num):
     # Get the current date in PST for comparison with start and end dates
     current_date_pst = current_pst_time.date()
     
-    game = Game.objects.get(sport="Football Weekly")
+    game = Game.objects.get(sport="Baseball")
     start_date = game.startDate
     end_date = game.endDate
     week = game.week
@@ -826,24 +828,24 @@ def checking(request, league_num):
     
     # Check if the current date is within the game's start and end dates
     if paid.paid_status == False and (start_datetime <= current_pst_time < end_datetime) and within_deadline:
-        return redirect('football:picking', league_num = league_num)
+        return redirect('baseballSL:picking', league_num = league_num)
     
     elif paid.paid_status == False and (start_datetime <= current_pst_time < end_datetime) and not within_deadline:
-        return redirect('football:playerboard', league_num = league_num)
+        return redirect('baseballSL:playerboard', league_num = league_num)
     
     elif not (start_datetime <= current_pst_time < end_datetime):
         username = request.user.username
         if not PickBL.objects.filter(username=username).exists():
-            return redirect('football:teamname')
-        return redirect('football:game', league_num = league_num)
+            return redirect('baseballSL:teamname')
+        return redirect('baseballSL:game', league_num = league_num)
     
     else:
         username = request.user.username
         if not PickBL.objects.filter(username=username).exists():
-            return redirect('football:teamname')
+            return redirect('baseballSL:teamname')
         else:
             user_data = PickBL.objects.filter(username=username)
             if within_deadline:
-                return redirect('football:game', league_num = league_num)
+                return redirect('baseballSL:game', league_num = league_num)
             else:
-                return redirect('football:leaderboard', league_num = league_num)
+                return redirect('baseballSL:leaderboard', league_num = league_num)

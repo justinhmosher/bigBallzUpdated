@@ -9,6 +9,7 @@ app_name = 'authentication'
 
 urlpatterns = [
     path('football/', include(('authentication.NFL_weekly_view.urls', 'football'), namespace='football')),
+    path('baseballSL/', include(('authentication.baseball_SL.urls', 'baseballSL'), namespace='baseballSL')),
     path('',views.home,name="home"),
     path('signup',views.signup,name="signup"),
     path('signin',views.signin,name="signin"),
