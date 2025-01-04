@@ -220,7 +220,7 @@ def playerboard(request, league_num):
     current_day_pst = current_pst_time.weekday()  # This gives the day of the week (int)
     current_date_pst = current_pst_time.date()
 
-    game = Game.objects.get(sport="Football")
+    game = Game.objects.get(sport="Baseball")
     start_date = game.startDate
     end_date = game.endDate
 
@@ -307,7 +307,7 @@ def leaderboard(request, league_num):
     current_day_pst = current_pst_time.weekday()  # This gives the day of the week (int)
     current_date_pst = current_pst_time.date()
 
-    game = Game.objects.get(sport="Football")
+    game = Game.objects.get(sport="Baseball")
     start_date = game.startDate
     end_date = game.endDate
 
@@ -409,7 +409,7 @@ def location(request, league_num):
         paid = PaidBL.objects.get(username = username)
         compliance = OfAge.objects.get(username = username)
         current_day = timezone.now().date()
-        game = Game.objects.get(sport = "Football")
+        game = Game.objects.get(sport = "Baseball")
         start_date = game.startDate
         end_date = game.endDate
         total_numteams = PaidBL.objects.filter(paid_status=True).aggregate(Sum('numteams'))['numteams__sum']
@@ -593,7 +593,7 @@ def game(request, league_num):
     current_day_pst = current_pst_time.weekday()  # This gives the day of the week (int)
     current_date_pst = current_pst_time.date()
 
-    game = Game.objects.get(sport="Football")
+    game = Game.objects.get(sport="Baseball")
     start_date = game.startDate
     end_date = game.endDate
     paid = PaidBL.objects.get(username = request.user.username)
@@ -659,7 +659,7 @@ def game(request, league_num):
         else:
             return JsonResponse({'success': False, 'message': 'Invalid data!'})
 
-    game = Game.objects.get(sport = "Football")
+    game = Game.objects.get(sport = "Baseball")
     start = game.startDate
     current_day = timezone.now().date()
     if current_day <= start:
@@ -740,7 +740,7 @@ def game_search(username,playerdata,pagenum):
         if pick.pick == 'N/A':
             try:
                 team_list = PickBL.objects.filter(username=username, teamnumber=pick.teamnumber).values_list('pick_team', flat=True)
-                all_equal = all(item == playerdata.team_name for item in team_list)
+                all_equal = all(item == playerdata.team for item in team_list)
                 ID_list = PickBL.objects.filter(username=username, teamnumber=pick.teamnumber).values_list('pick_player_ID', flat=True)
                 if all_equal:
                     return 11
@@ -748,7 +748,7 @@ def game_search(username,playerdata,pagenum):
                     return 13
                 else:
                     pick.pick = playerdata.name
-                    pick.pick_team = playerdata.team_name
+                    pick.pick_team = playerdata.team
                     pick.pick_position = playerdata.position 
                     pick.pick_color = playerdata.color
                     pick.pick_player_ID = playerdata.player_ID
@@ -758,7 +758,7 @@ def game_search(username,playerdata,pagenum):
                 return [pick.teamnumber,pick.pick_number,pick.pick,pick.pick_team,pick.pick_position,pick.pick_color,pick.pick_player_ID]
     for pick in user_pick_data:
         team_list = PickBL.objects.filter(username=username, teamnumber=pick.teamnumber).values_list('pick_team', flat=True)
-        all_equal = all(item == playerdata.team_name for item in team_list)
+        all_equal = all(item == playerdata.team for item in team_list)
         ID_list = PickBL.objects.filter(username=username, teamnumber=pick.teamnumber).values_list('pick_player_ID', flat=True)
         if all_equal:
             return 11
@@ -766,7 +766,7 @@ def game_search(username,playerdata,pagenum):
             return 13
         else:
             pick.pick = playerdata.name
-            pick.pick_team = playerdata.team_name
+            pick.pick_team = playerdata.team
             pick.pick_position = playerdata.position 
             pick.pick_color = playerdata.color
             pick.pick_player_ID = playerdata.player_ID
