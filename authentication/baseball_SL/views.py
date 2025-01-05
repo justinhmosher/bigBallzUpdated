@@ -16,7 +16,7 @@ import requests
 from decouple import config
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
-from .models import PickBL,ScorerBL,PaidBL,PromoCodeBL,PromoUserBL,WaitlistBL,MessageBL
+from .models import PickBL,ScorerBL,PaidBL,PromoCodeBL,PromoUserBL,WaitlistBL,MessageBL,PastPickBL,GrandSlamBL
 from authentication.models import OfAge,Game,BaseballPlayer,ChatMessage, Pick
 from authentication.NFL_weekly_view.models import PickNW
 from authentication.forms import CreateTeam
@@ -638,6 +638,12 @@ def game(request, league_num):
                         return JsonResponse({'success': False, 'message': "Selected players cannot be on the same team."})
                     elif result == 13:
                         return JsonResponse({'success': False, 'message': "Player already selected."})
+                    elif result == 14:
+                        return JsonResponse({'success': False, 'message': "Your team is out."})
+                    elif result == 15:
+                        return JsonResponse({'success': False, 'message': "Player selected last week."})
+                    elif result == 16:
+                        return JsonResponse({'success': False, 'message': "Player hit a grand slam for you."})
                     else:
                         return JsonResponse({
                             'success': True,
@@ -677,6 +683,8 @@ def game(request, league_num):
     # Convert to a list of teams with picks
     team_picks_list = list(team_picks_dict.values())
 
+    out_teams = PickBL.objects.filter(username=username, isin=False).values_list('teamnumber', flat=True).distinct()
+
     # Paginate the team-level data (1 team per page)
     paginator = Paginator(team_picks_list, 1)  # One team per page
     page_number = request.GET.get('page')
@@ -692,6 +700,7 @@ def game(request, league_num):
         'start':start,
         'team':name,
         'total':total_in,
+        'out_teams':out_teams,
         'pay_status':player.paid_status
         })
 
@@ -735,17 +744,32 @@ def search_players(request):
     return JsonResponse({'players': []})
 
 def game_search(username,playerdata,pagenum):
+    game = Game.objects.get(sport="Baseball")
+    week = game.week
     user_pick_data = PickBL.objects.filter(username = username,teamnumber = pagenum).order_by('pick_number')
+    past_picks = PastPickBL.objects.filter(username = username,teamnumber = pagenum,week = week -1)
     for pick in user_pick_data:
         if pick.pick == 'N/A':
             try:
-                team_list = PickBL.objects.filter(username=username, teamnumber=pick.teamnumber).values_list('pick_team', flat=True)
-                all_equal = all(item == playerdata.team for item in team_list)
+                team_list = PickBL.objects.filter(username=username, teamnumber=pick.teamnumber).order_by('pick_number').values_list('pick_team', flat=True)
+                all_equal = True
+                for i, item in enumerate(team_list):
+                    if i != int(pick.pick_number) - 1 and item != playerdata.team:
+                        all_equal = False
+                        break
                 ID_list = PickBL.objects.filter(username=username, teamnumber=pick.teamnumber).values_list('pick_player_ID', flat=True)
+                past_pick_ID = PastPickBL.objects.filter(username=username, teamnumber=pick.teamnumber,week = week -1).values_list('pick', flat=True)
+                slams = GrandSlamBL.objects.filter(username = username, teamnumber = pick.teamnumber).values_list('player_ID', flat=True)
                 if all_equal:
                     return 11
                 elif playerdata.player_ID in ID_list:
                     return 13
+                elif pick.isin == False:
+                    return 14
+                elif playerdata.player_ID in past_pick_ID:
+                    return 15
+                elif playerdata.player_ID in slams:
+                    return 16
                 else:
                     pick.pick = playerdata.name
                     pick.pick_team = playerdata.team
@@ -757,13 +781,25 @@ def game_search(username,playerdata,pagenum):
             except BaseballPlayer.DoesNotExist:
                 return [pick.teamnumber,pick.pick_number,pick.pick,pick.pick_team,pick.pick_position,pick.pick_color,pick.pick_player_ID]
     for pick in user_pick_data:
-        team_list = PickBL.objects.filter(username=username, teamnumber=pick.teamnumber).values_list('pick_team', flat=True)
-        all_equal = all(item == playerdata.team for item in team_list)
+        team_list = PickBL.objects.filter(username=username, teamnumber=pick.teamnumber).order_by('pick_number').values_list('pick_team', flat=True)
+        all_equal = True
+        for i, item in enumerate(team_list):
+            if i != int(pick.pick_number) - 1 and item != playerdata.team:
+                all_equal = False
+                break
         ID_list = PickBL.objects.filter(username=username, teamnumber=pick.teamnumber).values_list('pick_player_ID', flat=True)
+        past_pick_ID = PastPickBL.objects.filter(username=username, teamnumber=pick.teamnumber,week = week -1).values_list('pick', flat=True)
+        slams = GrandSlamBL.objects.filter(username = username, teamnumber = pick.teamnumber).values_list('player_ID', flat=True)
         if all_equal:
             return 11
         elif playerdata.player_ID in ID_list:
             return 13
+        elif pick.isin == False:
+            return 14
+        elif playerdata.player_ID in past_pick_ID:
+            return 15
+        elif playerdata.player_ID in slams:
+            return 16
         else:
             pick.pick = playerdata.name
             pick.pick_team = playerdata.team

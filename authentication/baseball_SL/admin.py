@@ -1,6 +1,6 @@
 from django.contrib.admin import AdminSite
 from django.contrib import admin
-from .models import PickBL,ScorerBL,PaidBL,PromoCodeBL,PromoUserBL,WaitlistBL,MessageBL  # Import your models
+from .models import PickBL,ScorerBL,PaidBL,PromoCodeBL,PromoUserBL,WaitlistBL,MessageBL,PastPickBL,GrandSlamBL  # Import your models
 
 class Game2AdminSite(AdminSite):
     site_header = "Game 3 Admin"
@@ -19,3 +19,5 @@ game3_admin.register(PaidBL)
 game3_admin.register(PromoUserBL)
 game3_admin.register(WaitlistBL)
 game3_admin.register(MessageBL)
+game3_admin.register(PastPickBL)
+game3_admin.register(GrandSlamBL)

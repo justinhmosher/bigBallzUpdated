@@ -142,7 +142,7 @@ def send_email_to_user_BL(scorer, league_num):
         message = MIMEMultipart()
         message['From'] = f"{sender_name} <{sender_email}>"
         message['To'] = receiver_email
-        message['Subject'] = f"{scorer} has scored!"
+        message['Subject'] = f"{scorer} hit a homerun!"
         body = render_to_string('authentication/scorer_email_BL.html')
 
         """

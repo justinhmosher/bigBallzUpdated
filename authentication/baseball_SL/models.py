@@ -15,6 +15,7 @@ class PickBL(models.Model):
     pick_number = models.IntegerField(default=1)
     league_number = models.IntegerField(default=1)
     paid = models.BooleanField(default = False)
+    isin = models.BooleanField(default = True)
     username = models.CharField(max_length = 100, default = "username")
     email = models.EmailField(max_length = 100, default = "useremail@gamil.com")
     pick = models.CharField(max_length = 100, default = "N/A")
@@ -25,12 +26,34 @@ class PickBL(models.Model):
     def __str__(self):
         return f"{self.team_name}"
 
+class PastPickBL(models.Model):
+    username = models.CharField(max_length = 100, default = "username")
+    team_name = models.CharField(max_length = 100, default='Default Team Name')
+    teamnumber = models.IntegerField(default=1)
+    week = models.IntegerField(default = 1)
+    pick = models.CharField(max_length = 100, default = "N/A")
+    pick_name = models.CharField(max_length = 100, default = "N/A")
+    HR_count = models.IntegerField(default=0)
+    league_number = models.IntegerField(default=1)
+    def __str__(self):
+        return f"{self.team_name}"
+
+class GrandSlamBL(models.Model):
+    player_name = models.CharField(max_length = 100, default = "name")
+    player_ID = models.CharField(max_length= 100, default = "player ID")
+    username = models.CharField(max_length = 100, default = "username")
+    league_number = models.IntegerField(default=1)
+    teamnumber = models.IntegerField(default=1)
+    def __str__(self):
+        return f"{self.player_name}" 
+
 class ScorerBL(models.Model):
     name = models.CharField(max_length = 100, default = "name")
     player_ID = models.CharField(max_length= 100, default = "player ID")
+    grand_slam = models.BooleanField(default = False)
     scored = models.BooleanField(default = False)
     not_scored = models.BooleanField(default = False)
-    touchdown_count = models.IntegerField(default=0)
+    homerun_count = models.IntegerField(default=0)
     league_number = models.IntegerField(default=1)
     def __str__(self):
         return f"{self.name}" 

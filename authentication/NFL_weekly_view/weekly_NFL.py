@@ -738,8 +738,12 @@ def game_search(username,playerdata,pagenum):
     for pick in user_pick_data:
         if pick.pick == 'N/A':
             try:
-                team_list = PickNW.objects.filter(username=username, teamnumber=pick.teamnumber).values_list('pick_team', flat=True)
-                all_equal = all(item == playerdata.team_name for item in team_list)
+                team_list = PickBL.objects.filter(username=username, teamnumber=pick.teamnumber).order_by('pick_number').values_list('pick_team', flat=True)
+                all_equal = True
+                for i, item in enumerate(team_list):
+                    if i != int(pick.pick_number) - 1 and item != playerdata.team:
+                        all_equal = False
+                        break
                 ID_list = PickNW.objects.filter(username=username, teamnumber=pick.teamnumber).values_list('pick_player_ID', flat=True)
                 if all_equal:
                     return 11
@@ -756,8 +760,12 @@ def game_search(username,playerdata,pagenum):
             except NFLPlayer.DoesNotExist:
                 return [pick.teamnumber,pick.pick_number,pick.pick,pick.pick_team,pick.pick_position,pick.pick_color,pick.pick_player_ID]
     for pick in user_pick_data:
-        team_list = PickNW.objects.filter(username=username, teamnumber=pick.teamnumber).values_list('pick_team', flat=True)
-        all_equal = all(item == playerdata.team_name for item in team_list)
+        team_list = PickBL.objects.filter(username=username, teamnumber=pick.teamnumber).order_by('pick_number').values_list('pick_team', flat=True)
+        all_equal = True
+        for i, item in enumerate(team_list):
+            if i != int(pick.pick_number) - 1 and item != playerdata.team:
+                all_equal = False
+                break
         ID_list = PickNW.objects.filter(username=username, teamnumber=pick.teamnumber).values_list('pick_player_ID', flat=True)
         if all_equal:
             return 11

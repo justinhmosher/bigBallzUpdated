@@ -124,21 +124,16 @@
     </div>
 </section>
 
-
-      <div class="album py-5 bg-body-tertiary">
-        {% if isin %}
-        <div class="d-flex justify-content-center">
-          {% if not all_teams_out %}
-          <h2>{{ team }} touchdown predictions:</h2>
-          {% else %}
-          <h2>{{ team }} losing predictions:</h2>
-          {% endif %}
-        </div>
-        {% endif %}
 <div class="container">
   <!-- Loop through all teams -->
   {% for team_picks in page_obj %}
+  {% if team_picks.0.teamnumber not in out_teams %}
+    <h2 class="text-center">{{ team_picks.0.team_name }} touchdown predictions:</h2>
     <h3 class="text-center">Team {{ team_picks.0.teamnumber }}</h3>
+  {% else %}
+    <h2 class="text-center">{{ team_picks.0.team_name }} losing predictions:</h2>
+    <h3 class="text-center" style="color: red;">Team {{ team_picks.0.teamnumber }} - Out</h3>
+  {% endif %}
    <nav>
     <ul class="pagination justify-content-center">
       {% if page_obj.has_previous %}
@@ -181,7 +176,9 @@
                 {% csrf_token %}
                 <input type="hidden" name="change_pick" value='{"picknumber":"{{ pick.pick_number }}", "teamnumber":"{{ pick.teamnumber }}"}'>
                 <p class="text-center">Team #{{ pick.teamnumber }}</p>
+                {% if pick.teamnumber not in out_teams %}
                 <button type="button" class="btn btn-primary btn-submit" data-pick="{{ pick.pick_number }}" data-team="{{ pick.teamnumber }}">Change</button>
+                {% endif %}
             </form>
 
             </div>
