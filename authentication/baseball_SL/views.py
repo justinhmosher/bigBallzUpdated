@@ -107,7 +107,7 @@ def rules(request):
 @login_required
 def teamname(request):
     print("hi")
-    if not Pick.objects.filter(username=request.user.username).exists() or not PickNW.objects.filter(username=request.user.username).exists():
+    if not Pick.objects.filter(username=request.user.username).exists() and not PickNW.objects.filter(username=request.user.username).exists():
         if request.method == "POST":
             form = CreateTeam(request.POST)
             if form.is_valid():
