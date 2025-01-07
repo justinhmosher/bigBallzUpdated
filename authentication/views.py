@@ -734,7 +734,7 @@ def tournaments(request):
 			"summary": "Each week, choose three players to hit a home run./If any player hits a home run, you advance, else you are out./If a selected player hits a home run, you cannot reselect that same player the following week./Last man standing wins the pot!", 
 			"money": "Max Entries per Tournament: 50/Buy In: $50",
 			"rules": 3, 
-			"playable": False,
+			"playable": True,
 			"app" : "football",
 			"path":reverse("baseballSL:location", args=[1])
 		},

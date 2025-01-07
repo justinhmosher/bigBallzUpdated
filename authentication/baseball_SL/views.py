@@ -386,6 +386,8 @@ def location(request, league_num):
         return redirect("baseballSL:location", league_num = player.league_number)
     user_ip_address = request.META.get('HTTP_X_FORWARDED_FOR') or request.META.get('REMOTE_ADDR')
 
+    return redirect('baseballSL:checking', league_num = league_num)
+
     access_key = config('API_KEY')
     ipstack_url = f'https://api.ipstack.com/{user_ip_address}?access_key={access_key}'
     response = requests.get(ipstack_url)
