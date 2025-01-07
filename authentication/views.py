@@ -731,7 +731,7 @@ def tournaments(request):
 		],
 		"Baseball": [
 			{"name": "SEASON LONG GAME", 
-			"summary": "Each week, choose three players to hit a home run./If any player hits a home run, you advance, else you are out./If a selected player hits a home run, you cannot reselect that same player the following week./Last man standing wins the pot!", 
+			"summary": "Each week, choose three players to hit a home run./If any player hits a home run, you advance, else you are out./You will be unable to reselect your home run hitter the following week only./If a selected player hits a grand slam, you may not choose that player for the remainder of the tournament./Last man standing wins the pot!", 
 			"money": "Max Entries per Tournament: 50/Buy In: $50",
 			"rules": 3, 
 			"playable": True,
