@@ -227,23 +227,20 @@ def playerboard(request, league_num):
     end_datetime = datetime.combine(end_date, time(23, 59, 59))
     end_datetime = pst.localize(end_datetime)
 
-    start_datetime = datetime.combine(start_date, time(17, 0))  # Combine date with 5:00 PM
-    start_datetime = pst.localize(start_datetime)  # Make it timezone-aware
+    start_datetime = datetime.combine(start_date, time(23, 59, 59))
+    start_datetime = pst.localize(start_datetime)
+
+    sunday_deadline = datetime.combine(end_date, time(23, 59, 59))  # Combine date with 5:00 PM
+    sunday_deadline = pst.localize(sunday_deadline) # Make it timezone-aware
 
     current_pst_time = datetime.now(pst)
 
+    within_deadline = current_day_pst == 6 and current_pst_time <= sunday_deadline  # Ensure it's Sunday and before midnight
     """
-    if current_day_pst == 3 and current_pst_time <= thursday_deadline:  # Thursday before 5:00 PM PST
-        within_deadline = True
-    elif current_day_pst in [1, 2]:  # Tuesday or Wednesday
-        within_deadline = True
-    else:
-        within_deadline = False
-    
     if (within_deadline) or not (start_datetime <= current_pst_time < end_datetime):
         return redirect('baseballSL:checking', league_num = league_num)  # Replace 'some_other_page' with the name of an appropriate view
     """
-    pick_counts = PickBL.objects.filter(league_number = league_num).exclude(pick='N/A').values('pick','pick_team', 'pick_position').annotate(count=Count('pick')).order_by('-count')
+    pick_counts = PickBL.objects.filter(league_number = league_num).exclude(pick='N/A').exclude(isin = False).values('pick','pick_team', 'pick_position').annotate(count=Count('pick')).order_by('-count')
 
     player_counts = defaultdict(lambda: {'count': 0, 'teams': None, 'positions': None})
 
@@ -257,7 +254,7 @@ def playerboard(request, league_num):
 
     # Collect teams or users associated with each pick
     pick_teams = defaultdict(list)
-    for pick_record in PickBL.objects.exclude(pick='N/A'):
+    for pick_record in PickBL.objects.exclude(pick='N/A').exclude(isin = False):
         pick_teams[pick_record.pick].append(pick_record.team_name)
 
     player_status = {}
@@ -277,7 +274,7 @@ def playerboard(request, league_num):
         reverse=True
     )
 
-    total_in = int(PickBL.objects.filter(paid = True,league_number = league_num).count() / 10)
+    total_in = int(PickBL.objects.filter(paid = True,league_number = league_num).exclude(isin = False).count() / 3)
 
     # Paginate sorted_player_counts (show 10 players per page)
     paginator = Paginator(sorted_player_counts, 10)  # Show 10 players per page
@@ -314,23 +311,20 @@ def leaderboard(request, league_num):
     end_datetime = datetime.combine(end_date, time(23, 59, 59))
     end_datetime = pst.localize(end_datetime)
 
-    start_datetime = datetime.combine(start_date, time(17, 0))  # Combine date with 5:00 PM
-    start_datetime = pst.localize(start_datetime)  # Make it timezone-aware
+    start_datetime = datetime.combine(start_date, time(23, 59, 59))
+    start_datetime = pst.localize(start_datetime)
+
+    sunday_deadline = datetime.combine(end_date, time(23, 59, 59))  # Combine date with 5:00 PM
+    sunday_deadline = pst.localize(sunday_deadline) # Make it timezone-aware
 
     current_pst_time = datetime.now(pst)
 
+    within_deadline = current_day_pst == 6 and current_pst_time <= sunday_deadline  # Ensure it's Sunday and before midnight
     """
-    if current_day_pst == 3 and current_pst_time <= thursday_deadline:  # Thursday before 5:00 PM PST
-        within_deadline = True
-    elif current_day_pst in [1, 2]:  # Tuesday or Wednesday
-        within_deadline = True
-    else:
-        within_deadline = False
-    
     if (within_deadline) or not (start_datetime <= current_pst_time < end_datetime):
         return redirect('baseballSL:checking', league_num = league_num)  # Replace 'some_other_page' with the name of an appropriate view
     """
-    pick_counts = PickBL.objects.filter(league_number = league_num).exclude(pick='N/A').values('pick','pick_team', 'pick_position').annotate(count=Count('pick')).order_by('-count')
+    pick_counts = PickBL.objects.filter(league_number = league_num).exclude(pick='N/A').exclude(isin = False).values('pick','pick_team', 'pick_position').annotate(count=Count('pick')).order_by('-count')
 
     player_counts = defaultdict(lambda: {'count': 0, 'teams': None, 'positions': None})
 
@@ -344,7 +338,7 @@ def leaderboard(request, league_num):
 
     # Collect teams or users associated with each pick
     pick_teams = defaultdict(list)
-    for pick_record in PickBL.objects.exclude(pick='N/A'):
+    for pick_record in PickBL.objects.exclude(pick='N/A').exclude(isin = False):
         pick_teams[pick_record.pick].append(pick_record.team_name)
 
     player_status = {}
@@ -364,14 +358,14 @@ def leaderboard(request, league_num):
         reverse=True
     )
 
-    total_in = int(PickBL.objects.filter(paid = True,league_number = league_num).count() / 10)
+    total_in = int(PickBL.objects.filter(paid = True,league_number = league_num).exclude(isin = False).count() / 3)
 
     # Paginate sorted_player_counts (show 10 players per page)
     paginator = Paginator(sorted_player_counts, 10)  # Show 10 players per page
     page_number = request.GET.get('page')  # Get the page number from the request URL
     page_obj = paginator.get_page(page_number)  # Get the paginated page
 
-    user_data= PickBL.objects.filter(username = request.user.username)
+    user_data= PickBL.objects.filter(username = request.user.username).exclude(isin = False)
 
     # Pass both sorted_player_counts and player_teams to the template
     return render(request, 'baseball_SL/leaderboard.html', {
@@ -509,7 +503,7 @@ def player_list(request, league_num):
         teams_data[team_key]['picks'].append(pick.pick)
 
     # Fetch all ScorerBL data for lookup
-    scorer_data = {scorer.player_ID: scorer.touchdown_count for scorer in ScorerBL.objects.all()}
+    scorer_data = {scorer.player_ID: scorer.homerun_count for scorer in ScorerBL.objects.all()}
 
     # Calculate total touchdowns for each team
     for team_key, team_info in teams_data.items():
@@ -570,10 +564,14 @@ def player_list(request, league_num):
     page_number = request.GET.get('page', 1)
     page_obj = paginator.get_page(page_number)
 
+    out_teams = PickBL.objects.filter(username=username, isin=False).values_list('teamnumber', flat=True).distinct()
+    print(out_teams)
+
     # Pass the data to the template
     return render(request, 'baseball_SL/leaders.html', {
         'leaderboard': page_obj,
-        'pay_status':player.paid_status
+        'pay_status':player.paid_status,
+        'out_teams' : out_teams
     })
 
 
@@ -588,7 +586,6 @@ def game(request, league_num):
     paid = PaidBL.objects.get(username = request.user.username)
     pst = pytz.timezone('America/Los_Angeles')
 
-    # Get the current time in PST
     current_pst_time = timezone.now().astimezone(pst)
     current_day_pst = current_pst_time.weekday()  # This gives the day of the week (int)
     current_date_pst = current_pst_time.date()
@@ -596,25 +593,22 @@ def game(request, league_num):
     game = Game.objects.get(sport="Baseball")
     start_date = game.startDate
     end_date = game.endDate
-    paid = PaidBL.objects.get(username = request.user.username)
+
+    start_datetime = datetime.combine(start_date, time(23, 59, 59))
+    start_datetime = pst.localize(start_datetime)
 
     end_datetime = datetime.combine(end_date, time(23, 59, 59))
     end_datetime = pst.localize(end_datetime)
 
-    start_datetime = datetime.combine(start_date, time(17, 0))  # Combine date with 5:00 PM
-    start_datetime = pst.localize(start_datetime)  # Make it timezone-aware
+    sunday_deadline = datetime.combine(end_date, time(23, 59, 59))  # Combine date with 5:00 PM
+    sunday_deadline = pst.localize(sunday_deadline) # Make it timezone-aware
+
     current_pst_time = datetime.now(pst)
 
-    thursday_deadline = current_pst_time.replace(hour=17, minute=0, second=0, microsecond=0)
+    within_deadline = current_day_pst == 6 and current_pst_time <= sunday_deadline  # Ensure it's Sunday and before midnight
     """
-    if current_day_pst == 3 and current_pst_time <= thursday_deadline:  # Thursday before 5:00 PM PST
-        within_deadline = True
-    elif current_day_pst in [1, 2]:  # Tuesday or Wednesday
-        within_deadline = True
-    else:
-        within_deadline = False
-    if (not within_deadline and (start_datetime <= current_pst_time < end_datetime)):
-        return redirect('baseballSL:checking', league_num = player.league_number)  # Replace 'some_other_page' with the name of an appropriate view
+    if not (within_deadline) and (start_datetime <= current_pst_time < end_datetime):
+        return redirect('baseballSL:checking', league_num = league_num)  # Replace 'some_other_page' with the name of an appropriate view
     """
     user_data = PickBL.objects.filter(username = request.user.username)
     user_pick_data = PickBL.objects.filter(username = request.user.username).order_by('teamnumber','pick_number')
@@ -690,7 +684,7 @@ def game(request, league_num):
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
-    total_in = int(PickBL.objects.filter(paid = True,league_number = league_num).count() / 10)
+    total_in = int(PickBL.objects.filter(paid = True,league_number = league_num).exclude(isin = False).count() / 3)
 
 
     return render(request, 'baseball_SL/game.html', 
@@ -831,6 +825,10 @@ def checking(request, league_num):
         
     paid = PaidBL.objects.get(username=request.user.username)
     count = PickBL.objects.count()
+
+    game = Game.objects.get(sport="Baseball")
+    start_date = game.startDate
+    end_date = game.endDate
     
     # Define the PST timezone
     pst = pytz.timezone('America/Los_Angeles')
@@ -838,29 +836,24 @@ def checking(request, league_num):
     # Get the current time in PST
     current_pst_time = timezone.now().astimezone(pst)
     current_day_pst = current_pst_time.weekday()  # This gives the day of the week (int)
-    thursday_deadline = current_pst_time.replace(hour=17, minute=0, second=0, microsecond=0)
-    if current_day_pst == 3 and current_pst_time <= thursday_deadline:  # Thursday before 5:00 PM PST
-        within_deadline = True
-    elif current_day_pst in [1, 2]:  # Tuesday or Wednesday
-        within_deadline = True
-    else:
-        within_deadline = False
-
-    # Get the current date in PST for comparison with start and end dates
     current_date_pst = current_pst_time.date()
-    
+
     game = Game.objects.get(sport="Baseball")
     start_date = game.startDate
     end_date = game.endDate
-    week = game.week
 
     end_datetime = datetime.combine(end_date, time(23, 59, 59))
     end_datetime = pst.localize(end_datetime)
 
-    start_datetime = datetime.combine(start_date, time(17, 0))  # Combine date with 5:00 PM
-    start_datetime = pst.localize(start_datetime)  # Make it timezone-aware
+    start_datetime = datetime.combine(start_date, time(23, 59, 59))
+    start_datetime = pst.localize(start_datetime)
+
+    sunday_deadline = datetime.combine(end_date, time(23, 59, 59))  # Combine date with 5:00 PM
+    sunday_deadline = pst.localize(sunday_deadline) # Make it timezone-aware
+
     current_pst_time = datetime.now(pst)
 
+    within_deadline = current_day_pst == 6 and current_pst_time <= sunday_deadline  # Ensure it's Sunday and before midnight
     
     # Check if the current date is within the game's start and end dates
     if paid.paid_status == False and (start_datetime <= current_pst_time < end_datetime) and within_deadline:
@@ -884,4 +877,13 @@ def checking(request, league_num):
             if within_deadline:
                 return redirect('baseballSL:game', league_num = league_num)
             else:
-                return redirect('baseballSL:leaderboard', league_num = league_num)
+                all_out = True
+                team_list = PickBL.objects.filter(username=username, teamnumber=pick.teamnumber).order_by('pick_number').values_list('isin', flat=True)
+                for i in team_list:
+                    if i == True:
+                        all_out = False
+                        break
+                if all_out:
+                    return redirect('baseballSL:playerboard', league_num = league_num)
+                else:
+                    return redirect('baseballSL:leaderboard', league_num = league_num)

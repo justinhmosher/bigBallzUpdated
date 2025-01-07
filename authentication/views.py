@@ -72,14 +72,14 @@ def custom_csrf_failure_view(request, reason=""):
 def home(request):
     tournaments = [
         {
-            'name': 'NFL - Touchdown Manea',
+            'name': 'NFL - Touchdown Mania',
             'description': 'Each week, choose two players to score a touchdown and get one or more offensive yards./If one or both score and have one or more offensive yards, you advance, else you are out./Last man standing wins the pot!',
             'deadline': 'Deadline: September 11, 2025',
         },
         {
             'name': 'MLB - Home Run Derby',
-            'description': "Each week, choose three players to hit a homerun./If any player hits a homerun, you advance, else you are out./If a selected player hits a homerun, you cannot reselect that same player the following week./Last man standing wins the pot!",
-            'deadline': 'Deadline: March 27, 2025',
+            'description': "Each week, choose three players to hit a home run./If any player hits a home run, you advance, else you are out./You will be unable to reselect your home run hitter the following week only./If a selected player hits a grand slam, you may not choose that player for the remainder of the tournament./Last man standing wins the pot!",
+            'deadline': 'Deadline: March 30, 2025',
         },
         {
             'name': 'NBA - Three Point Contest',
@@ -141,6 +141,8 @@ def rules(request,game):
 		return render(request,'authentication/rules.html')
 	if game ==2:
 		return render(request,"authentication/rules_NW.html")
+	if game==3:
+		return render(request,"authentication/rules_BL.html")
 
 def confirm_email(request, email):
 	user = User.objects.get(username = email)
@@ -729,8 +731,8 @@ def tournaments(request):
 		],
 		"Baseball": [
 			{"name": "SEASON LONG GAME", 
-			"summary": "Each week, choose three players to hit a homerun./If any player hits a homerun, you advance, else you are out./If a selected player hits a homerun, you cannot reselect that same player the following week./Last man standing wins the pot!", 
-			"money": "",
+			"summary": "Each week, choose three players to hit a home run./If any player hits a home run, you advance, else you are out./If a selected player hits a home run, you cannot reselect that same player the following week./Last man standing wins the pot!", 
+			"money": "Max Entries per Tournament: 50/Buy In: $50",
 			"rules": 3, 
 			"playable": True,
 			"app" : "football",
@@ -738,7 +740,7 @@ def tournaments(request):
 		},
 		{
 			"name": "WEEKLY GAME", 
-			"summary": "Select 10 players to hit a homerun./The user with the most comultive homeruns wins the pot!", 
+			"summary": "Select 10 players to hit a home run./The user with the most comultive home runs wins the pot!", 
 			"money": "",
 			"rules": 4, 
 			"playable": False,

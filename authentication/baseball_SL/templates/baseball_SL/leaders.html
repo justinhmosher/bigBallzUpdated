@@ -164,7 +164,13 @@
                 <td>
                     <div class="hover-container">
                         <span class="team-name">
+                            {% if team.team.team_number in out_teams %}
                             {{ team.team.team_name }}
+                            {% else %}
+                            {{ team.team.team_number }}
+                            {{ team.team.team_name }}👑
+                            {% endif %}
+                            
                         </span>
                         <!-- Hover content for displaying team picks -->
                         <div class="hover-content">

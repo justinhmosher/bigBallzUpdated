@@ -10,9 +10,9 @@
             font-family: 'Arial', sans-serif;
             background: linear-gradient(to bottom, #000, #222);
             color: white;
+            flex-direction: column;
             margin: 0;
-            padding: 0;
-            overflow-x: hidden;
+            min-height: 100vh;
         }
 
         h1, h2, h3 {
@@ -116,6 +116,7 @@ li > ul > li:before, li > ol > li:before {
             display: flex;
             flex-direction: column;
             justify-content: center;
+            min-height: 80vh;
         }
 
         footer {
@@ -124,7 +125,6 @@ li > ul > li:before, li > ol > li:before {
             padding: 10px;
             color: gold;
             position: relative;
-            bottom: 0;
             width: 100%;
         }
 
@@ -153,52 +153,40 @@ li > ul > li:before, li > ol > li:before {
                 text-shadow: 0 0 10px gold, 0 0 20px orange;
             }
         }
+        main{
+            flex: 1;
+        }
     </style>
 </head>
 <body>
+    <main>
     <div class="container">
-        <h1 class="sparkle">Touchdown Mania Rules</h1>
+        <h1 class="sparkle">Home Run Derby</h1>
 
-        <h2>Definitions</h2>
-        <p >Team: Consists of two NFL players (Running Back, Wide Receiver, Tight End, or Quarter Back - rushing and receiving only) on separate NFL rosters.</p>
+        <h2>Facts</h2>
         <ul>
+            <li>A team consists of three MLB players who are not all on the same team.</li>
             <li>Each team costs $50 to buy.</li>
             <li>You can buy a minimum of 1 team and a maximum of 7 teams.</li>
         </ul>
 
         <h2>Rules</h2>
         <ol>
-            <li>The game starts on Thursday, week 1 of the NFL season.</li>
-            <li>The object is to select two players per team to score a touchdown and one or more offensive yards.</li>
-            <li>If one or both players score a touchdown and one or more offensive yards, then that team advances onto the following week.</li>
-            <li>If both players DO NOT score a touchdown, then that team is eliminated.
+            <li>The game starts on Sunday - March 30th, 2025 </li>
+            <li>The goal is to choose at least one player to hit a home run per week.
                 <ul>
-                    <li>You may choose/change player selections at any time Tuesday through Thursday before 8:00pm EST.</li>
-                    <li>Starting Thursday 8:00pm EST., you may no longer choose/change players.</li>
+                    <li>Selection starts every Sunday 12:00am PST, and ends 11:59pm PST that same Sunday.</li>
+                    <li>After Sunday, you may no longer change your team for the week.</li>
                 </ul>
             </li>
-            <li>If your team advances, you select two new players starting Tuesday of the following week.</li>
-            <li>If a player scores a touchdown and one or more offensive yards for one of your teams at any point in the season, you may no longer select that player to score FOR THAT TEAM ONLY.
-                <ul>
-                    <li>You may still select that player to a touchdown for a different team you own.</li>
-                </ul>
-            </li>
-            <li>The user with the last team remaining wins the pot!</li>
-            <li>Tie breakers are determined for total cumulative touchdowns for the entire season.</li>
-            <li>The game will end after week 18.</li>
+            <li>If one or more of your players hits a home run that week, you advance to the following week, else you are out.</li>
+            <li>When a player hits a home run for your team, you may not select that same player the next week.  However, the player will become available once again the week after.</li>
+            <li>At any point, if a selected player hits a grand slam, you may not choose that player again for the rest of the tournament.  You will still advance to the following week.</li>
+            <li>If a tiebreaker is required, it will be decided by total cumulative home runs throughout the tournament.</li>
         </ol>
 
-        <div class="example-box">
-            <h2>Example</h2>
-            <p>A user paid $250 for 5 teams. It is now week 7 of the NFL season and the user has 2 teams remaining, and the user selects the following players to score a touchdown and one or more offensive yards:</p>
-            <p>Team 1 = Travis Kelce or Tyreek Hill</p>
-            <p>Team 2 = Austin Eckler or Mike Evans</p>
-            <p>If Travis Kelce, Mike Evans, and Tyreek Hill score a touchdown and one or more offensive yards that week, then both teams stay alive!</p>
-            <h3>Going Forward</h3>
-            <p>Team 1 will no longer be able to select Travis Kelce, nor Tyreek Hill for the remainder of the season, and team 2 will no longer be able to select Mike Evans for the remainder of the season. However, team 2 may still be able to pick Travis Kelce and Tyreek Hill (assuming they haven’t already scored a TD for Team 2), and likewise with Mike Evans on team 1.</p>
-        </div>
-
     </div>
+    </main>
 </body>
         <footer>
             <p>Ready to play? <a href="/signup">Sign Up Now!</a></p>

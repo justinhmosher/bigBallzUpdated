@@ -101,9 +101,9 @@
         <h2 class="text-center"> Game starts: {{ start }}</h2>
       {% else %}
       {% if not all_teams_out %}
-        <h2 class="text-center"> Selection ends Wednesday 11:59pm PST</h2>
+        <h2 class="text-center"> Selection ends Sunday 11:59pm PST</h2>
       {% else %}
-      <h2 class="text-center">Come back Thursday to view the picks!</h2>
+      <h2 class="text-center">Come back Sunday to view the picks!</h2>
       {% endif %}
       {% endif %}
       <br>
@@ -128,7 +128,7 @@
   <!-- Loop through all teams -->
   {% for team_picks in page_obj %}
   {% if team_picks.0.teamnumber not in out_teams %}
-    <h2 class="text-center">{{ team_picks.0.team_name }} touchdown predictions:</h2>
+    <h2 class="text-center">{{ team_picks.0.team_name }} home run predictions:</h2>
     <h3 class="text-center">Team {{ team_picks.0.teamnumber }}</h3>
   {% else %}
     <h2 class="text-center">{{ team_picks.0.team_name }} losing predictions:</h2>
