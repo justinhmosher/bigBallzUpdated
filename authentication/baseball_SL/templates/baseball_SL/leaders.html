@@ -173,16 +173,6 @@
                             
                         </span>
                         <!-- Hover content for displaying team picks -->
-                        <div class="hover-content">
-                            <h4>Picks</h4>
-                            <ul>
-                                {% for pick in team.team.picks %}
-                                    <li>{{ pick }}</li>
-                                {% empty %}
-                                    <li>No picks</li>
-                                {% endfor %}
-                            </ul>
-                        </div>
                     </div>
                 </td>
                 <td class="pick-count">{{ team.team.total_touchdowns }}</td>

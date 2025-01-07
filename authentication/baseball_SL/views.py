@@ -130,10 +130,10 @@ def teamname(request):
                             for j in range(3):
                                 new_pick = PickBL(team_name=team_name,username= request.user.username,paid = True,pick_number = j+1,teamnumber = i+1)
                                 new_pick.save()
-                    return redirect('baseballSL:checking', league_num = new_pick.league_number)
+                    return redirect('baseballSL:checking', new_pick.league_number)
             else:
                 messages.error(request,"Please submit a valid teamname.")
-                return redirect('baseballSL:teamname', league_num = league_num)
+                return redirect('baseballSL:teamname')
     else:
         pick = Pick.objects.get(username = request.user.username, teamnumber = 1)
         paid = PaidBL.objects.get(username = request.user.username)
@@ -378,7 +378,7 @@ def leaderboard(request, league_num):
 
 
 @login_required
-def location(request, league_num):    
+def location(request, league_num):
     username = request.user.username
     player = PaidBL.objects.get(username = username)
     if int(league_num) != player.league_number:
