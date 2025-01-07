@@ -796,6 +796,7 @@ def location(request,league_num):
 	if int(league_num) != player.league_number:
 		return redirect("authentication:location", league_num = player.league_number)
 	user_ip_address = request.META.get('HTTP_X_FORWARDED_FOR') or request.META.get('REMOTE_ADDR')
+	return redirect("authentication:checking", league_num = player.league_number)
 
 	access_key = config('API_KEY')
 	ipstack_url = f'https://api.ipstack.com/{user_ip_address}?access_key={access_key}'
