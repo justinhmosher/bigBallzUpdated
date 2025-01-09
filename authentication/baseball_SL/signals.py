@@ -25,10 +25,12 @@ def delete_unpaid_players(sender, instance, **kwargs):
             # Trigger the message creation only if `isin` is changed to False
             paid = PaidBL.objects.get(username = instance.username)
             pick = PickBL.objects.get(username = instance.username, pick_number = 1)
+            team = pick.team_name
+            PickBL.objects.filter(username=instance.username, paid=False).delete()
             teamcount = paid.numteams
+            print(teamcount)
             for i in range(teamcount):
                 for j in range(3):
-                    new_pick = PickBL(team_name=pick.team_name,username= instance.username,paid = True,pick_number = j+1,teamnumber = i+1)
+                    new_pick = PickBL(team_name=team,username= instance.username,paid = True,pick_number = j+1,teamnumber = i+1)
                     new_pick.save()
-            PickBL.objects.filter(username = instance.username, paid=False).delete()
             send_paid_email(instance.username, instance.league_number)
