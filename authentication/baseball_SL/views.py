@@ -486,6 +486,8 @@ def submitverification(request):
 
 @login_required
 def player_list(request, league_num):
+    game = Game.objects.get(sport = "Baseball")
+    week = game.week
     username = request.user.username
     player = PaidBL.objects.get(username = username)
     if int(league_num) != player.league_number:
@@ -494,46 +496,71 @@ def player_list(request, league_num):
     all_picks = PickBL.objects.filter(league_number = league_num, paid = True)
 
     # Build a dictionary to store team data
-    teams_data = defaultdict(lambda: {'team_name': '', 'total_touchdowns': 0, 'picks': []})
+    teams_data = defaultdict(lambda: {'team_name': '', 'total_homeruns': 0, 'picks': []})
 
     # Iterate through all picks
     for pick in all_picks:
         team_key = (pick.teamnumber, pick.team_name)  # Unique key for each team by teamnumber and team_name
         teams_data[team_key]['team_name'] = pick.team_name
         # Store player names (PickBL.pick) instead of IDs for hover display
-        teams_data[team_key]['picks'].append(pick.pick)
+        pastHR = PastPickBL.objects.filter(username = pick.username, teamnumber=pick.teamnumber, team_name=pick.team_name)
+        for past_pick in pastHR:
+            if past_pick.pick_name not in teams_data[team_key]['picks'] and week == past_pick.week + 1:
+                teams_data[team_key]['picks'].append(past_pick.pick_name)
 
     # Fetch all ScorerBL data for lookup
-    scorer_data = {scorer.player_ID: scorer.homerun_count for scorer in ScorerBL.objects.all()}
+    scorer_data = {scorer.player_ID: scorer.homerun_count for scorer in ScorerBL.objects.filter(league_number=league_num)}
+    print(scorer_data)
 
-    # Calculate total touchdowns for each team
-    for team_key, team_info in teams_data.items():
-        # Filter picks specific to this team and calculate total touchdowns
-        total_touchdowns = sum(
-            scorer_data.get(pick.pick_player_ID, 0)
-            for pick in all_picks
-            if pick.team_name == team_info['team_name'] and pick.teamnumber == team_key[0]
-        )
-        teams_data[team_key]['total_touchdowns'] = total_touchdowns
+    # Initialize a dictionary to store cumulative homeruns by team
+    cumulative_homeruns = defaultdict(lambda: {'team_name': '', 'teamnumber': 0, 'total_homeruns': 0})
 
-    # Convert to a sorted list by total_touchdowns in descending order
+    # Fetch all past picks for the league
+    pastpicks = PastPickBL.objects.filter(league_number=league_num)
+
+    # Add homeruns from past picks
+    for past_pick in pastpicks:
+        team_key = (past_pick.teamnumber, past_pick.team_name)
+        cumulative_homeruns[team_key]['team_name'] = past_pick.team_name
+        cumulative_homeruns[team_key]['teamnumber'] = past_pick.teamnumber
+        cumulative_homeruns[team_key]['total_homeruns'] += past_pick.HR_count
+
+    current_picks = PickBL.objects.filter(league_number=league_num)
+
+    # Add homeruns from current scorers
+    for player_id, homerun_count in scorer_data.items():
+        # Find all past picks matching the player_id
+        matching_picks = current_picks.filter(pick_player_ID=player_id)
+        for pick in matching_picks:
+            team_key = (pick.teamnumber, pick.team_name)
+            cumulative_homeruns[team_key]['team_name'] = pick.team_name
+            cumulative_homeruns[team_key]['teamnumber'] = pick.teamnumber
+            cumulative_homeruns[team_key]['total_homeruns'] += homerun_count
+
+    for team_key, homerun_data in cumulative_homeruns.items():
+        if team_key in teams_data:
+            teams_data[team_key]['total_homeruns'] = homerun_data['total_homeruns']
+
+
+    # Convert to a sorted list by total_homeruns in descending order
     sorted_teams = sorted(
         [{'teamnumber': team_key[0], 'team_name': team_key[1], **team_info} for team_key, team_info in teams_data.items()],
-        key=lambda x: x['total_touchdowns'],
+        key=lambda x: x['total_homeruns'],
         reverse=True
     )
+    print(sorted_teams)
 
     standings = []
     previous_count = None
     current_rank = 1
     for index, item in enumerate(sorted_teams):
-        pick_count = item['total_touchdowns']
+        pick_count = item['total_homeruns']
         if pick_count == 0:
             pick_count = None
         if previous_count == 0:
             previous_count = None
         # Get the next team's pick count
-        next_pick_count = sorted_teams[index + 1]['total_touchdowns'] if index + 1 < len(sorted_teams) else None
+        next_pick_count = sorted_teams[index + 1]['total_homeruns'] if index + 1 < len(sorted_teams) else None
         if next_pick_count == 0:
             next_pick_count = None
         is_tied_with_previous = pick_count == previous_count
@@ -566,7 +593,6 @@ def player_list(request, league_num):
     page_obj = paginator.get_page(page_number)
 
     out_teams = PickBL.objects.filter(username=username, isin=False).values_list('teamnumber', flat=True).distinct()
-    print(out_teams)
 
     # Pass the data to the template
     return render(request, 'baseball_SL/leaders.html', {
