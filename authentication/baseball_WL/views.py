@@ -16,10 +16,10 @@ import requests
 from decouple import config
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
-from .models import PickNW,ScorerNW,PaidNW,PromoCodeNW,PromoUserNW,WaitlistNW,MessageNW
-from authentication.models import OfAge,Game,NFLPlayer,ChatMessage, Pick
+from .models import PickBS,ScorerBS,PaidBS,PromoCodeBS,PromoUserBS,WaitlistBS,MessageBS
+from authentication.models import OfAge,Game,BaseballPlayer,ChatMessage, Pick
 from authentication.baseball_SL.models import PickBL
-from authentication.baseball_WL.models import PickBS
+from authentication.NFL_weekly_view.models import PickNW
 from authentication.forms import CreateTeam
 from django.db.models import Count,F,ExpressionWrapper,fields,OuterRef,Subquery
 from datetime import datetime, time
@@ -42,11 +42,11 @@ from django.db.models.functions import Lower
 @login_required
 def message_board(request, league_num):
     username = request.user.username
-    player = PaidNW.objects.get(username = username)
+    player = PaidBS.objects.get(username = username)
     if int(league_num) != player.league_number:
-        return redirect("football:message_board", league_num = player.league_number)
+        return redirect("baseballWL:message_board", league_num = player.league_number)
     # Fetch all messages, ordered by week and timestamp
-    messages = MessageNW.objects.filter(league_number = league_num).order_by('-week', '-timestamp')
+    messages = MessageBS.objects.filter(league_number = league_num).order_by('-week', '-timestamp')
 
     # Group messages by week
     grouped_messages = {}
@@ -55,7 +55,7 @@ def message_board(request, league_num):
             grouped_messages[message.week] = []
         grouped_messages[message.week].append(message)
 
-    return render(request, 'NFL_weekly_view/messages.html', {
+    return render(request, 'baseball_WL/messages.html', {
         'grouped_messages': grouped_messages,
         'pay_status':player.paid_status
         })
@@ -64,10 +64,10 @@ def custom_csrf_failure_view(request, reason=""):
     # Set an error message to be displayed on the login page
     messages.error(request, "There was an issue with your request. Please sign in again.")
     # Redirect the user back to the login page
-    return redirect('football:signin')  # 'login' should be the name of your login URL
+    return redirect('baseballWL:signin')  # 'login' should be the name of your login URL
 
 def home(request):
-    total_numteams = PaidNW.objects.filter(paid_status=True).aggregate(Sum('numteams'))['numteams__sum']
+    total_numteams = PaidBS.objects.filter(paid_status=True).aggregate(Sum('numteams'))['numteams__sum']
     if total_numteams is None:
         total_numteams = 0
     return render(request, "authentication/homepage.html",{'total': 200 - total_numteams})
@@ -76,14 +76,14 @@ def home(request):
 @login_required
 def room(request, room_name, league_num):
     username = request.user.username
-    player = PaidNW.objects.get(username = username)
+    player = PaidBS.objects.get(username = username)
     if int(league_num) != player.league_number:
-        return redirect("football:room", room_name = "weekly-NFL", league_num = player.league_number)
+        return redirect("baseballWL:room", room_name = "weekly-MLB", league_num = player.league_number)
     username = request.user.username
     try:
-        paids = PickNW.objects.get(username=username, teamnumber=1,pick_number=1)
+        paids = PickBS.objects.get(username=username, teamnumber=1,pick_number=1)
         team = paids.team_name
-    except PickNW.DoesNotExist:
+    except PickBS.DoesNotExist:
         team = "No Team"
 
     # Fetch all chat messages for the room, including their likes and dislikes count
@@ -94,7 +94,7 @@ def room(request, room_name, league_num):
     # Convert the QuerySet to a list of dictionaries
     messages = list(messages)
     
-    return render(request, 'NFL_weekly_view/room.html', {
+    return render(request, 'baseball_WL/room.html', {
         'room_name': room_name,
         'team': team,
         'messages': messages,
@@ -113,51 +113,51 @@ def teamname(request):
             if form.is_valid():
                 team_name = form.cleaned_data['team_name']
                 username = request.user.username
-                if PickNW.objects.filter(team_name = team_name).exists() or PickBL.objects.filter(team_name = team_name).exists() or PickBS.objects.filter(team_name = team_name).exists() or Pick.objects.filter(team_name = team_name).exists():
+                if PickBS.objects.filter(team_name = team_name).exists() or PickBL.objects.filter(team_name = team_name).exists() or PickNW.objects.filter(team_name = team_name).exists() or Pick.objects.filter(team_name = team_name).exists():
                     messages.error(request,"Team name already exists.")
-                    return redirect('football:teamname' , league_num = league_num)
+                    return redirect('baseballWL:teamname' , league_num = league_num)
                 elif len(team_name) > 16:
                     messages.error(request,"Team name needs to be less than 15 characters.")
-                    return redirect("football:teamname" , league_num = league_num)
+                    return redirect("baseballWL:teamname" , league_num = league_num)
                 else:
-                    paid = PaidNW.objects.get(username = request.user.username)
+                    paid = PaidBS.objects.get(username = request.user.username)
                     if paid.paid_status == False:
                         for j in range(10):
-                            new_pick = PickNW(team_name=team_name,username= request.user.username,paid = False,pick_number = j+1, teamnumber = 1)
+                            new_pick = PickBS(team_name=team_name,username= request.user.username,paid = False,pick_number = j+1, teamnumber = 1)
                             new_pick.save()
                     else:
                         teamcount = paid.numteams
                         for i in range(teamcount):
                             for j in range(10):
-                                new_pick = PickNW(team_name=team_name,username= request.user.username,paid = True,pick_number = j+1,teamnumber = i+1)
+                                new_pick = PickBS(team_name=team_name,username= request.user.username,paid = True,pick_number = j+1,teamnumber = i+1)
                                 new_pick.save()
-                    return redirect('football:checking', league_num = new_pick.league_number)
+                    return redirect('baseballWL:checking', league_num = new_pick.league_number)
             else:
                 messages.error(request,"Please submit a valid teamname.")
-                return redirect('football:teamname', league_num = league_num)
+                return redirect('baseballWL:teamname', league_num = league_num)
     else:
         pick = Pick.objects.get(username = request.user.username, teamnumber = 1)
-        paid = PaidNW.objects.get(username = request.user.username)
+        paid = PaidBS.objects.get(username = request.user.username)
         if paid.paid_status == False:
             for j in range(10):
-                new_pick = PickNW(team_name=pick.team_name,username= request.user.username,paid = False,pick_number = j+1, teamnumber = 1)
+                new_pick = PickBS(team_name=pick.team_name,username= request.user.username,paid = False,pick_number = j+1, teamnumber = 1)
                 new_pick.save()
-        return redirect('football:checking', league_num = new_pick.league_number)
+        return redirect('baseballWL:checking', league_num = new_pick.league_number)
 
-    return render(request,"NFL_weekly_view/teamname.html")
+    return render(request,"baseball_WL/teamname.html")
 
 
 def signout(request):
     logout(request)
-    return redirect('football:home')
+    return redirect('baseballWL:home')
 
 @login_required
 def payment(request, league_num):
     username = request.user.username
-    player = PaidNW.objects.get(username = username)
+    player = PaidBS.objects.get(username = username)
     if int(league_num) != player.league_number:
-        return redirect("football:payment", league_num = player.league_number)
-    user = PromoUserNW.objects.get(username = request.user.username)
+        return redirect("baseballWL:payment", league_num = player.league_number)
+    user = PromoUserBS.objects.get(username = request.user.username)
     code = user.code
     codeuser = False
     if code != "0000":
@@ -167,7 +167,7 @@ def payment(request, league_num):
         promocode = request.POST.get('code',"").strip()
         if not promocode:
             promocode = "0000"
-        promouser = PromoUserNW.objects.get(username = request.user.username)
+        promouser = PromoUserBS.objects.get(username = request.user.username)
         promouser.code = promocode
         promouser.save()
         if promocode != "0000":
@@ -180,7 +180,7 @@ def payment(request, league_num):
             total_amount = team_count * 50
         else:
             total_amount = team_count * 50  # $50 per team
-        info = PaidNW.objects.get(username = request.user.username)
+        info = PaidBS.objects.get(username = request.user.username)
         info.numteams = team_count
         info.price = total_amount
         info.save()
@@ -204,14 +204,14 @@ def payment(request, league_num):
         } 
     print(context)
 
-    return render(request, 'NFL_weekly_view/payment.html', context)
+    return render(request, 'baseball_WL/payment.html', context)
 
 @login_required
 def playerboard(request, league_num):
     username = request.user.username
-    player = PaidNW.objects.get(username = username)
+    player = PaidBS.objects.get(username = username)
     if int(league_num) != player.league_number:
-        return redirect("football:playerboard", league_num = player.league_number)
+        return redirect("baseballWL:playerboard", league_num = player.league_number)
     # Define the PST timezone
     pst = pytz.timezone('America/Los_Angeles')
 
@@ -220,30 +220,27 @@ def playerboard(request, league_num):
     current_day_pst = current_pst_time.weekday()  # This gives the day of the week (int)
     current_date_pst = current_pst_time.date()
 
-    game = Game.objects.get(sport="Football")
+    game = Game.objects.get(sport="Baseball")
     start_date = game.startDate
     end_date = game.endDate
 
     end_datetime = datetime.combine(end_date, time(23, 59, 59))
     end_datetime = pst.localize(end_datetime)
 
-    start_datetime = datetime.combine(start_date, time(17, 0))  # Combine date with 5:00 PM
-    start_datetime = pst.localize(start_datetime)  # Make it timezone-aware
+    start_datetime = datetime.combine(start_date, time(23, 59, 59))
+    start_datetime = pst.localize(start_datetime)
+
+    sunday_deadline = datetime.combine(end_date, time(23, 59, 59))  # Combine date with 5:00 PM
+    sunday_deadline = pst.localize(sunday_deadline) # Make it timezone-aware
 
     current_pst_time = datetime.now(pst)
 
-    """
-    if current_day_pst == 3 and current_pst_time <= thursday_deadline:  # Thursday before 5:00 PM PST
-        within_deadline = True
-    elif current_day_pst in [1, 2]:  # Tuesday or Wednesday
-        within_deadline = True
-    else:
-        within_deadline = False
+    within_deadline = current_day_pst == 6 and current_pst_time <= sunday_deadline  # Ensure it's Sunday and before midnight
     
     if (within_deadline) or not (start_datetime <= current_pst_time < end_datetime):
-        return redirect('football:checking', league_num = league_num)  # Replace 'some_other_page' with the name of an appropriate view
-    """
-    pick_counts = PickNW.objects.filter(league_number = league_num).exclude(pick='N/A').values('pick','pick_team', 'pick_position').annotate(count=Count('pick')).order_by('-count')
+        return redirect('baseballSL:checking', league_num = league_num)  # Replace 'some_other_page' with the name of an appropriate view
+    
+    pick_counts = PickBS.objects.filter(league_number = league_num).exclude(pick='N/A').values('pick','pick_team', 'pick_position').annotate(count=Count('pick')).order_by('-count')
 
     player_counts = defaultdict(lambda: {'count': 0, 'teams': None, 'positions': None})
 
@@ -257,13 +254,13 @@ def playerboard(request, league_num):
 
     # Collect teams or users associated with each pick
     pick_teams = defaultdict(list)
-    for pick_record in PickNW.objects.exclude(pick='N/A'):
+    for pick_record in PickBS.objects.exclude(pick='N/A'):
         pick_teams[pick_record.pick].append(pick_record.team_name)
 
     player_status = {}
     for pick_name in pick_counts:
         player_name = pick_name['pick']
-        scorer = ScorerNW.objects.filter(name=player_name).first()
+        scorer = ScorerBS.objects.filter(name=player_name).first()
         player_status[player_name] = {
             'scored':scorer.scored if scorer else False,
             'not_scored':scorer.not_scored if scorer else False,
@@ -277,7 +274,7 @@ def playerboard(request, league_num):
         reverse=True
     )
 
-    total_in = int(PickNW.objects.filter(paid = True,league_number = league_num).count() / 10)
+    total_in = int(PickBS.objects.filter(paid = True,league_number = league_num).count() / 10)
 
     # Paginate sorted_player_counts (show 10 players per page)
     paginator = Paginator(sorted_player_counts, 10)  # Show 10 players per page
@@ -286,7 +283,7 @@ def playerboard(request, league_num):
 
 
     # Pass both sorted_player_counts and player_teams to the template
-    return render(request, 'NFL_weekly_view/playerboard.html', {
+    return render(request, 'baseball_WL/playerboard.html', {
         'page_obj': page_obj,
         'sorted_player_counts': sorted_player_counts,
         'player_teams': dict(pick_teams),
@@ -296,9 +293,9 @@ def playerboard(request, league_num):
 @login_required
 def leaderboard(request, league_num):
     username = request.user.username
-    player = PaidNW.objects.get(username = username)
+    player = PaidBS.objects.get(username = username)
     if int(league_num) != player.league_number:
-        return redirect("football:leaderboard", league_num = player.league_number)
+        return redirect("baseballWL:leaderboard", league_num = player.league_number)
     # Define the PST timezone
     pst = pytz.timezone('America/Los_Angeles')
 
@@ -307,30 +304,27 @@ def leaderboard(request, league_num):
     current_day_pst = current_pst_time.weekday()  # This gives the day of the week (int)
     current_date_pst = current_pst_time.date()
 
-    game = Game.objects.get(sport="Football")
+    game = Game.objects.get(sport="Baseball")
     start_date = game.startDate
     end_date = game.endDate
 
     end_datetime = datetime.combine(end_date, time(23, 59, 59))
     end_datetime = pst.localize(end_datetime)
 
-    start_datetime = datetime.combine(start_date, time(17, 0))  # Combine date with 5:00 PM
-    start_datetime = pst.localize(start_datetime)  # Make it timezone-aware
+    start_datetime = datetime.combine(start_date, time(23, 59, 59))
+    start_datetime = pst.localize(start_datetime)
+
+    sunday_deadline = datetime.combine(end_date, time(23, 59, 59))  # Combine date with 5:00 PM
+    sunday_deadline = pst.localize(sunday_deadline) # Make it timezone-aware
 
     current_pst_time = datetime.now(pst)
 
-    """
-    if current_day_pst == 3 and current_pst_time <= thursday_deadline:  # Thursday before 5:00 PM PST
-        within_deadline = True
-    elif current_day_pst in [1, 2]:  # Tuesday or Wednesday
-        within_deadline = True
-    else:
-        within_deadline = False
+    within_deadline = current_day_pst == 6 and current_pst_time <= sunday_deadline  # Ensure it's Sunday and before midnight
     
     if (within_deadline) or not (start_datetime <= current_pst_time < end_datetime):
-        return redirect('football:checking', league_num = league_num)  # Replace 'some_other_page' with the name of an appropriate view
-    """
-    pick_counts = PickNW.objects.filter(league_number = league_num).exclude(pick='N/A').values('pick','pick_team', 'pick_position').annotate(count=Count('pick')).order_by('-count')
+        return redirect('baseballWL:checking', league_num = league_num)  # Replace 'some_other_page' with the name of an appropriate view
+    
+    pick_counts = PickBS.objects.filter(league_number = league_num).exclude(pick='N/A').values('pick','pick_team', 'pick_position').annotate(count=Count('pick')).order_by('-count')
 
     player_counts = defaultdict(lambda: {'count': 0, 'teams': None, 'positions': None})
 
@@ -344,13 +338,13 @@ def leaderboard(request, league_num):
 
     # Collect teams or users associated with each pick
     pick_teams = defaultdict(list)
-    for pick_record in PickNW.objects.exclude(pick='N/A'):
+    for pick_record in PickBS.objects.exclude(pick='N/A'):
         pick_teams[pick_record.pick].append(pick_record.team_name)
 
     player_status = {}
     for pick_name in pick_counts:
         player_name = pick_name['pick']
-        scorer = ScorerNW.objects.filter(name=player_name).first()
+        scorer = ScorerBS.objects.filter(name=player_name).first()
         player_status[player_name] = {
             'scored':scorer.scored if scorer else False,
             'not_scored':scorer.not_scored if scorer else False,
@@ -364,17 +358,17 @@ def leaderboard(request, league_num):
         reverse=True
     )
 
-    total_in = int(PickNW.objects.filter(paid = True,league_number = league_num).count() / 10)
+    total_in = int(PickBS.objects.filter(paid = True,league_number = league_num).count() / 10)
 
     # Paginate sorted_player_counts (show 10 players per page)
     paginator = Paginator(sorted_player_counts, 10)  # Show 10 players per page
     page_number = request.GET.get('page')  # Get the page number from the request URL
     page_obj = paginator.get_page(page_number)  # Get the paginated page
 
-    user_data= PickNW.objects.filter(username = request.user.username)
+    user_data= PickBS.objects.filter(username = request.user.username)
 
     # Pass both sorted_player_counts and player_teams to the template
-    return render(request, 'NFL_weekly_view/leaderboard.html', {
+    return render(request, 'baseball_WL/leaderboard.html', {
         'page_obj': page_obj,
         'sorted_player_counts': sorted_player_counts,
         'player_teams': dict(pick_teams),
@@ -387,11 +381,11 @@ def leaderboard(request, league_num):
 @login_required
 def location(request, league_num):    
     username = request.user.username
-    player = PaidNW.objects.get(username = username)
+    player = PaidBS.objects.get(username = username)
     if int(league_num) != player.league_number:
-        return redirect("football:location", league_num = player.league_number)
+        return redirect("baseballWL:location", league_num = player.league_number)
     user_ip_address = request.META.get('HTTP_X_FORWARDED_FOR') or request.META.get('REMOTE_ADDR')
-    return redirect('football:checking', league_num = player.league_number)
+    return redirect('baseballWL:checking', league_num = player.league_number)
 
     access_key = config('API_KEY')
     ipstack_url = f'https://api.ipstack.com/{user_ip_address}?access_key={access_key}'
@@ -407,61 +401,61 @@ def location(request, league_num):
 
         allowed_states = [None,'None','California','Oregon','Alaska','Arizona','Utah','New Mexico','Texas','Oklahoma','Arkansas','Kansas','Nebraska','South Dakota','North Dekota','Minnesota','Wisconsin','Illinois','Indiana','Kentucky','Virginia','North Carolina','South Carolina','Georgia','Vermont','Rhode Island']
 
-        paid = PaidNW.objects.get(username = username)
+        paid = PaidBS.objects.get(username = username)
         compliance = OfAge.objects.get(username = username)
         current_day = timezone.now().date()
         game = Game.objects.get(sport = "Football")
         start_date = game.startDate
         end_date = game.endDate
-        total_numteams = PaidNW.objects.filter(paid_status=True).aggregate(Sum('numteams'))['numteams__sum']
+        total_numteams = PaidBS.objects.filter(paid_status=True).aggregate(Sum('numteams'))['numteams__sum']
         if total_numteams is None:
             total_numteams = 0
         if not ((user_state in allowed_states and not is_proxy) or True):
             if is_proxy:
                 messages.error(request,"You cannot use a VPN.")
-                return redirect('football:tournaments')
+                return redirect('baseballWL:tournaments')
             else:
                 messages.error(request,"You are in a disallowed state.")
-                return redirect('football:tournaments')
+                return redirect('baseballWL:tournaments')
         else:
             if (start_date <= current_day < end_date):
-                return redirect('football:checking', league_num = league_num)
+                return redirect('baseballWL:checking', league_num = league_num)
             else:
                 if paid.paid_status == True:
-                    return redirect("football:checking", league_num = league_num)
+                    return redirect("baseballWL:checking", league_num = league_num)
                 else:
                     if total_numteams >= 200:
                         try:
                             Waitlist.objects.get(username = username)
                             messages.error(request,"You are already added to the waitlist.")
-                            return redirect('football:tournaments')
+                            return redirect('baseballWL:tournaments')
                         except Waitlist.DoesNotExist:
                             waiter = Waitlist(username = username)
                             waiter.save()
                             messages.error(request,"Max number of teams entered, we are adding you to a waitlist.")
-                            return redirect('football:tournaments')
+                            return redirect('baseballWL:tournaments')
                     else:
-                        return redirect('football:checking', league_num = league_num) #needs to be removed to check age
+                        return redirect('baseballWL:checking', league_num = league_num) #needs to be removed to check age
                         if compliance.old == False and compliance.young == False:
                             age_api_key = config('AGE_API')
                             return render(request,'authentication/agechecking.html',{'api':age_api_key})
                         elif compliance.young == True:
                             messages.error(request,"You are too young to participate.")
-                            return redirect("football:tournaments")
+                            return redirect("baseballWL:tournaments")
                         else:
-                            return redirect('football:checking', league_num = league_num)
+                            return redirect('baseballWL:checking', league_num = league_num)
 
     else:
         messages.error(request,"Failed to register location data.")
-        return redirect('football:tournaments')
+        return redirect('baseballWL:tournaments')
 
 @login_required
 @csrf_exempt  # Use cautiously, ensure your site is protected against CSRF attacks
 def submitverification(request):
     username = request.user.username
-    player = PaidNW.objects.get(username = username)
+    player = PaidBS.objects.get(username = username)
     if int(league_num) != player.league_number:
-        return redirect("football:submitverification", league_num = player.league_number)
+        return redirect("baseballWL:submitverification", league_num = player.league_number)
     compliance = OfAge.objects.get(username=username)
     # Prepare data for the AgeChecker API
     headers = {
@@ -481,23 +475,50 @@ def submitverification(request):
         if verification_status in ['accepted', 'verified']:
             compliance.old = True
             compliance.save()
-            return redirect('football:checking', league_num = league_num)
+            return redirect('baseballWL:checking', league_num = league_num)
         else:
             compliance.young = True
             compliance.save()
-            return redirect('football:location', league_num = league_num)
+            return redirect('baseballWL:location', league_num = league_num)
 
     # If not a POST request, render the form page
-    return redirect('football:checking', league_num = league_num)
+    return redirect('baseballWL:checking', league_num = league_num)
 
 @login_required
 def player_list(request, league_num):
     username = request.user.username
-    player = PaidNW.objects.get(username = username)
+    player = PaidBS.objects.get(username = username)
     if int(league_num) != player.league_number:
-        return redirect("football:player_list", league_num = player.league_number)
-    # Fetch all PickNW entries
-    all_picks = PickNW.objects.filter(league_number = league_num, paid = True)
+        return redirect("baseballWL:player_list", league_num = player.league_number)
+    # Fetch all PickBS entries
+    all_picks = PickBS.objects.filter(league_number = league_num, paid = True)
+
+    pst = pytz.timezone('America/Los_Angeles')
+
+    current_pst_time = timezone.now().astimezone(pst)
+    current_day_pst = current_pst_time.weekday()  # This gives the day of the week (int)
+    current_date_pst = current_pst_time.date()
+
+    game = Game.objects.get(sport="Baseball")
+    start_date = game.startDate
+    end_date = game.endDate
+
+    start_datetime = datetime.combine(start_date, time(23, 59, 59))
+    start_datetime = pst.localize(start_datetime)
+
+    end_datetime = datetime.combine(end_date, time(23, 59, 59))
+    end_datetime = pst.localize(end_datetime)
+
+    sunday_deadline = datetime.combine(end_date, time(23, 59, 59))  # Combine date with 5:00 PM
+    sunday_deadline = pst.localize(sunday_deadline) # Make it timezone-aware
+
+    current_pst_time = datetime.now(pst)
+
+    within_deadline = current_day_pst == 6 and current_pst_time <= sunday_deadline  # Ensure it's Sunday and before midnight
+    
+    if not (within_deadline) and (start_datetime <= current_pst_time < end_datetime):
+        return redirect('baseballWL:checking', league_num = league_num)  # Replace 'some_other_page' with the name of an appropriate view
+    
 
     # Build a dictionary to store team data
     teams_data = defaultdict(lambda: {'team_name': '', 'total_touchdowns': 0, 'picks': []})
@@ -506,11 +527,12 @@ def player_list(request, league_num):
     for pick in all_picks:
         team_key = (pick.teamnumber, pick.team_name)  # Unique key for each team by teamnumber and team_name
         teams_data[team_key]['team_name'] = pick.team_name
-        # Store player names (PickNW.pick) instead of IDs for hover display
-        teams_data[team_key]['picks'].append(pick.pick)
+        # Store player names (PickBS.pick) instead of IDs for hover display
+        if not (within_deadline) and (start_datetime <= current_pst_time < end_datetime):
+            teams_data[team_key]['picks'].append(pick.pick)
 
-    # Fetch all ScorerNW data for lookup
-    scorer_data = {scorer.player_ID: scorer.touchdown_count for scorer in ScorerNW.objects.all()}
+    # Fetch all ScorerBS data for lookup
+    scorer_data = {scorer.player_ID: scorer.touchdown_count for scorer in ScorerBS.objects.all()}
 
     # Calculate total touchdowns for each team
     for team_key, team_info in teams_data.items():
@@ -572,7 +594,7 @@ def player_list(request, league_num):
     page_obj = paginator.get_page(page_number)
 
     # Pass the data to the template
-    return render(request, 'NFL_weekly_view/leaders.html', {
+    return render(request, 'baseball_WL/leaders.html', {
         'leaderboard': page_obj,
         'pay_status':player.paid_status
     })
@@ -582,43 +604,39 @@ def player_list(request, league_num):
 @login_required
 def game(request, league_num):
     username = request.user.username
-    player = PaidNW.objects.get(username = username)
+    player = PaidBS.objects.get(username = username)
     if int(league_num) != player.league_number:
-        return redirect("football:game", league_num = player.league_number)
+        return redirect("baseballWL:game", league_num = player.league_number)
     # Define the PST timezone
-    paid = PaidNW.objects.get(username = request.user.username)
+    paid = PaidBS.objects.get(username = request.user.username)
     pst = pytz.timezone('America/Los_Angeles')
 
-    # Get the current time in PST
     current_pst_time = timezone.now().astimezone(pst)
     current_day_pst = current_pst_time.weekday()  # This gives the day of the week (int)
     current_date_pst = current_pst_time.date()
 
-    game = Game.objects.get(sport="Football")
+    game = Game.objects.get(sport="Baseball")
     start_date = game.startDate
     end_date = game.endDate
-    paid = PaidNW.objects.get(username = request.user.username)
+
+    start_datetime = datetime.combine(start_date, time(23, 59, 59))
+    start_datetime = pst.localize(start_datetime)
 
     end_datetime = datetime.combine(end_date, time(23, 59, 59))
     end_datetime = pst.localize(end_datetime)
 
-    start_datetime = datetime.combine(start_date, time(17, 0))  # Combine date with 5:00 PM
-    start_datetime = pst.localize(start_datetime)  # Make it timezone-aware
+    sunday_deadline = datetime.combine(end_date, time(23, 59, 59))  # Combine date with 5:00 PM
+    sunday_deadline = pst.localize(sunday_deadline) # Make it timezone-aware
+
     current_pst_time = datetime.now(pst)
 
-    thursday_deadline = current_pst_time.replace(hour=17, minute=0, second=0, microsecond=0)
+    within_deadline = current_day_pst == 6 and current_pst_time <= sunday_deadline  # Ensure it's Sunday and before midnight
     """
-    if current_day_pst == 3 and current_pst_time <= thursday_deadline:  # Thursday before 5:00 PM PST
-        within_deadline = True
-    elif current_day_pst in [1, 2]:  # Tuesday or Wednesday
-        within_deadline = True
-    else:
-        within_deadline = False
-    if (not within_deadline and (start_datetime <= current_pst_time < end_datetime)):
-        return redirect('football:checking', league_num = player.league_number)  # Replace 'some_other_page' with the name of an appropriate view
+    if not (within_deadline) and (start_datetime <= current_pst_time < end_datetime):
+        return redirect('baseballSL:checking', league_num = league_num)  # Replace 'some_other_page' with the name of an appropriate view
     """
-    user_data = PickNW.objects.filter(username = request.user.username)
-    user_pick_data = PickNW.objects.filter(username = request.user.username).order_by('teamnumber','pick_number')
+    user_data = PickBS.objects.filter(username = request.user.username)
+    user_pick_data = PickBS.objects.filter(username = request.user.username).order_by('teamnumber','pick_number')
     player_data = []
     pick1_data = None
     pick2_data = None
@@ -629,7 +647,7 @@ def game(request, league_num):
         if selected_player:
             try:
                 # Retrieve the selected player
-                player_data_selected = NFLPlayer.objects.get(name=selected_player)
+                player_data_selected = BaseballPlayer.objects.get(name=selected_player)
                 if paid.paid_status == False:
                     return JsonResponse({'success': False, 'message': "Features activate after payment"})
                 else:
@@ -653,9 +671,9 @@ def game(request, league_num):
                             }
                         })
 
-            except NFLPlayer.DoesNotExist:
+            except BaseballPlayer.DoesNotExist:
                 return JsonResponse({'success': False, 'message': 'Player not found!'})
-            except PickNW.DoesNotExist:
+            except PickBS.DoesNotExist:
                 return JsonResponse({'success': False, 'message': 'Pick not found!'})
         else:
             return JsonResponse({'success': False, 'message': 'Invalid data!'})
@@ -667,7 +685,7 @@ def game(request, league_num):
         has_started = False
     else:
         has_started = True
-    team = PickNW.objects.get(username = request.user.username, teamnumber = 1, pick_number =1)
+    team = PickBS.objects.get(username = request.user.username, teamnumber = 1, pick_number =1)
     name = team.team_name
 
     # Group picks by team
@@ -683,10 +701,10 @@ def game(request, league_num):
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
-    total_in = int(PickNW.objects.filter(paid = True,league_number = league_num).count() / 10)
+    total_in = int(PickBS.objects.filter(paid = True,league_number = league_num).count() / 10)
 
 
-    return render(request, 'NFL_weekly_view/weeklyNFLgame.html', 
+    return render(request, 'baseball_WL/game.html', 
         {'page_obj': page_obj,
         'user_pick_data' : user_pick_data,
         'has_started' : has_started,
@@ -709,7 +727,7 @@ def update_pick(request):
             if not (pick and team):
                 raise ValueError("Invalid pick or team data.")
 
-            user_pick_data = PickNW.objects.filter(username=request.user.username)
+            user_pick_data = PickBS.objects.filter(username=request.user.username)
             for user_pick in user_pick_data.filter(teamnumber=team):
                 if int(pick) == user_pick.pick_number:
                     user_pick.pick = "N/A"
@@ -730,52 +748,52 @@ def search_players(request):
     if request.headers.get('x-requested-with') == 'XMLHttpRequest' and request.method == 'GET':
         search_query = request.GET.get('search', '')
         if search_query:
-            players = NFLPlayer.objects.filter(name__icontains=search_query)[:5]
+            players = BaseballPlayer.objects.filter(name__icontains=search_query)[:5]
             player_list = [{'name': player.name} for player in players]
             return JsonResponse({'players': player_list})
     return JsonResponse({'players': []})
 
 def game_search(username,playerdata,pagenum):
-    user_pick_data = PickNW.objects.filter(username = username,teamnumber = pagenum).order_by('pick_number')
+    user_pick_data = PickBS.objects.filter(username = username,teamnumber = pagenum).order_by('pick_number')
     for pick in user_pick_data:
         if pick.pick == 'N/A':
             try:
-                team_list = PickNW.objects.filter(username=username, teamnumber=pick.teamnumber).order_by('pick_number').values_list('pick_team', flat=True)
+                team_list = PickBS.objects.filter(username=username, teamnumber=pick.teamnumber).order_by('pick_number').values_list('pick_team', flat=True)
                 all_equal = True
                 for i, item in enumerate(team_list):
                     if i != int(pick.pick_number) - 1 and item != playerdata.team:
                         all_equal = False
                         break
-                ID_list = PickNW.objects.filter(username=username, teamnumber=pick.teamnumber).values_list('pick_player_ID', flat=True)
+                ID_list = PickBS.objects.filter(username=username, teamnumber=pick.teamnumber).values_list('pick_player_ID', flat=True)
                 if all_equal:
                     return 11
                 elif playerdata.player_ID in ID_list:
                     return 13
                 else:
                     pick.pick = playerdata.name
-                    pick.pick_team = playerdata.team_name
+                    pick.pick_team = playerdata.team
                     pick.pick_position = playerdata.position 
                     pick.pick_color = playerdata.color
                     pick.pick_player_ID = playerdata.player_ID
                     pick.save()
                     return [pick.teamnumber,pick.pick_number,pick.pick,pick.pick_team,pick.pick_position,pick.pick_color,pick.pick_player_ID]
-            except NFLPlayer.DoesNotExist:
+            except BaseballPlayer.DoesNotExist:
                 return [pick.teamnumber,pick.pick_number,pick.pick,pick.pick_team,pick.pick_position,pick.pick_color,pick.pick_player_ID]
     for pick in user_pick_data:
-        team_list = PickNW.objects.filter(username=username, teamnumber=pick.teamnumber).order_by('pick_number').values_list('pick_team', flat=True)
+        team_list = PickBS.objects.filter(username=username, teamnumber=pick.teamnumber).order_by('pick_number').values_list('pick_team', flat=True)
         all_equal = True
         for i, item in enumerate(team_list):
             if i != int(pick.pick_number) - 1 and item != playerdata.team:
                 all_equal = False
                 break
-        ID_list = PickNW.objects.filter(username=username, teamnumber=pick.teamnumber).values_list('pick_player_ID', flat=True)
+        ID_list = PickBS.objects.filter(username=username, teamnumber=pick.teamnumber).values_list('pick_player_ID', flat=True)
         if all_equal:
             return 11
         elif playerdata.player_ID in ID_list:
             return 13
         else:
             pick.pick = playerdata.name
-            pick.pick_team = playerdata.team_name
+            pick.pick_team = playerdata.team
             pick.pick_position = playerdata.position 
             pick.pick_color = playerdata.color
             pick.pick_player_ID = playerdata.player_ID
@@ -786,24 +804,29 @@ def game_search(username,playerdata,pagenum):
 @login_required
 def picking(request, league_num):
     username = request.user.username
-    player = PaidNW.objects.get(username = username)
+    player = PaidBS.objects.get(username = username)
     if int(league_num) != player.league_number:
-        return redirect("football:picking", league_num = player.league_number)
-    total_in = int(PickNW.objects.filter(paid = True,league_number = league_num).count() / 10)
-    return render(request, 'NFL_weekly_view/picking.html', {'total_in': total_in})
+        return redirect("baseballWL:picking", league_num = player.league_number)
+    total_in = int(PickBS.objects.filter(paid = True,league_number = league_num).count() / 10)
+    return render(request, 'baseball_WL/picking.html', {'total_in': total_in})
 
 @login_required
 def checking(request, league_num):
     username = request.user.username
-    player = PaidNW.objects.get(username = username)
+    player = PaidBS.objects.get(username = username)
     if int(league_num) != player.league_number:
-        return redirect("football:checking", league_num = player.league_number)
-    if not PaidNW.objects.filter(username=request.user.username).exists():
-        new_user = PaidNW(username=request.user.username)
+        return redirect("baseballWL:checking", league_num = player.league_number)
+    if not PaidBS.objects.filter(username=request.user.username).exists():
+        new_user = PaidBS(username=request.user.username)
         new_user.save()
         
-    paid = PaidNW.objects.get(username=request.user.username)
-    count = PickNW.objects.count()
+    paid = PaidBS.objects.get(username=request.user.username)
+    count = PickBS.objects.count()
+    
+    # Define the PST timezone
+    game = Game.objects.get(sport="Baseball")
+    start_date = game.startDate
+    end_date = game.endDate
     
     # Define the PST timezone
     pst = pytz.timezone('America/Los_Angeles')
@@ -811,50 +834,46 @@ def checking(request, league_num):
     # Get the current time in PST
     current_pst_time = timezone.now().astimezone(pst)
     current_day_pst = current_pst_time.weekday()  # This gives the day of the week (int)
-    thursday_deadline = current_pst_time.replace(hour=17, minute=0, second=0, microsecond=0)
-    if current_day_pst == 3 and current_pst_time <= thursday_deadline:  # Thursday before 5:00 PM PST
-        within_deadline = True
-    elif current_day_pst in [1, 2]:  # Tuesday or Wednesday
-        within_deadline = True
-    else:
-        within_deadline = False
-
-    # Get the current date in PST for comparison with start and end dates
     current_date_pst = current_pst_time.date()
-    
-    game = Game.objects.get(sport="Football Weekly")
+
+    game = Game.objects.get(sport="Baseball")
     start_date = game.startDate
     end_date = game.endDate
-    week = game.week
 
     end_datetime = datetime.combine(end_date, time(23, 59, 59))
     end_datetime = pst.localize(end_datetime)
 
-    start_datetime = datetime.combine(start_date, time(17, 0))  # Combine date with 5:00 PM
-    start_datetime = pst.localize(start_datetime)  # Make it timezone-aware
+    start_datetime = datetime.combine(start_date, time(23, 59, 59))
+    start_datetime = pst.localize(start_datetime)
+
+    sunday_deadline = datetime.combine(end_date, time(23, 59, 59))  # Combine date with 5:00 PM
+    sunday_deadline = pst.localize(sunday_deadline) # Make it timezone-aware
+
     current_pst_time = datetime.now(pst)
+
+    within_deadline = current_day_pst == 6 and current_pst_time <= sunday_deadline  # Ensure it's Sunday and before midnight
 
     
     # Check if the current date is within the game's start and end dates
     if paid.paid_status == False and (start_datetime <= current_pst_time < end_datetime) and within_deadline:
-        return redirect('football:picking', league_num = league_num)
+        return redirect('baseballWL:picking', league_num = league_num)
     
     elif paid.paid_status == False and (start_datetime <= current_pst_time < end_datetime) and not within_deadline:
-        return redirect('football:playerboard', league_num = league_num)
+        return redirect('baseballWL:playerboard', league_num = league_num)
     
     elif not (start_datetime <= current_pst_time < end_datetime):
         username = request.user.username
-        if not PickNW.objects.filter(username=username).exists():
-            return redirect('football:teamname')
-        return redirect('football:game', league_num = league_num)
+        if not PickBS.objects.filter(username=username).exists():
+            return redirect('baseballWL:teamname')
+        return redirect('baseballWL:game', league_num = league_num)
     
     else:
         username = request.user.username
-        if not PickNW.objects.filter(username=username).exists():
-            return redirect('football:teamname')
+        if not PickBS.objects.filter(username=username).exists():
+            return redirect('baseballWL:teamname')
         else:
-            user_data = PickNW.objects.filter(username=username)
+            user_data = PickBS.objects.filter(username=username)
             if within_deadline:
-                return redirect('football:game', league_num = league_num)
+                return redirect('baseballWL:game', league_num = league_num)
             else:
-                return redirect('football:leaderboard', league_num = league_num)
+                return redirect('baseballWL:leaderboard', league_num = league_num)

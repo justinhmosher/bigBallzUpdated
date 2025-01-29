@@ -123,6 +123,60 @@ def send_email_to_user_NW(scorer, league_num):
             finally:
                 server.quit()
 
+def send_email_to_user_BS(scorer, league_num):
+    emails = PickNW.objects.filter(pick = scorer, league_number = league_num)
+    email_list = []
+    for i in emails:
+        if i.username not in email_list:
+            email_list.append(i.username)
+    sender_email = config('SENDER_EMAIL')
+    sender_name = "The Chosen Fantasy Games"
+    sender_password = config('SENDER_PASSWORD')
+
+    smtp_server = config('SMTP_SERVER')
+    smtp_port = config('SMTP_PORT')
+
+    for email in email_list:
+        receiver_email = email
+
+        message = MIMEMultipart()
+        message['From'] = f"{sender_name} <{sender_email}>"
+        message['To'] = receiver_email
+        message['Subject'] = f"{scorer} hit a homerun!"
+        body = render_to_string('authentication/scorer_email_BS.html')
+
+        """
+        image_path = finders.find('Simple.png')
+        print(f"Image path: {image_path}")
+        with open(image_path, 'rb') as img:
+            image = MIMEImage(img.read(), _subtype="png")
+            image.add_header('Content-ID', '<logo_image>')  # Content-ID must match the CID in your HTML
+            message.attach(image)
+        """
+        message.attach(MIMEText(body, "html"))
+        text = message.as_string()
+            
+        try:
+            server = smtplib.SMTP(smtp_server, smtp_port)
+            server.starttls()
+            server.login(sender_email, sender_password)
+            server.sendmail(sender_email, receiver_email, text)
+            print(f'Successfully sent email to {receiver_email}')
+        except smtplib.SMTPServerDisconnected:
+            print(f"Server disconnected unexpectedly when sending email to {receiver_email}. Reconnecting...")
+            try:
+                server = smtplib.SMTP(smtp_server, smtp_port)
+                server.starttls()
+                server.login(sender_email, sender_password)
+                server.sendmail(sender_email, receiver_email, text)
+                print(f'Successfully sent email to {receiver_email} after reconnecting')
+            except Exception as e:
+                print(f"Failed to send email to {receiver_email} after reconnecting: {e}")
+            except Exception as e:
+                print(f"Failed to send email to {receiver_email}: {e}")
+            finally:
+                server.quit()
+
 def send_email_to_user_BL(scorer, league_num):
     emails = PickBL.objects.filter(pick = scorer, league_number = league_num)
     email_list = []

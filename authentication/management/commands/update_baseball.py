@@ -71,7 +71,8 @@ class Command(BaseCommand):
                                         player_ID = pick_player_ID,
                                         username = username,
                                         league_number = league_number,
-                                        teamnumber = teamnumber)
+                                        teamnumber = teamnumber,
+                                        team_name = PickBL.objects.filter(username=username, teamnumber=teamnumber).first().team_name)
                                     
         game = Game.objects.get(sport="Baseball")
         week = game.week

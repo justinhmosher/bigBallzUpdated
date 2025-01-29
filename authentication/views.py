@@ -21,6 +21,7 @@ from .forms import PlayerSearchForm, Pickform, Pick1Form, CreateTeam
 from .models import Pick,Scorer,Paid,NFLPlayer,Game,PastPick,PromoCode,PromoUser,OfAge,UserVerification,Blog,ChatMessage,Waitlist,MessageReaction,Message,Email
 from authentication.NFL_weekly_view.models import PickNW
 from authentication.baseball_SL.models import PickBL
+from authentication.baseball_WL.models import PickBS
 from django.db.models import Count,F,ExpressionWrapper,fields,OuterRef,Subquery
 from datetime import datetime, time
 from itertools import chain
@@ -82,7 +83,7 @@ def home(request):
             'deadline': 'Deadline: March 30, 2025',
         },
         {
-            'name': 'NBA - Three Point Contest',
+            'name': 'NBA - Double-Double Contest',
             'description': "Each week, choose two players to record a double-double (double digit numbers in two or more statistical categories)./If one or both players record a double-double, you advance, else you are out./Last man standing wins the pot!",
             'deadline': 'Deadline: October 14, 2025',
         },
@@ -143,6 +144,8 @@ def rules(request,game):
 		return render(request,"authentication/rules_NW.html")
 	if game==3:
 		return render(request,"authentication/rules_BL.html")
+	if game==4:
+		return render(request,"authentication/rules_BS.html")
 
 def confirm_email(request, email):
 	user = User.objects.get(username = email)
@@ -242,13 +245,13 @@ def create_email(request, myuser):
 
 @login_required
 def teamname(request):
-	if not PickNW.objects.filter(username=request.user.username).exists() and not PickBL.objects.filter(username=request.user.username).exists():
+	if not PickNW.objects.filter(username=request.user.username).exists() and not PickBL.objects.filter(username=request.user.username).exists() and not PickBS.objects.filter(username=request.user.username).exists() and not Pick.objects.filter(username=request.user.username).exists():
 		if request.method == "POST":
 			form = CreateTeam(request.POST)
 			if form.is_valid():
 				team_name = form.cleaned_data['team_name']
 				username = request.user.username
-				if PickBL.objects.filter(team_name = team_name).exists() or PickNW.objects.filter(team_name = team_name).exists() or Pick.objects.filter(team_name = team_name).exists():
+				if PickBL.objects.filter(team_name = team_name).exists() or PickBS.objects.filter(team_name = team_name).exists() or PickNW.objects.filter(team_name = team_name).exists() or Pick.objects.filter(team_name = team_name).exists():
 					messages.error(request,"Team name already exists.")
 					return redirect('authentication:teamname')
 				elif len(team_name) > 16:
@@ -714,7 +717,7 @@ def tournaments(request):
 		"Football": [
 			{"name": "SEASON LONG GAME", 
 			"summary": "Each week, choose two players to score a touchdown and get one or more offensive yards./If one or both score and have one or more offensive yards, you advance, else you're out./Last man standing wins the pot!", 
-			"money": "Max Entries per Tournament: 110/Buy In: $50/Pot: $5K",
+			"money": "Max Entries per Tournament: 100/Buy In: $50/Pot: $5K",
 			"rules": 1, 
 			"playable": True,
 			"app": "authentication",
@@ -723,7 +726,7 @@ def tournaments(request):
 		{	
 			"name": "WEEKLY GAME", 
 			"summary": "Select 10 NFL players to score touchdowns and accumulate one or more offensive yards./The user with the most comultive touchdowns wins the pot!", 
-			"money": "Max Entries per Tournament: 30/Buy In: $20/Pot: $500",
+			"money": "Max Entries per Tournament: 25/Buy In: $20/Pot: $500",
 			"rules": 2, 
 			"playable": True,
 			"app" : "football",
@@ -743,9 +746,9 @@ def tournaments(request):
 			"summary": "Select 10 players to hit a home run./The user with the most comultive home runs wins the pot!", 
 			"money": "",
 			"rules": 4, 
-			"playable": False,
+			"playable": True,
 			"app" : "football",
-			"path":reverse("authentication:location", args=[1])},
+			"path":reverse("baseballWL:location", args=[1])},
 		],
 		"Basketball": [
 			{"name": "SEASON LONG GAME", 

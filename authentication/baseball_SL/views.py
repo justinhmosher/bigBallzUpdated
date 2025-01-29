@@ -19,6 +19,7 @@ from django.http import JsonResponse
 from .models import PickBL,ScorerBL,PaidBL,PromoCodeBL,PromoUserBL,WaitlistBL,MessageBL,PastPickBL,GrandSlamBL
 from authentication.models import OfAge,Game,BaseballPlayer,ChatMessage, Pick
 from authentication.NFL_weekly_view.models import PickNW
+from authentication.baseball_WL.models import PickBS
 from authentication.forms import CreateTeam
 from django.db.models import Count,F,ExpressionWrapper,fields,OuterRef,Subquery
 from datetime import datetime, time
@@ -106,13 +107,13 @@ def rules(request):
 
 @login_required
 def teamname(request):
-    if not Pick.objects.filter(username=request.user.username).exists() and not PickNW.objects.filter(username=request.user.username).exists():
+    if not Pick.objects.filter(username=request.user.username).exists() and not PickBS.objects.filter(username=request.user.username).exists() and not PickNW.objects.filter(username=request.user.username).exists() and not PickBL.objects.filter(username=request.user.username).exists():
         if request.method == "POST":
             form = CreateTeam(request.POST)
             if form.is_valid():
                 team_name = form.cleaned_data['team_name']
                 username = request.user.username
-                if PickBL.objects.filter(team_name = team_name).exists() or PickNW.objects.filter(team_name = team_name).exists() or Pick.objects.filter(team_name = team_name).exists():
+                if PickBL.objects.filter(team_name = team_name).exists() or PickBS.objects.filter(team_name = team_name).exists() or PickNW.objects.filter(team_name = team_name).exists() or Pick.objects.filter(team_name = team_name).exists():
                     messages.error(request,"Team name already exists.")
                     return redirect('baseballSL:teamname' , league_num = league_num)
                 elif len(team_name) > 16:
@@ -120,6 +121,7 @@ def teamname(request):
                     return redirect("baseballSL:teamname" , league_num = league_num)
                 else:
                     paid = PaidBL.objects.get(username = request.user.username)
+                    print("hi")
                     if paid.paid_status == False:
                         for j in range(3):
                             new_pick = PickBL(team_name=team_name,username= request.user.username,paid = False,pick_number = j+1, teamnumber = 1)
@@ -184,7 +186,7 @@ def payment(request, league_num):
         info.price = total_amount
         info.save()
         username = request.user.username
-        note = f"Entry-for-{username}-minigame"
+        note = f"Entry-for-{username}-baseballSL"
 
         venmo_url = f"https://venmo.com/thechosenfantasy?txn=pay&amount={total_amount}&note={note}"
 
@@ -235,10 +237,10 @@ def playerboard(request, league_num):
     current_pst_time = datetime.now(pst)
 
     within_deadline = current_day_pst == 6 and current_pst_time <= sunday_deadline  # Ensure it's Sunday and before midnight
-    """
+    
     if (within_deadline) or not (start_datetime <= current_pst_time < end_datetime):
         return redirect('baseballSL:checking', league_num = league_num)  # Replace 'some_other_page' with the name of an appropriate view
-    """
+    
     pick_counts = PickBL.objects.filter(league_number = league_num).exclude(pick='N/A').exclude(isin = False).values('pick','pick_team', 'pick_position').annotate(count=Count('pick')).order_by('-count')
 
     player_counts = defaultdict(lambda: {'count': 0, 'teams': None, 'positions': None})
@@ -319,10 +321,10 @@ def leaderboard(request, league_num):
     current_pst_time = datetime.now(pst)
 
     within_deadline = current_day_pst == 6 and current_pst_time <= sunday_deadline  # Ensure it's Sunday and before midnight
-    """
+    
     if (within_deadline) or not (start_datetime <= current_pst_time < end_datetime):
         return redirect('baseballSL:checking', league_num = league_num)  # Replace 'some_other_page' with the name of an appropriate view
-    """
+    
     pick_counts = PickBL.objects.filter(league_number = league_num).exclude(pick='N/A').exclude(isin = False).values('pick','pick_team', 'pick_position').annotate(count=Count('pick')).order_by('-count')
 
     player_counts = defaultdict(lambda: {'count': 0, 'teams': None, 'positions': None})
@@ -496,7 +498,7 @@ def player_list(request, league_num):
     all_picks = PickBL.objects.filter(league_number = league_num, paid = True)
 
     # Build a dictionary to store team data
-    teams_data = defaultdict(lambda: {'team_name': '', 'total_homeruns': 0, 'picks': []})
+    teams_data = defaultdict(lambda: {'team_name': '', 'total_homeruns': 0, 'picks': [], 'grandslams':[]})
 
     # Iterate through all picks
     for pick in all_picks:
@@ -504,13 +506,16 @@ def player_list(request, league_num):
         teams_data[team_key]['team_name'] = pick.team_name
         # Store player names (PickBL.pick) instead of IDs for hover display
         pastHR = PastPickBL.objects.filter(username = pick.username, teamnumber=pick.teamnumber, team_name=pick.team_name)
+        gs_list = GrandSlamBL.objects.filter(username = pick.username, teamnumber=pick.teamnumber, team_name=pick.team_name)
         for past_pick in pastHR:
             if past_pick.pick_name not in teams_data[team_key]['picks'] and week == past_pick.week + 1:
                 teams_data[team_key]['picks'].append(past_pick.pick_name)
+        for gs in gs_list:
+            if gs.player_name not in teams_data[team_key]['grandslams']:
+                teams_data[team_key]['grandslams'].append(gs.player_name)
 
     # Fetch all ScorerBL data for lookup
     scorer_data = {scorer.player_ID: scorer.homerun_count for scorer in ScorerBL.objects.filter(league_number=league_num)}
-    print(scorer_data)
 
     # Initialize a dictionary to store cumulative homeruns by team
     cumulative_homeruns = defaultdict(lambda: {'team_name': '', 'teamnumber': 0, 'total_homeruns': 0})
@@ -548,7 +553,6 @@ def player_list(request, league_num):
         key=lambda x: x['total_homeruns'],
         reverse=True
     )
-    print(sorted_teams)
 
     standings = []
     previous_count = None
@@ -569,20 +573,16 @@ def player_list(request, league_num):
         # Handle ties
         if is_tied_with_previous or is_tied_with_next:
             if is_tied_with_previous and is_tied_with_next:
-                print("1")
                 standings.append({"rank": f"T{current_rank}", "team": item})
             elif is_tied_with_previous and not is_tied_with_next:
-                print("2")
                 standings.append({"rank": f"T{current_rank}", "team": item})
                 current_rank = index + 2
             elif not is_tied_with_previous and is_tied_with_next:
-                print("3")
                 if index + 1 == len(sorted_teams):
                     standings.append({"rank": f"{current_rank}", "team": item})
                 else:
                     standings.append({"rank": f"T{current_rank}", "team": item})
         else:
-            print("4")
             standings.append({"rank": current_rank, "team": item})
             current_rank += 1
 
@@ -633,10 +633,10 @@ def game(request, league_num):
     current_pst_time = datetime.now(pst)
 
     within_deadline = current_day_pst == 6 and current_pst_time <= sunday_deadline  # Ensure it's Sunday and before midnight
-    """
+    
     if not (within_deadline) and (start_datetime <= current_pst_time < end_datetime):
         return redirect('baseballSL:checking', league_num = league_num)  # Replace 'some_other_page' with the name of an appropriate view
-    """
+    
     user_data = PickBL.objects.filter(username = request.user.username)
     user_pick_data = PickBL.objects.filter(username = request.user.username).order_by('teamnumber','pick_number')
     player_data = []
@@ -905,7 +905,7 @@ def checking(request, league_num):
                 return redirect('baseballSL:game', league_num = league_num)
             else:
                 all_out = True
-                team_list = PickBL.objects.filter(username=username, teamnumber=pick.teamnumber).order_by('pick_number').values_list('isin', flat=True)
+                team_list = PickBL.objects.filter(username=username).order_by('pick_number').values_list('isin', flat=True)
                 for i in team_list:
                     if i == True:
                         all_out = False

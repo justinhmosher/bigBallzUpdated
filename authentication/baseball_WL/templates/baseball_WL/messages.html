@@ -1,0 +1,167 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css">
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+    <title>League Message Board</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    
+    <!-- Bootstrap CSS -->
+    <link
+        href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css"
+        rel="stylesheet"
+    >
+    <link rel="stylesheet" href="{% static 'css/shared.css' %}">
+    
+    <!-- Custom CSS -->
+    <style>
+        body {
+            background: linear-gradient(135deg, #ffffff, #ffffff);
+            color: #333333;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        h2 {
+            text-align: center;
+            font-weight: 600;
+            color: #333333;
+            margin-bottom: 30px;
+        }
+
+        .message-board {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .week-header {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: #000000;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            padding: 10px 15px;
+            background: #ffffff;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .list-group-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            margin-bottom: 10px;
+            background: #ffd700;
+            color: #333333;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .list-group-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .timestamp {
+            font-size: 14px;
+            color: #6c757d;
+            font-weight: 400;
+        }
+
+        .message {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 14px;
+            color: #333333;
+            opacity: 0.8;
+        }
+        @media (max-width: 576px) {
+          .navbar .nav-link {
+           font-size: .9rem !important;
+        }
+        }
+    </style>
+</head>
+{% if pay_status == True %}
+{% include 'authentication/partials/header_game_BW.html' %}
+{% block trophy %}
+      <a class="navbar-brand" style="position: absolute; top: 10px; left: 3px;"  href="javascript:void(0);">
+        <img src="{% static 'Trophy-logo.svg' %}" alt="The Chosen Fantasy Games">
+      </a>
+{% endblock %}
+{% else %}
+{% include 'authentication/partials/No_pay_BW.html' %}
+      <a class="navbar-brand" style="position: absolute; top: 10px; left: 3px;"  href="javascript:void(0);">
+        <img src="{% static 'Trophy-logo.svg' %}" alt="The Chosen Fantasy Games">
+      </a>
+{% endif %}
+<body>
+    <div class="container">
+        <h2>League Updates</h2>
+        <ul class="message-board">
+            {% for week, messages in grouped_messages.items %}
+                <!-- Display Week Header -->
+                <li class="week-header">Week {{ week }}</li>
+                {% for message in messages %}
+                    <li class="list-group-item">
+                        <span class="message">{{ message.content }}</span>
+                        <span class="timestamp">{{ message.timestamp|date:"l, m/d" }}</span>
+                    </li>
+                {% endfor %}
+            {% endfor %}
+        </ul>
+    </div>
+
+    <footer class="footer">
+        &copy; 2024 The Chosen Fantasy Games
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script type="text/javascript">
+            document.addEventListener("DOMContentLoaded", function() {
+        const logo = document.querySelector('.navbar-brand img');
+        const dropdownMenu = document.querySelector('.dropdown-menu');
+
+        function toggleDropdown() {
+            console.log("Toggle function triggered"); // For debugging
+            dropdownMenu.classList.toggle("show");
+        }
+
+        logo.addEventListener("click", toggleDropdown);
+
+        document.addEventListener("click", function(event) {
+            if (!logo.contains(event.target) && !dropdownMenu.contains(event.target)) {
+                dropdownMenu.classList.remove("show");
+            }
+        });
+    });
+    </script>
+</body>
+</html>

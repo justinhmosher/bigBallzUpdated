@@ -76,5 +76,7 @@ def delete_unpaid_players(sender, instance, **kwargs):
             for i in range(teamcount):
                 new_pick = Pick(team_name=pick.team_name,username= instance.username,paid = True, teamnumber = i+1)
                 new_pick.save()
-            Pick.objects.filter(username =instance.username, paid=False).delete()
+            for i in Pick.objects.filter(username=instance.username):
+                if i.paid == False:
+                    i.delete()
             send_paid_email(instance.username, instance.league_number)

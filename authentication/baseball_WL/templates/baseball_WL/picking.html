@@ -1,0 +1,172 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- Bootstrap JS and dependencies -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="{% static 'css/shared.css' %}">
+    <title>The Chosen</title>
+    <style>
+        body {
+            background-color: #ffffff; /* Green background color */
+        }
+
+        .loading-container {
+            text-align: center;
+            color: #000000; /* White text color for better contrast */
+        }
+
+        .loading-text {
+            font-size: 30px;
+            margin-bottom: 30px;
+        }
+
+        .loading-bubbles {
+            display: inline-block;
+            margin: 0 auto;
+        }
+
+        .loading-bubble-left,
+        .loading-bubble-middle,
+        .loading-bubble-right {
+            background-color: #000000; /* Black bubble color */
+            border-radius: 50%;
+            display: inline-block;
+            margin: 0 5px;
+            width: 20px;
+            height: 20px;
+            animation: loading-animation 1.5s infinite ease-in-out;
+        }
+
+        .loading-bubble-middle {
+            animation-delay: 0.2s;
+        }
+
+        .loading-bubble-right {
+            animation-delay: 0.4s;
+        }
+        .top-left {
+            position: absolute; /* Change from padding to absolute positioning */
+            top: 0; /* Align to the top edge */
+            left: 0; /* Align to the left edge */
+            padding: 20px; /* Add some padding to move it slightly from the very edge */
+        }
+
+     .image-boarder {
+        width: auto;
+        height: 50px;
+        border: 2px solid black;
+        border-radius: 10px;
+        }
+    .center-box{
+        margin-top: 80px;
+    }
+
+        @keyframes loading-animation {
+            0%, 25% {
+                transform: scale(1);
+            }
+            50%, 75% {
+                transform: scale(1.5);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+  
+    h4 {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #212529;
+        margin-bottom: 20px;
+    }
+    .span-container {
+        font-size: 1.2rem;
+        color: #6c757d;
+    }
+
+    .btn-signout {
+        color: #ffffff;
+        background-color: #212529;
+        border: 2px solid #ffffff; /* Adds a white border */
+        padding: 8px 16px;
+        border-radius: 5px;
+        transition: background-color 0.3s ease, border-color 0.3s ease;
+    }
+
+    .btn-signout:hover {
+        background-color: #444;
+        border-color: #ddd; /* Lightens the border color on hover */
+    }
+    
+    }
+    @media (max-width: 576px) {
+    
+    .btn-signout {
+        padding: 6px 12px;
+        font-size: 0.7rem;
+    }
+}
+        @media (max-width: 576px) {
+          .navbar .nav-link {
+           font-size: .9rem !important;
+        }
+        }
+    </style>
+</head>
+{% if pay_status == True %}
+{% include 'authentication/partials/header_game_BW.html' %}
+{% block trophy %}
+      <a class="navbar-brand" style="position: absolute; top: 10px; left: 3px;"  href="javascript:void(0);">
+        <img src="{% static 'Trophy-logo.svg' %}" alt="The Chosen Fantasy Games">
+      </a>
+{% endblock %}
+{% else %}
+{% include 'authentication/partials/No_pay_BW.html' %}
+      <a class="navbar-brand" style="position: absolute; top: 10px; left: 3px;"  href="javascript:void(0);">
+        <img src="{% static 'Trophy-logo.svg' %}" alt="The Chosen Fantasy Games">
+      </a>
+{% endif %}
+<body>
+<br>
+<br>
+<br>
+
+<br>
+<br>
+<br>
+<br>
+<h4 class="text-center">Teams left: {{ total_in }}</h4>
+    <div class="loading-container">
+        <h1 class="loading-text">Users are currently picking players, please come back on Thursday!</h1>
+        <div class="loading-bubbles">
+            <div class="loading-bubble-left"></div>
+            <div class="loading-bubble-middle"></div>
+            <div class="loading-bubble-right"></div>
+        </div>
+    </div>
+</body>
+<script type="text/javascript">
+    document.addEventListener("DOMContentLoaded", function() {
+        const logo = document.querySelector('.navbar-brand img');
+        const dropdownMenu = document.querySelector('.dropdown-menu');
+
+        function toggleDropdown() {
+            console.log("Toggle function triggered"); // For debugging
+            dropdownMenu.classList.toggle("show");
+        }
+
+        logo.addEventListener("click", toggleDropdown);
+
+        document.addEventListener("click", function(event) {
+            if (!logo.contains(event.target) && !dropdownMenu.contains(event.target)) {
+                dropdownMenu.classList.remove("show");
+            }
+        });
+    });
+</script>
+</html>

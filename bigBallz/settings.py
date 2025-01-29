@@ -59,6 +59,7 @@ INSTALLED_APPS = [
     'authentication',
     'authentication.NFL_weekly_view',
     'authentication.baseball_SL',
+    'authentication.baseball_WL',
     'django.contrib.sitemaps',
     'channels',
     'django_ckeditor_5',
