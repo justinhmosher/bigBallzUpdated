@@ -18,7 +18,7 @@ from decouple import config
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from .forms import PlayerSearchForm, Pickform, Pick1Form, CreateTeam
-from .models import Pick,Scorer,Paid,NFLPlayer,Game,PastPick,PromoCode,PromoUser,OfAge,UserVerification,Blog,ChatMessage,Waitlist,MessageReaction,Message,Email
+from .models import Pick,Scorer,Paid,NFLPlayer,Game,PastPick,PromoCode,PromoUser,OfAge,UserVerification,Blog,ChatMessage,Waitlist,MessageReaction,Message,Email,KYC
 from authentication.NFL_weekly_view.models import PickNW
 from authentication.baseball_SL.models import PickBL
 from authentication.baseball_WL.models import PickBS
@@ -432,12 +432,22 @@ def activate(request, uidb64, token):
 
 logger = logging.getLogger(__name__)
 
+
 @login_required
 def payment(request, league_num):
 	username = request.user.username
 	player = Paid.objects.get(username = username)
 	if int(league_num) != player.league_number:
 		return redirect("authentication:payment", league_num = player.league_number)
+	"""
+	KYC_status = KYC_check(username)
+	if KYC_status == 0:
+		messages.error(request,"Verification failed")
+		return redirect("authentication:game", league_num = player.league_number)
+	elif KYC_status == 1:
+		messages.error(request,"Verification pending")
+		return redirect("authentication:game", league_num = player.league_number)
+	"""
 	user = PromoUser.objects.get(username = request.user.username)
 	code = user.code
 	codeuser = False
@@ -485,6 +495,102 @@ def payment(request, league_num):
 		} 
 
 	return render(request, 'authentication/payment.html', context)
+"""
+def KYC_check(username):
+	if KYC.objects.filter(username = username).exists():
+		kyc_entry = KYC.objects.filter(username=username).first()
+		if kyc_entry.kyc_status == "rejected":
+			return 0
+		elif kyc_entry.kyc_status == "pending":
+			return 1
+		elif kyc_entry.kyc_status == "approved":
+			return 2
+	else:
+		return redirect("authentication:start_KYC_verification")
+
+@login_required
+def start_KYC_verification(request):
+	SUMSUB_API_URL = "https://api.sumsub.com"
+	SUMSUB_APP_TOKEN = config('SUBSUM_SECRET')
+
+	#Starts the Sumsub KYC verification process for a user without an existing applicant ID.
+
+	username = request.user.username
+	user = request.user
+	kyc_entry, created = KYC.objects.get_or_create(username=username, user = user)
+
+	# 🔹 Only create a Sumsub applicant if it doesn’t exist
+	if not kyc_entry.applicant_id:
+		url = f"{SUMSUB_API_URL}/resources/applicants?levelName=basic-kyc-level"
+		headers = {
+			"X-App-Token": SUMSUB_APP_TOKEN,
+			"Content-Type": "application/json"
+		}
+		data = {"externalUserId": "SMITH ANDREW", "fixedInfo": {"country": "US"}}
+
+		response = requests.post(url, headers=headers, json=data)
+
+		if response.status_code in [200, 201]:
+			applicant_data = response.json()
+			kyc_entry.applicant_id = applicant_data["id"]
+			kyc_entry.kyc_status = "pending"
+			kyc_entry.save()
+		else:
+			return render(request, "authentication/kyc_failed.html", {"error": "Failed to start verification"})
+
+	# 🔹 Fetch Sumsub access token for Web SDK
+	url = f"{SUMSUB_API_URL}/resources/accessTokens?userId={kyc_entry.applicant_id}&levelName=basic-kyc-level"
+	headers = {"X-App-Token": SUMSUB_APP_TOKEN}
+	response = requests.post(url, headers=headers)
+
+	if response.status_code == 200:
+		access_token = response.json()["token"]
+		return render(request, "authentication/kyc_verification.html", {"access_token": access_token})
+	else:
+		return render(request, "authentication/kyc_failed.html", {"error": "Failed to fetch verification token"})
+
+
+def subsum_webhook(request):
+
+    #Webhook to update KYC status when Sumsub completes verification.
+
+    if request.method != "POST":
+        return JsonResponse({"error": "Invalid request method"}, status=405)
+
+    try:
+        raw_body = request.body
+        sumsub_signature = request.headers.get("X-App-Access-Sig", "")
+
+        computed_signature = hmac.new(
+            settings.SUBSUM_SECRET_KEY.encode(), raw_body, hashlib.sha256
+        ).hexdigest()
+
+        if computed_signature != sumsub_signature:
+            return JsonResponse({"error": "Invalid signature"}, status=403)
+
+        data = json.loads(raw_body)
+        applicant_id = data.get("applicantId")
+        review_status = data.get("reviewStatus")
+
+        kyc_entry = KYC.objects.filter(applicant_id=applicant_id).first()
+        if not kyc_entry:
+            return JsonResponse({"error": "User not found"}, status=404)
+
+        # ✅ Update KYC status based on Sumsub result
+        if review_status == "completed":
+            review_result = data.get("reviewResult", {})
+            if review_result.get("reviewAnswer") == "GREEN":
+                kyc_entry.kyc_status = "approved"
+                kyc_entry.kyc_verified_at = timezone.now()
+            else:
+                kyc_entry.kyc_status = "rejected"
+            kyc_entry.save()
+
+        return JsonResponse({"message": "Webhook received", "status": kyc_entry.kyc_status})
+
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=400)
+"""
 
 @csrf_exempt  # Disable CSRF protection for this endpoint
 @require_POST
@@ -735,7 +841,7 @@ def tournaments(request):
 		"Baseball": [
 			{"name": "SEASON LONG GAME", 
 			"summary": "Each week, choose three players to hit a home run./If any player hits a home run, you advance, else you are out./You will be unable to reselect your home run hitter the following week only./If a selected player hits a grand slam, you may not choose that player for the remainder of the tournament./Last man standing wins the pot!", 
-			"money": "Max Entries per Tournament: 50/Buy In: $50",
+			"money": "Buy In: $50",
 			"rules": 3, 
 			"playable": True,
 			"app" : "football",

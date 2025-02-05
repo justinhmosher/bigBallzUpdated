@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KYC Verification</title>
+    <script src="https://static.sumsub.com/idensic/static/sumsub-websdk-latest.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
+        #sumsub-verification { width: 100%; max-width: 500px; margin: 0 auto; }
+        button { background-color: #007BFF; color: white; padding: 10px; border: none; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h2>Identity Verification</h2>
+    <p>Please complete verification to proceed.</p>
+
+    <div id="sumsub-verification"></div>  <!-- ✅ Embedded Web SDK Here -->
+
+    <script>
+        async function loadVerification() {
+            let response = await fetch("/get-sumsub-token/");
+            let data = await response.json();
+            let accessToken = data.token;
+
+            if (!accessToken) {
+                alert("Failed to get verification token.");
+                return;
+            }
+
+            let idensic = new SumsubWebSDK(accessToken, {lang: "en"})
+                .on("onSuccess", () => {
+                    alert("Verification completed! Redirecting...");
+                    window.location.href = "/payment/";
+                })
+                .on("onPending", () => {
+                    alert("Verification pending. Please wait.");
+                })
+                .on("onError", (error) => {
+                    console.error("Sumsub Error:", error);
+                    alert("Verification failed. Please try again.");
+                })
+                .mount("#sumsub-verification");  // ✅ EMBEDS IN THE PAGE
+        }
+
+        loadVerification();
+    </script>
+</body>
+</html>

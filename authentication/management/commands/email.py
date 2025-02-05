@@ -27,17 +27,17 @@ class Command(BaseCommand):
             message = MIMEMultipart()
             message['From'] = f"{sender_name} <{sender_email}>"
             message['To'] = receiver_email
-            message['Subject'] = "WE HAVE A WINNER"
+            message['Subject'] = "INTRODUCING OUR MLB GAME"
             body = render_to_string('authentication/emarketing.html')
 
+            """
             image_path = finders.find('Charlie.jpg')
-            print(f"Image path: {image_path}")
             with open(image_path, 'rb') as img:
                 image = MIMEImage(img.read(), _subtype="jpg")
                 image['Content-ID'] = '<logo_image>'  # Set the Content-ID header directly
                 del image['Content-Disposition']
                 message.attach(image)
-            
+            """
             message.attach(MIMEText(body, "html"))
             text = message.as_string()
             

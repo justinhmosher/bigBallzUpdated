@@ -135,6 +135,19 @@ class OfAge(models.Model):
     def __str__(self):
         return f"{self.username}"
 
+class KYC(models.Model):
+    username = models.CharField(max_length = 100, default = "username")
+    user = models.OneToOneField(User, on_delete=models.CASCADE)  # Links to User model
+    applicant_id = models.CharField(max_length=255, blank=True, null=True)  # Sumsub Applicant ID
+    kyc_status = models.CharField(
+        max_length=20,
+        choices=[("pending", "Pending"), ("approved", "Approved"), ("rejected", "Rejected")],
+        default="pending"
+    )
+    kyc_verified_at = models.DateTimeField(blank=True, null=True)
+    def __str__(self):
+        return f"{self.username}"
+
 class UserVerification(models.Model):
     username = models.CharField(max_length = 100, default = "username")
     first_name = models.CharField(max_length=100,default = "first name")
