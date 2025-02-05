@@ -823,7 +823,7 @@ def tournaments(request):
 		"Football": [
 			{"name": "SEASON LONG GAME", 
 			"summary": "Each week, choose two players to score a touchdown and get one or more offensive yards./If one or both score and have one or more offensive yards, you advance, else you're out./Last man standing wins the pot!", 
-			"money": "Max Entries per Tournament: 100/Buy In: $50/Pot: $5K",
+			"money": "",
 			"rules": 1, 
 			"playable": True,
 			"app": "authentication",
@@ -832,7 +832,7 @@ def tournaments(request):
 		{	
 			"name": "WEEKLY GAME", 
 			"summary": "Select 10 NFL players to score touchdowns and accumulate one or more offensive yards./The user with the most comultive touchdowns wins the pot!", 
-			"money": "Max Entries per Tournament: 25/Buy In: $20/Pot: $500",
+			"money": "",
 			"rules": 2, 
 			"playable": True,
 			"app" : "football",
