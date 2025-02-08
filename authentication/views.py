@@ -71,24 +71,25 @@ def custom_csrf_failure_view(request, reason=""):
 	return redirect('authentication:signin')  # 'login' should be the name of your login URL
 
 def home(request):
-    tournaments = [
-        {
-            'name': 'NFL - Touchdown Mania',
-            'description': 'Each week, choose two players to score a touchdown and get one or more offensive yards./If one or both score and have one or more offensive yards, you advance, else you are out./Last man standing wins the pot!',
-            'deadline': 'Deadline: September 11, 2025',
-        },
-        {
-            'name': 'MLB - Home Run Derby',
-            'description': "Each week, choose three players to hit a home run./If any player hits a home run, you advance, else you are out./You will be unable to reselect your home run hitter the following week only./If a selected player hits a grand slam, you may not choose that player for the remainder of the tournament./Last man standing wins the pot!",
-            'deadline': 'Deadline: March 30, 2025',
-        },
-        {
-            'name': 'NBA - Double-Double Contest',
-            'description': "Each week, choose two players to record a double-double (double digit numbers in two or more statistical categories)./If one or both players record a double-double, you advance, else you are out./Last man standing wins the pot!",
-            'deadline': 'Deadline: October 14, 2025',
-        },
-    ]
-    return render(request, "authentication/homepage.html", {'tournaments': tournaments})
+	#return redirect('authentication:tournaments')
+	tournaments = [
+		{
+			'name': 'NFL - Touchdown Mania',
+			'description': 'Each week, choose two players to score a touchdown and get one or more offensive yards./If one or both score and have one or more offensive yards, you advance, else you are out./Last man standing wins the pot!',
+			'deadline': 'Deadline: September 11, 2025',
+		},
+		{
+			'name': 'MLB - Home Run Derby',
+			'description': "Each week, choose three players to hit a home run./If any player hits a home run, you advance, else you are out./You will be unable to reselect your home run hitter the following week only./If a selected player hits a grand slam, you may not choose that player for the remainder of the tournament./Last man standing wins the pot!",
+			'deadline': 'Deadline: March 30, 2025',
+		},
+		{
+			'name': 'NBA - Double-Double Contest',
+			'description': "Each week, choose two players to record a double-double (double digit numbers in two or more statistical categories)./If one or both players record a double-double, you advance, else you are out./Last man standing wins the pot!",
+			'deadline': 'Deadline: October 14, 2025',
+		},
+	]
+	return render(request, "authentication/homepage.html", {'tournaments': tournaments})
 
 
 
@@ -110,7 +111,7 @@ def room(request,room_name,league_num):
 
 	username = request.user.username
 	try:
-		paids = Pick.objects.get(username=username, teamnumber=1)
+		paids = Pick.objects.get(username=username, teamnumber=1,pick_number = 1)
 		team = paids.team_name
 	except Pick.DoesNotExist:
 		team = "No Team"
@@ -242,43 +243,52 @@ def create_email(request, myuser):
 
 	return 1
 
+def get_pick_object(username, teamnumber):
+    for model in [Pick, PickBL, PickNW, PickBS]:
+        if model.objects.filter(username=username, teamnumber=teamnumber).exists():
+            return model.objects.get(username=username, teamnumber=teamnumber, pick_number = 1)
+    return None  # Return None if no pick object is found
 
 @login_required
 def teamname(request):
-	if not PickNW.objects.filter(username=request.user.username).exists() and not PickBL.objects.filter(username=request.user.username).exists() and not PickBS.objects.filter(username=request.user.username).exists() and not Pick.objects.filter(username=request.user.username).exists():
-		if request.method == "POST":
-			form = CreateTeam(request.POST)
-			if form.is_valid():
-				team_name = form.cleaned_data['team_name']
-				username = request.user.username
-				if PickBL.objects.filter(team_name = team_name).exists() or PickBS.objects.filter(team_name = team_name).exists() or PickNW.objects.filter(team_name = team_name).exists() or Pick.objects.filter(team_name = team_name).exists():
-					messages.error(request,"Team name already exists.")
-					return redirect('authentication:teamname')
-				elif len(team_name) > 16:
-					messages.error(request,"Team names need to be less than 15 characters.")
-					return redirect("authentication:teamname")
-				else:
-					paid = Paid.objects.get(username = request.user.username)
-					if paid.paid_status == False:
-						new_pick = Pick(team_name=team_name,username= request.user.username,paid = False, teamnumber = 1)
-						new_pick.save()
-					else: 
-						teamcount = paid.numteams
-						for i in range(teamcount):
-							new_pick = Pick(team_name=team_name,username= request.user.username,paid = True, teamnumber = i+1)
-							new_pick.save()
-					return redirect('authentication:checking', league_num = new_pick.league_number)
-			else:
-				messages.error(request,"Please submit a valid teamname.")
-				return redirect('authentication:teamname')
-	else:
-		pick = PickNW.objects.get(username = request.user.username, teamnumber = 1, pick_number = 1)
-		paid = Paid.objects.get(username = request.user.username)
-		if paid.paid_status == False:
-			new_pick = Pick(team_name= pick.team_name,username= request.user.username,paid = False, teamnumber = 1)
-			new_pick.save()
-		return redirect('authentication:checking', league_num = new_pick.league_number)
-	return render(request,"authentication/teamname.html")
+    if not Pick.objects.filter(username=request.user.username).exists() and not PickBL.objects.filter(username=request.user.username).exists() and not PickNW.objects.filter(username=request.user.username).exists() and not PickBS.objects.filter(username=request.user.username).exists():
+        if request.method == "POST":
+            form = CreateTeam(request.POST)
+            if form.is_valid():
+                team_name = form.cleaned_data['team_name']
+                username = request.user.username
+                if Pick.objects.filter(team_name = team_name).exists() or PickBL.objects.filter(team_name = team_name).exists() or PickBS.objects.filter(team_name = team_name).exists() or Pick.objects.filter(team_name = team_name).exists():
+                    messages.error(request,"Team name already exists.")
+                    return redirect('authentication:teamname' , league_num = league_num)
+                elif len(team_name) > 16:
+                    messages.error(request,"Team name needs to be less than 15 characters.")
+                    return redirect("authentication:teamname" , league_num = league_num)
+                else:
+                    paid = Paid.objects.get(username = request.user.username)
+                    if paid.paid_status == False:
+                        for j in range(2):
+                            new_pick = Pick(team_name=team_name,username= request.user.username,paid = False,pick_number = j+1, teamnumber = 1)
+                            new_pick.save()
+                    else:
+                        teamcount = paid.numteams
+                        for i in range(teamcount):
+                            for j in range(2):
+                                new_pick = Pick(team_name=team_name,username= request.user.username,paid = True,pick_number = j+1,teamnumber = i+1)
+                                new_pick.save()
+                    return redirect('authentication:checking', league_num = new_pick.league_number)
+            else:
+                messages.error(request,"Please submit a valid teamname.")
+                return redirect('authentication:teamname', league_num = league_num)
+    else:
+        pick = get_pick_object(request.user.username, teamnumber=1)
+        paid = Paid.objects.get(username = request.user.username)
+        if paid.paid_status == False:
+            for j in range(2):
+                new_pick = Pick(team_name=pick.team_name,username= request.user.username,paid = False,pick_number = j+1, teamnumber = 1)
+                new_pick.save()
+        return redirect('authentication:checking', league_num = new_pick.league_number)
+
+    return render(request,"authentication/teamname.html")
 
 
 def signin(request):
@@ -615,209 +625,181 @@ def coinbase_webhook(request):
 
 @login_required
 def playerboard(request, league_num):
-	username = request.user.username
-	player = Paid.objects.get(username = username)
-	if int(league_num) != player.league_number:
-		return redirect("authentication:playerboard", league_num = player.league_number)
-	# Define the PST timezone
-	pst = pytz.timezone('America/Los_Angeles')
+    username = request.user.username
+    player = Paid.objects.get(username = username)
+    if int(league_num) != player.league_number:
+        return redirect("authentication:playerboard", league_num = player.league_number)
+    # Define the PST timezone
+    pst = pytz.timezone('America/Los_Angeles')
 
-	# Get the current time in PST
-	current_pst_time = timezone.now().astimezone(pst)
-	current_day_pst = current_pst_time.weekday()  # This gives the day of the week (int)
-	current_date_pst = current_pst_time.date()
+    # Get the current time in PST
+    current_pst_time = timezone.now().astimezone(pst)
+    current_day_pst = current_pst_time.weekday()  # This gives the day of the week (int)
+    current_date_pst = current_pst_time.date()
 
-	game = Game.objects.get(sport="Football")
-	start_date = game.startDate
-	end_date = game.endDate
+    game = Game.objects.get(sport="Football")
+    start_date = game.startDate
+    end_date = game.endDate
 
-	end_datetime = datetime.combine(end_date, time(23, 59, 59))
-	end_datetime = pst.localize(end_datetime)
+    end_datetime = datetime.combine(end_date, time(23, 59, 59))
+    end_datetime = pst.localize(end_datetime)
 
-	start_datetime = datetime.combine(start_date, time(17, 0))  # Combine date with 5:00 PM
-	start_datetime = pst.localize(start_datetime)  # Make it timezone-aware
-	current_pst_time = datetime.now(pst)
-	thursday_deadline = current_pst_time.replace(hour=17, minute=0, second=0, microsecond=0)
+    start_datetime = datetime.combine(start_date, time(17, 0))  # Combine date with 5:00 PM
+    start_datetime = pst.localize(start_datetime)  # Make it timezone-aware
 
-	if current_day_pst == 3 and current_pst_time <= thursday_deadline:  # Thursday before 5:00 PM PST
-		within_deadline = True
-	elif current_day_pst in [1, 2]:  # Tuesday or Wednesday
-		within_deadline = True
-	else:
-		within_deadline = False
+    current_pst_time = datetime.now(pst)
 
-	if (within_deadline) or not (start_datetime <= current_pst_time < end_datetime):
-		return redirect('authentication:checking', league_num = player.league_number)  # Replace 'some_other_page' with the name of an appropriate view
-	
-	player_counts1 = Pick.objects.filter(isin=True, paid = True, league_number = league_num).exclude(pick1='N/A').values('pick1','pick1_team', 'pick1_position').annotate(count=Count('pick1')).order_by('-count')
-	player_counts2 = Pick.objects.filter(isin=True, paid = True, league_number = league_num).exclude(pick2='N/A').values('pick2','pick2_team', 'pick2_position').annotate(count=Count('pick2')).order_by('-count')
+    """
+    if current_day_pst == 3 and current_pst_time <= thursday_deadline:  # Thursday before 5:00 PM PST
+        within_deadline = True
+    elif current_day_pst in [1, 2]:  # Tuesday or Wednesday
+        within_deadline = True
+    else:
+        within_deadline = False
+    
+    if (within_deadline) or not (start_datetime <= current_pst_time < end_datetime):
+        return redirect('authentication:checking', league_num = league_num)  # Replace 'some_other_page' with the name of an appropriate view
+    """
+    pick_counts = Pick.objects.filter(league_number = league_num).exclude(pick='N/A').values('pick','pick_team', 'pick_position').annotate(count=Count('pick')).order_by('-count')
 
+    player_counts = defaultdict(lambda: {'count': 0, 'teams': None, 'positions': None})
 
-	# Combine player counts
-	player_counts = defaultdict(lambda: {'count': 0, 'teams': None, 'positions': None})
-	player_teams = defaultdict(list)  # Collect teams per player
+    for players in pick_counts:
+        player_name = players.get('pick')
+        team = players.get('pick_team')
+        position = players.get('pick_position')
+        player_counts[player_name]['count'] += players['count']
+        player_counts[player_name]['teams'] = team
+        player_counts[player_name]['positions'] = position
 
-	for player_count in chain(player_counts1, player_counts2):
-		player_name = player_count.get('pick1') or player_count.get('pick2')
-		team = player_count.get('pick1_team') or player_count.get('pick2_team')
-		position = player_count.get('pick1_position') or player_count.get('pick2_position')
+    # Collect teams or users associated with each pick
+    pick_teams = defaultdict(list)
+    for pick_record in Pick.objects.exclude(pick='N/A'):
+        pick_teams[pick_record.pick].append(pick_record.team_name)
 
-		player_counts[player_name]['count'] += player_count['count']
-		player_counts[player_name]['teams'] = team
-		player_counts[player_name]['positions'] = position
-
-	for player_name in player_counts.keys():
-		for pick in Pick.objects.filter(isin = True):
-			if pick.pick1 == player_name:
-				player_teams[player_name].append(pick.team_name)
-			if pick.pick2 == player_name:
-				player_teams[player_name].append(pick.team_name)
-
-	# Get player statuses
-	player_status = {}
-	for player in player_counts.keys():
-		scorer = Scorer.objects.filter(name=player).first()
-		if scorer:
-			player_status[player] = {
-				'scored': scorer.scored,
-				'not_scored': scorer.not_scored,
-			}
-		else:
-			player_status[player] = {
-				'scored': False,
-				'not_scored': False,
-			}
-
-	# Sort players by the number of picks
-	sorted_player_counts = sorted(
-		[{'player': player, **data} for player, data in player_counts.items()],
-		key=lambda x: x['count'],
-		reverse=True
-	)
-
-	total_in = Pick.objects.filter(isin = True,paid = True, league_number = league_num).count()
-
-	# Paginate sorted_player_counts (show 10 players per page)
-	paginator = Paginator(sorted_player_counts, 10)  # Show 10 players per page
-	page_number = request.GET.get('page')  # Get the page number from the request URL
-	page_obj = paginator.get_page(page_number)  # Get the paginated page
+    player_status = {}
+    for pick_name in pick_counts:
+        player_name = pick_name['pick']
+        scorer = Scorer.objects.filter(name=player_name).first()
+        player_status[player_name] = {
+            'scored':scorer.scored if scorer else False,
+            'not_scored':scorer.not_scored if scorer else False,
+        }
 
 
-	# Pass both sorted_player_counts and player_teams to the template
-	return render(request, 'authentication/playerboard.html', {
-		'page_obj': page_obj,
-		'sorted_player_counts': sorted_player_counts,
-		'player_teams': dict(player_teams),
-		'player_status': player_status,
-		'total_in': total_in,
-	})
+    # Sort players by the number of picks
+    sorted_player_counts = sorted(
+        [{'player': player, **data} for player, data in player_counts.items()],
+        key=lambda x: x['count'],
+        reverse=True
+    )
+
+    total_in = int(Pick.objects.filter(paid = True,league_number = league_num).count() / 10)
+
+    # Paginate sorted_player_counts (show 10 players per page)
+    paginator = Paginator(sorted_player_counts, 10)  # Show 10 players per page
+    page_number = request.GET.get('page')  # Get the page number from the request URL
+    page_obj = paginator.get_page(page_number)  # Get the paginated page
 
 
-	return render(request,'authentication/playerboard.html',{'player_counts':sorted_player_counts,'count':count,'total_in':total_in})
+    # Pass both sorted_player_counts and player_teams to the template
+    return render(request, 'authentication/playerboard.html', {
+        'page_obj': page_obj,
+        'sorted_player_counts': sorted_player_counts,
+        'player_teams': dict(pick_teams),
+        'player_status': player_status,
+        'total_in': total_in, })
+
 
 @login_required
 def leaderboard(request, league_num):
-	username = request.user.username
-	player = Paid.objects.get(username = username)
-	if int(league_num) != player.league_number:
-		return redirect("authentication:leaderboard", league_num = player.league_number)
+    username = request.user.username
+    player = Paid.objects.get(username = username)
+    if int(league_num) != player.league_number:
+        return redirect("authentication:leaderboard", league_num = player.league_number)
+    # Define the PST timezone
+    pst = pytz.timezone('America/Los_Angeles')
 
-	# Define the PST timezone
-	pst = pytz.timezone('America/Los_Angeles')
+    # Get the current time in PST
+    current_pst_time = timezone.now().astimezone(pst)
+    current_day_pst = current_pst_time.weekday()  # This gives the day of the week (int)
+    current_date_pst = current_pst_time.date()
 
-	# Get the current time in PST
-	current_pst_time = timezone.now().astimezone(pst)
-	current_day_pst = current_pst_time.weekday()  # This gives the day of the week (int)
-	current_date_pst = current_pst_time.date()
+    game = Game.objects.get(sport="Football")
+    start_date = game.startDate
+    end_date = game.endDate
 
-	game = Game.objects.get(sport="Football")
-	start_date = game.startDate
-	end_date = game.endDate
+    end_datetime = datetime.combine(end_date, time(23, 59, 59))
+    end_datetime = pst.localize(end_datetime)
 
-	end_datetime = datetime.combine(end_date, time(23, 59, 59))
-	end_datetime = pst.localize(end_datetime)
+    start_datetime = datetime.combine(start_date, time(17, 0))  # Combine date with 5:00 PM
+    start_datetime = pst.localize(start_datetime)  # Make it timezone-aware
 
-	start_datetime = datetime.combine(start_date, time(17, 0))  # Combine date with 5:00 PM
-	start_datetime = pst.localize(start_datetime)  # Make it timezone-aware
-	current_pst_time = datetime.now(pst)
-	thursday_deadline = current_pst_time.replace(hour=17, minute=0, second=0, microsecond=0)
+    current_pst_time = datetime.now(pst)
 
-	if current_day_pst == 3 and current_pst_time <= thursday_deadline:  # Thursday before 5:00 PM PST
-		within_deadline = True
-	elif current_day_pst in [1, 2]:  # Tuesday or Wednesday
-		within_deadline = True
-	else:
-		within_deadline = False
+    """
+    if current_day_pst == 3 and current_pst_time <= thursday_deadline:  # Thursday before 5:00 PM PST
+        within_deadline = True
+    elif current_day_pst in [1, 2]:  # Tuesday or Wednesday
+        within_deadline = True
+    else:
+        within_deadline = False
+    
+    if (within_deadline) or not (start_datetime <= current_pst_time < end_datetime):
+        return redirect('authentication:checking', league_num = league_num)  # Replace 'some_other_page' with the name of an appropriate view
+    """
+    pick_counts = Pick.objects.filter(league_number = league_num).exclude(pick='N/A').values('pick','pick_team', 'pick_position').annotate(count=Count('pick')).order_by('-count')
 
-	if (within_deadline) or not (start_datetime <= current_pst_time < end_datetime):
-		return redirect('authentication:checking', league_num = player.league_number)  # Replace 'some_other_page' with the name of an appropriate view
-	
-	player_counts1 = Pick.objects.filter(isin=True, paid = True, league_number = league_num).exclude(pick1='N/A').values('pick1','pick1_team', 'pick1_position').annotate(count=Count('pick1')).order_by('-count')
-	player_counts2 = Pick.objects.filter(isin=True, paid = True, league_number = league_num).exclude(pick2='N/A').values('pick2','pick2_team', 'pick2_position').annotate(count=Count('pick2')).order_by('-count')
+    player_counts = defaultdict(lambda: {'count': 0, 'teams': None, 'positions': None})
 
+    for players in pick_counts:
+        player_name = players.get('pick')
+        team = players.get('pick_team')
+        position = players.get('pick_position')
+        player_counts[player_name]['count'] += players['count']
+        player_counts[player_name]['teams'] = team
+        player_counts[player_name]['positions'] = position
 
-	# Combine player counts
-	player_counts = defaultdict(lambda: {'count': 0, 'teams': None, 'positions': None})
-	player_teams = defaultdict(list)  # Collect teams per player
+    # Collect teams or users associated with each pick
+    pick_teams = defaultdict(list)
+    for pick_record in Pick.objects.exclude(pick='N/A'):
+        pick_teams[pick_record.pick].append(pick_record.team_name)
 
-	for player_count in chain(player_counts1, player_counts2):
-		player_name = player_count.get('pick1') or player_count.get('pick2')
-		team = player_count.get('pick1_team') or player_count.get('pick2_team')
-		position = player_count.get('pick1_position') or player_count.get('pick2_position')
-
-		player_counts[player_name]['count'] += player_count['count']
-		player_counts[player_name]['teams'] = team
-		player_counts[player_name]['positions'] = position
-
-	for player_name in player_counts.keys():
-		for pick in Pick.objects.filter(isin = True):
-			if pick.pick1 == player_name:
-				player_teams[player_name].append(pick.team_name)
-			if pick.pick2 == player_name:
-				player_teams[player_name].append(pick.team_name)
-
-	# Get player statuses
-	player_status = {}
-	for player in player_counts.keys():
-		scorer = Scorer.objects.filter(name=player).first()
-		if scorer:
-			player_status[player] = {
-				'scored': scorer.scored,
-				'not_scored': scorer.not_scored,
-			}
-		else:
-			player_status[player] = {
-				'scored': False,
-				'not_scored': False,
-			}
-
-	# Sort players by the number of picks
-	sorted_player_counts = sorted(
-		[{'player': player, **data} for player, data in player_counts.items()],
-		key=lambda x: x['count'],
-		reverse=True
-	)
-
-	total_in = Pick.objects.filter(isin = True,paid = True, league_number = league_num).count()
+    player_status = {}
+    for pick_name in pick_counts:
+        player_name = pick_name['pick']
+        scorer = Scorer.objects.filter(name=player_name).first()
+        player_status[player_name] = {
+            'scored':scorer.scored if scorer else False,
+            'not_scored':scorer.not_scored if scorer else False,
+        }
 
 
-	user_data = Pick.objects.filter(username=request.user.username, isin=True)
+    # Sort players by the number of picks
+    sorted_player_counts = sorted(
+        [{'player': player, **data} for player, data in player_counts.items()],
+        key=lambda x: x['count'],
+        reverse=True
+    )
 
-	# Paginate sorted_player_counts (show 10 players per page)
-	paginator = Paginator(sorted_player_counts, 10)  # Show 10 players per page
-	page_number = request.GET.get('page')  # Get the page number from the request URL
-	page_obj = paginator.get_page(page_number)  # Get the paginated page
+    total_in = int(Pick.objects.filter(paid = True,league_number = league_num).count() / 10)
 
+    # Paginate sorted_player_counts (show 10 players per page)
+    paginator = Paginator(sorted_player_counts, 10)  # Show 10 players per page
+    page_number = request.GET.get('page')  # Get the page number from the request URL
+    page_obj = paginator.get_page(page_number)  # Get the paginated page
 
-	# Pass both sorted_player_counts and player_teams to the template
-	return render(request, 'authentication/leaderboard.html', {
-		'page_obj': page_obj,
-		'sorted_player_counts': sorted_player_counts,
-		'player_teams': dict(player_teams),
-		'player_status': player_status,
-		'total_in': total_in,
-		'user_data': user_data,
-	})
+    user_data= Pick.objects.filter(username = request.user.username)
+
+    # Pass both sorted_player_counts and player_teams to the template
+    return render(request, 'authentication/leaderboard.html', {
+        'page_obj': page_obj,
+        'sorted_player_counts': sorted_player_counts,
+        'player_teams': dict(pick_teams),
+        'player_status': player_status,
+        'total_in': total_in,
+        'user_data': user_data,
+    })
 
 def tournaments(request):
 	"""
@@ -1092,262 +1074,208 @@ def player_list(request,league_num):
 
 
 @login_required
-def game(request,league_num):
-	username = request.user.username
-	player = Paid.objects.get(username = username)
-	if int(league_num) != player.league_number:
-		return redirect("authentication:game", league_num = player.league_number)
-	paid = Paid.objects.get(username = request.user.username)
-	# Define the PST timezone
-	pst = pytz.timezone('America/Los_Angeles')
+def game(request, league_num):
+    username = request.user.username
+    player = Paid.objects.get(username = username)
+    if int(league_num) != player.league_number:
+        return redirect("authentication:game", league_num = player.league_number)
+    # Define the PST timezone
+    paid = Paid.objects.get(username = request.user.username)
+    pst = pytz.timezone('America/Los_Angeles')
 
-	# Get the current time in PST
-	current_pst_time = timezone.now().astimezone(pst)
-	current_day_pst = current_pst_time.weekday()  # This gives the day of the week (int)
-	current_date_pst = current_pst_time.date()
+    # Get the current time in PST
+    current_pst_time = timezone.now().astimezone(pst)
+    current_day_pst = current_pst_time.weekday()  # This gives the day of the week (int)
+    current_date_pst = current_pst_time.date()
 
-	game = Game.objects.get(sport="Football")
-	start_date = game.startDate
-	end_date = game.endDate
+    game = Game.objects.get(sport="Football")
+    start_date = game.startDate
+    end_date = game.endDate
+    paid = Paid.objects.get(username = request.user.username)
 
-	end_datetime = datetime.combine(end_date, time(23, 59, 59))
-	end_datetime = pst.localize(end_datetime)
+    end_datetime = datetime.combine(end_date, time(23, 59, 59))
+    end_datetime = pst.localize(end_datetime)
 
-	start_datetime = datetime.combine(start_date, time(17, 0))  # Combine date with 5:00 PM
-	start_datetime = pst.localize(start_datetime)  # Make it timezone-aware
-	current_pst_time = datetime.now(pst)
+    start_datetime = datetime.combine(start_date, time(17, 0))  # Combine date with 5:00 PM
+    start_datetime = pst.localize(start_datetime)  # Make it timezone-aware
+    current_pst_time = datetime.now(pst)
 
-	thursday_deadline = current_pst_time.replace(hour=17, minute=0, second=0, microsecond=0)
-	if current_day_pst == 3 and current_pst_time <= thursday_deadline:  # Thursday before 5:00 PM PST
-		within_deadline = True
-	elif current_day_pst in [1, 2]:  # Tuesday or Wednesday
-		within_deadline = True
-	else:
-		within_deadline = False
-	if (not within_deadline and (start_datetime <= current_pst_time < end_datetime)):
-		return redirect('authentication:checking', league_num = player.league_number)  # Replace 'some_other_page' with the name of an appropriate view
-	user_data = Pick.objects.filter(username = request.user.username)
-	user_pick_data = Pick.objects.filter(username = request.user.username,isin = True).order_by('teamnumber')
-	player_data = []
-	pick1_data = None
-	pick2_data = None
+    thursday_deadline = current_pst_time.replace(hour=17, minute=0, second=0, microsecond=0)
+    """
+    if current_day_pst == 3 and current_pst_time <= thursday_deadline:  # Thursday before 5:00 PM PST
+        within_deadline = True
+    elif current_day_pst in [1, 2]:  # Tuesday or Wednesday
+        within_deadline = True
+    else:
+        within_deadline = False
+    if (not within_deadline and (start_datetime <= current_pst_time < end_datetime)):
+        return redirect('football:checking', league_num = player.league_number)  # Replace 'some_other_page' with the name of an appropriate view
+    """
+    user_data = Pick.objects.filter(username = request.user.username)
+    user_pick_data = Pick.objects.filter(username = request.user.username).order_by('teamnumber','pick_number')
+    player_data = []
+    pick1_data = None
+    pick2_data = None
 
-	if request.method == 'POST':
+    if request.method == 'POST' and request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        selected_player = request.POST.get('selected_player')
+        page_num = request.POST.get('currentPage')
+        if selected_player:
+            try:
+                # Retrieve the selected player
+                player_data_selected = NFLPlayer.objects.get(name=selected_player)
+                if paid.paid_status == False:
+                    return JsonResponse({'success': False, 'message': "Features activate after payment"})
+                else:
+                    # Use your existing game_search function
+                    result = game_search(request.user.username, player_data_selected,page_num)
+                    if result == 11:
+                        return JsonResponse({'success': False, 'message': "Selected players cannot be on the same team."})
+                    elif result == 13:
+                        return JsonResponse({'success': False, 'message': "Player already selected."})
+                    else:
+                        return JsonResponse({
+                            'success': True,
+                            'message': 'Player selected successfully!',
+                            'pick': {
+                                'pick_number': result[1],
+                                'team_number': result[0],
+                                'pick_name': result[2],
+                                'pick_team': result[3],
+                                'pick_position': result[4],
+                                'pick_color': result[5],
+                            }
+                        })
 
-		search = request.POST.get('searched')
+            except NFLPlayer.DoesNotExist:
+                return JsonResponse({'success': False, 'message': 'Player not found!'})
+            except Pick.DoesNotExist:
+                return JsonResponse({'success': False, 'message': 'Pick not found!'})
+        else:
+            return JsonResponse({'success': False, 'message': 'Invalid data!'})
 
-		if search is not None:
-			player_data = NFLPlayer.objects.filter(name__icontains=search)[:5]
+    game = Game.objects.get(sport = "Football")
+    start = game.startDate
+    current_day = timezone.now().date()
+    if current_day <= start:
+        has_started = False
+    else:
+        has_started = True
+    team = Pick.objects.get(username = request.user.username, teamnumber = 1, pick_number =1)
+    name = team.team_name
 
-		selected_player = request.POST.get('selected_player')
-		try:
-			player_data_selected = NFLPlayer.objects.get(name=selected_player)
-		except NFLPlayer.DoesNotExist:
-			player_data_selected = None
+    # Group picks by team
+    team_picks_dict = defaultdict(list)
+    for pick in user_pick_data:
+        team_picks_dict[pick.teamnumber].append(pick)
 
-		if player_data_selected is not None:
-			if paid.paid_status == False:
-				messages.error(request, "Features activate after payment")
-			else:
-				num = game_search(request.user.username,player_data_selected)
-				if num == 1:
-					messages.error(request,"Selected players cannot be on the same team.")
-				elif num ==3:
-					messages.error(request,"Your selected player has already scored a TD.")
+    # Convert to a list of teams with picks
+    team_picks_list = list(team_picks_dict.values())
 
-		change_pick = request.POST.get('change_pick','{}')
-		try:
-			data = json.loads(change_pick)
-			pick = data.get('pick')
-			team = data.get('team')
-			for user_pick in user_pick_data.filter(teamnumber=team):
-				if pick == 'pick1':
-					user_pick.pick1 = "N/A"
-					user_pick.pick1_team = "N/A"
-					user_pick.pick1_position = "N/A" 
-					user_pick.pick1_color = "N/A"
-					user_pick.pick1_player_ID = "N/A"
-					user_pick.pick1_image = "N/A"
-				elif pick == "pick2":
-					user_pick.pick2 = "N/A"
-					user_pick.pick2 = "N/A"
-					user_pick.pick2_team = "N/A"
-					user_pick.pick2_position = "N/A" 
-					user_pick.pick2_color = "N/A"
-					user_pick.pick2_player_ID = "N/A"
-					user_pick.pick2_image = "N/A"
-				user_pick.save()
-		except json.JSONDecodeError:
-			messages.error(request, "Invalid change pick data.")
+    # Paginate the team-level data (1 team per page)
+    paginator = Paginator(team_picks_list, 1)  # One team per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
 
-	game = Game.objects.get(sport = "Football")
-	start = game.startDate
-	current_day = timezone.now().date()
-	if current_day <= start:
-		has_started = False
-	else:
-		has_started = True
-	team = Pick.objects.get(username = request.user.username, teamnumber = 1)
-	name = team.team_name
+    total_in = int(Pick.objects.filter(paid = True,league_number = league_num).count() / 10)
 
-	total_in = Pick.objects.filter(isin = True,paid = True, league_number = league_num).count()
 
-	active_teams = Pick.objects.filter(username=request.user.username, isin=True).values_list('teamnumber', flat=True)
+    return render(request, 'authentication/game.html', 
+        {'page_obj': page_obj,
+        'user_pick_data' : user_pick_data,
+        'has_started' : has_started,
+        'start':start,
+        'team':name,
+        'total':total_in,
+        'pay_status':player.paid_status
+        })
 
-	past_picks = PastPick.objects.filter(username=request.user.username, teamnumber__in=active_teams).order_by('teamnumber', 'pick1', 'pick2')
+@csrf_exempt
+@login_required
+def update_pick(request):
+    if request.method == 'POST':
+        change_pick = request.POST.get('change_pick', '{}')
+        try:
+            data = json.loads(change_pick)
+            pick = data.get('pick_number')
+            team = data.get('teamnumber')
 
-	organized_picks = defaultdict(list)
+            if not (pick and team):
+                raise ValueError("Invalid pick or team data.")
 
-	for pick in past_picks:
-		if pick.pick1 != "N/A":  # Only add if pick1 is not "N/A"
-			player1 = NFLPlayer.objects.get(player_ID=pick.pick1)
-			organized_picks[pick.teamnumber].append(player1.name)
-		if pick.pick2 != "N/A":  # Only add if pick2 is not "N/A"
-			player2 = NFLPlayer.objects.get(player_ID=pick.pick2)
-			organized_picks[pick.teamnumber].append(player2.name)
+            user_pick_data = Pick.objects.filter(username=request.user.username)
+            for user_pick in user_pick_data.filter(teamnumber=team):
+                if int(pick) == user_pick.pick_number:
+                    user_pick.pick = "N/A"
+                    user_pick.pick_team = "N/A"
+                    user_pick.pick_position = "N/A" 
+                    user_pick.pick_color = "N/A"
+                    user_pick.pick_player_ID = "N/A"
+                    user_pick.save()
 
-	organized_picks = dict(organized_picks)
+            return JsonResponse({'success': True})
 
-	user_picks_out = Pick.objects.filter(username=request.user.username, isin=False).order_by('teamnumber')
-	user_picks_in = Pick.objects.filter(username=request.user.username, isin=True).order_by('teamnumber')
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)})
 
-	all_teams_in = user_picks_out.count() == 0
-	all_teams_out = user_picks_in.count() == 0
-
-	if all_teams_in:
-		isin = True
-	elif all_teams_out:
-		isin = False
-	else:
-		isin = request.GET.get('isin', 'True') == 'True'  # Use the query parameter if mixed
-
-	page_number = request.GET.get('page', 1)  # Default to page 1
-	in_paginator = Paginator(user_pick_data,20)
-	out_paginator = Paginator(user_picks_out,20)
-
-	user_pick_data = in_paginator.get_page(page_number) if isin else out_paginator.get_page(page_number)
-
-	return render(request, 'authentication/game.html', 
-		{'player_data': player_data,
-		'pay_status': player.paid_status,
-		'user_pick_data' : user_pick_data,
-		'has_started' : has_started,
-		'isin': isin,
-		'start':start,
-		'all_teams_in': all_teams_in,
-		'all_teams_out': all_teams_out,
-		'page_obj': user_pick_data,
-		'team':name,
-		'total':total_in,
-		'organized_picks': organized_picks
-		})
+    return JsonResponse({'success': False, 'message': 'Invalid request.'})
 
 def search_players(request):
-	if request.headers.get('x-requested-with') == 'XMLHttpRequest' and request.method == 'GET':
-		search_query = request.GET.get('search', '')
-		if search_query:
-			players = NFLPlayer.objects.filter(name__icontains=search_query)[:5]
-			player_list = [{'name': player.name} for player in players]
-			return JsonResponse({'players': player_list})
-	return JsonResponse({'players': []})
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest' and request.method == 'GET':
+        search_query = request.GET.get('search', '')
+        if search_query:
+            players = NFLPlayer.objects.filter(name__icontains=search_query)[:5]
+            player_list = [{'name': player.name} for player in players]
+            return JsonResponse({'players': player_list})
+    return JsonResponse({'players': []})
 
-def game_search(username,playerdata):
-	user_pick_data = Pick.objects.filter(username = username,isin = True).order_by('teamnumber')
-	for pick in user_pick_data:
-		past_picks = PastPick.objects.filter(username = username,teamnumber = pick.teamnumber)
-		scorers = []
-		for past in past_picks:
-			if past.pick1 != "N/A":
-				scorers.append(past.pick1)
-			elif past.pick2 != "N/A":
-				scorers.append(past.pick2)
-		if pick.pick1 == 'N/A':
-			try:
-				player_data_pick2 = NFLPlayer.objects.get(name=pick.pick2)
-				if player_data_pick2.team_name == playerdata.team_name:
-					return 1
-				elif playerdata.player_ID in scorers:
-					return 3
-				else:
-					pick.pick1 = playerdata.name
-					pick.pick1_team = playerdata.team_name
-					pick.pick1_position = playerdata.position 
-					pick.pick1_color = playerdata.color
-					pick.pick1_player_ID = playerdata.player_ID
-					pick.pick1_image = playerdata.image
-					pick.save()
-					return 2
-			except NFLPlayer.DoesNotExist:
-				if playerdata.player_ID in scorers:
-					return 3
-				else:
-					pick.pick1 = playerdata.name
-					pick.pick1_team = playerdata.team_name
-					pick.pick1_position = playerdata.position 
-					pick.pick1_color = playerdata.color
-					pick.pick1_player_ID = playerdata.player_ID
-					pick.pick1_image = playerdata.image
-					pick.save()
-					return 2
-		elif pick.pick2 == 'N/A':
-			try:
-				player_data_pick1 = NFLPlayer.objects.get(name=pick.pick1)
-				if player_data_pick1.team_name == playerdata.team_name:
-					return 1
-				elif playerdata.player_ID in scorers:
-					return 3
-				else:
-					pick.pick2 = playerdata.name
-					pick.pick2_team = playerdata.team_name
-					pick.pick2_position = playerdata.position
-					pick.pick2_color = playerdata.color
-					pick.pick2_player_ID = playerdata.player_ID
-					pick.pick2_image = playerdata.image
-					pick.save()
-					return 2
-			except NFLPlayer.DoesNotExist:
-				pick.pick2 = playerdata.name
-				pick.pick2_team = playerdata.team_name
-				pick.pick2_position = playerdata.position
-				pick.pick2_color = playerdata.color
-				pick.pick2_player_ID = playerdata.player_ID
-				pick.pick2_image = playerdata.image
-				pick.save()
-				return 2
-
-	for pick in user_pick_data:
-		past_picks = PastPick.objects.filter(username = username,teamnumber = pick.teamnumber)
-		scorers = []
-		for past in past_picks:
-			if past.pick1 != "N/A":
-				scorers.append(past.pick1)
-			elif past.pick2 != "N/A":
-				scorers.append(past.pick2)
-		try:
-			player_data_pick2 = NFLPlayer.objects.get(name=pick.pick2)
-			if player_data_pick2.team_name == playerdata.team_name:
-				return 1
-			elif playerdata.player_ID in scorers:
-				return 3
-			else:
-				pick.pick1 = playerdata.name
-				pick.pick1_team = playerdata.team_name
-				pick.pick1_position = playerdata.position 
-				pick.pick1_color = playerdata.color
-				pick.pick1_player_ID = playerdata.player_ID
-				pick.pick1_image = playerdata.image
-				pick.save()
-				return 2
-		except NFLPlayer.DoesNotExist:
-				pick.pick1 = playerdata.name
-				pick.pick1_team = playerdata.team_name
-				pick.pick1_position = playerdata.position
-				pick.pick1_color = playerdata.color
-				pick.pick1_player_ID = playerdata.player_ID
-				pick.pick1_image = playerdata.image
-				pick.save()
-				return 2
-	return 2
+def game_search(username,playerdata,pagenum):
+    user_pick_data = Pick.objects.filter(username = username,teamnumber = pagenum).order_by('pick_number')
+    for pick in user_pick_data:
+        if pick.pick == 'N/A':
+            try:
+                team_list = Pick.objects.filter(username=username, teamnumber=pick.teamnumber).order_by('pick_number').values_list('pick_team', flat=True)
+                all_equal = True
+                for i, item in enumerate(team_list):
+                    if i != int(pick.pick_number) - 1 and item != playerdata.team_name:
+                        all_equal = False
+                        break
+                ID_list = Pick.objects.filter(username=username, teamnumber=pick.teamnumber).values_list('pick_player_ID', flat=True)
+                if all_equal:
+                    return 11
+                elif playerdata.player_ID in ID_list:
+                    return 13
+                else:
+                    pick.pick = playerdata.name
+                    pick.pick_team = playerdata.team_name
+                    pick.pick_position = playerdata.position 
+                    pick.pick_color = playerdata.color
+                    pick.pick_player_ID = playerdata.player_ID
+                    pick.save()
+                    return [pick.teamnumber,pick.pick_number,pick.pick,pick.pick_team,pick.pick_position,pick.pick_color,pick.pick_player_ID]
+            except NFLPlayer.DoesNotExist:
+                return [pick.teamnumber,pick.pick_number,pick.pick,pick.pick_team,pick.pick_position,pick.pick_color,pick.pick_player_ID]
+    for pick in user_pick_data:
+        team_list = Pick.objects.filter(username=username, teamnumber=pick.teamnumber).order_by('pick_number').values_list('pick_team', flat=True)
+        all_equal = True
+        for i, item in enumerate(team_list):
+            if i != int(pick.pick_number) - 1 and item != playerdata.team_name:
+                all_equal = False
+                break
+        ID_list = Pick.objects.filter(username=username, teamnumber=pick.teamnumber).values_list('pick_player_ID', flat=True)
+        if all_equal:
+            return 11
+        elif playerdata.player_ID in ID_list:
+            return 13
+        else:
+            pick.pick = playerdata.name
+            pick.pick_team = playerdata.team_name
+            pick.pick_position = playerdata.position 
+            pick.pick_color = playerdata.color
+            pick.pick_player_ID = playerdata.player_ID
+            pick.save()
+            return [pick.teamnumber,pick.pick_number,pick.pick,pick.pick_team,pick.pick_position,pick.pick_color,pick.pick_player_ID]
+    return [pick.teamnumber,pick.pick_number,pick.pick,pick.pick_team,pick.pick_position,pick.pick_color,pick.pick_player_ID]
 
 @login_required
 def picking(request,league_num):

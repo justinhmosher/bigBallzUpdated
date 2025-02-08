@@ -71,11 +71,12 @@ def delete_unpaid_players(sender, instance, **kwargs):
         if instance.paid_status and not previous_instance.paid_status:
             # Trigger the message creation only if `isin` is changed to False
             paid = Paid.objects.get(username = instance.username)
-            pick = Pick.objects.get(username = instance.username)
+            pick = Pick.objects.get(username = instance.username, pick_number = 1)
             teamcount = paid.numteams
             for i in range(teamcount):
-                new_pick = Pick(team_name=pick.team_name,username= instance.username,paid = True, teamnumber = i+1)
-                new_pick.save()
+                for j in range(2):
+                    new_pick = Pick(team_name=pick.team_name,username= instance.username,paid = True,pick_number = j+1,teamnumber = i+1)
+                    new_pick.save()
             for i in Pick.objects.filter(username=instance.username):
                 if i.paid == False:
                     i.delete()

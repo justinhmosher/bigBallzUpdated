@@ -1,7 +1,9 @@
 import requests
 from django.core.management.base import BaseCommand
-from authentication.models import Scorer,PastPick,Pick,Game
+from authentication.models import Scorer,PastPick,Pick
+from authentication.models import Game
 from decouple import config  # Import the decouple library for handling environment variables
+from collections import defaultdict
 
 class Command(BaseCommand):
     help = 'Fetch NFLPlayers from API and save to the database, handling multiple leagues.'
@@ -15,7 +17,7 @@ class Command(BaseCommand):
 
             # Fetch the current game for this league
             try:
-                game = Game.objects.get(sport="Football")
+                game = Game.objects.get(sport="Footll")
                 week = game.week
             except Game.DoesNotExist:
                 self.stdout.write(self.style.WARNING(f"Game not found. Skipping."))
@@ -23,69 +25,52 @@ class Command(BaseCommand):
 
             # Get scorers who have scored for this league
             scorers = Scorer.objects.filter(scored=True, league_number=league_number).values_list('player_ID', flat=True)
-
-            # Iterate through all picks in this league
-            for pick in Pick.objects.filter(isin=True, league_number=league_number):
-                if pick.pick1_player_ID not in scorers and pick.pick2_player_ID not in scorers:
-                    # Eliminate the team if neither player scored
-                    pick.isin = False
-                    pick.save()
-                else:
-                    # Handle pick1 if the player scored
-                    if pick.pick1_player_ID in scorers:
-                        try:
-                            scorer = Scorer.objects.get(player_ID=pick.pick1_player_ID, league_number=league_number)
-                            past_pick = PastPick(
-                                username=pick.username,
-                                team_name=pick.team_name,
-                                week=week,
-                                teamnumber=pick.teamnumber,
-                                pick1=pick.pick1_player_ID,
-                                pick1_name=pick.pick1,
-                                TD1_count=scorer.total_touchdowns,
-                                league_number=league_number,  # Track league number
-                            )
-                            past_pick.save()
-                        except Scorer.DoesNotExist:
-                            self.stdout.write(self.style.WARNING(f"Scorer for pick1 {pick.pick1_player_ID} in league {league_number} not found. Skipping."))
-
-                        # Reset pick1 fields
-                        pick.pick1 = "N/A"
-                        pick.pick1_team = "N/A"
-                        pick.pick1_position = "N/A"
-                        pick.pick1_color = "N/A"
-                        pick.pick1_player_ID = "N/A"
-                        pick.save()
-
-                    # Handle pick2 if the player scored
-                    if pick.pick2_player_ID in scorers:
-                        try:
-                            scorer = Scorer.objects.get(player_ID=pick.pick2_player_ID, league_number=league_number)
-                            past_pick = PastPick(
-                                username=pick.username,
-                                team_name=pick.team_name,
-                                week=week,
-                                teamnumber=pick.teamnumber,
-                                pick2=pick.pick2_player_ID,
-                                pick2_name=pick.pick2,
-                                TD2_count=scorer.total_touchdowns,
-                                league_number=league_number,  # Track league number
-                            )
-                            past_pick.save()
-                        except Scorer.DoesNotExist:
-                            self.stdout.write(self.style.WARNING(f"Scorer for pick2 {pick.pick2_player_ID} in league {league_number} not found. Skipping."))
-
-                        # Reset pick2 fields
-                        pick.pick2 = "N/A"
-                        pick.pick2_team = "N/A"
-                        pick.pick2_position = "N/A"
-                        pick.pick2_color = "N/A"
-                        pick.pick2_player_ID = "N/A"
-                        pick.save()
+            picks = Pick.objects.filter(isin = True).order_by('teamnumber', 'username', 'pick_number')
+            # Use a dictionary to group picks by teamnumber and username
+            grouped_picks = defaultdict(lambda: defaultdict(list))
+            for pick in picks:
+                # Group by teamnumber and username
+                grouped_picks[pick.teamnumber][pick.username].append(pick.pick_player_ID)
+            # Check each group and update isin field
+            for teamnumber, user_data in grouped_picks.items():
+                for username, pick_player_IDs in user_data.items():
+                    # Check if any pick_player_ID matches a scorer
+                    if not any(pick_player_ID in scorers for pick_player_ID in pick_player_IDs):
+                        # Update all picks for this teamnumber and username to set isin=False
+                        Pick.objects.filter(teamnumber=teamnumber, username=username).update(isin=False)
+                    else:
+                        # Handle matching player IDs
+                        for pick_player_ID in [pid for pid in pick_player_IDs if pid in scorers]:
+                            matching_scorer = Scorer.objects.get(player_ID=pick_player_ID)
+                            if matching_scorer.player_ID == pick_player_ID:
+                                # Create a PastPick instance
+                                PastPick.objects.create(
+                                    username=username,
+                                    team_name=Pick.objects.filter(username=username, teamnumber=teamnumber).first().team_name,
+                                    teamnumber=teamnumber,
+                                    week=week,  # Assuming week is passed as pagenum or needs to be set dynamically
+                                    pick=pick_player_ID,
+                                    pick_name=matching_scorer.name,
+                                    league_number=league_number
+                                )
+                                Pick.objects.filter(
+                                    username=username,
+                                    teamnumber=teamnumber,
+                                    pick_player_ID=pick_player_ID
+                                ).update(
+                                    pick="N/A",
+                                    pick_team="N/A",
+                                    pick_position="N/A",
+                                    pick_color="N/A",
+                                    pick_player_ID="N/A"
+                                )
+                                    
+        game = Game.objects.get(sport="Football")
+        week = game.week
+        Game.objects.get(name = "Football").update(week = week + 1)
 
             self.stdout.write(self.style.SUCCESS(f"Finished processing league {league_number}."))
 
         self.stdout.write(self.style.SUCCESS("Successfully processed all leagues."))
-
 
 

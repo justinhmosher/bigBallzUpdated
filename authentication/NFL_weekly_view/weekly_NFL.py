@@ -105,6 +105,12 @@ def room(request, room_name, league_num):
 def rules(request):
     return render(request,'authentication/rules.html')
 
+def get_pick_object(username, teamnumber):
+    for model in [Pick, PickBL, PickNW, PickBS]:
+        if model.objects.filter(username=username, teamnumber=teamnumber).exists():
+            return model.objects.get(username=username, teamnumber=teamnumber, pick_number = 1)
+    return None  # Return None if no pick object is found
+
 @login_required
 def teamname(request):
     if not Pick.objects.filter(username=request.user.username).exists() and not PickBL.objects.filter(username=request.user.username).exists() and not PickNW.objects.filter(username=request.user.username).exists() and not PickBS.objects.filter(username=request.user.username).exists():
@@ -136,7 +142,7 @@ def teamname(request):
                 messages.error(request,"Please submit a valid teamname.")
                 return redirect('football:teamname', league_num = league_num)
     else:
-        pick = Pick.objects.get(username = request.user.username, teamnumber = 1)
+        pick = get_pick_object(request.user.username, teamnumber=1)
         paid = PaidNW.objects.get(username = request.user.username)
         if paid.paid_status == False:
             for j in range(10):

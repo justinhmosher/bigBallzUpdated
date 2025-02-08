@@ -43,6 +43,7 @@ urlpatterns = [
     path('search_players/', views.search_players, name='search_players'),
     path('ckeditor5/', include('django_ckeditor_5.urls')),
     path('messages/<int:league_num>', views.message_board, name = 'messages'),
+    path('update-pick', views.update_pick, name = 'update_pick'),
     #path('verification',views.start_KYC_verification, name = 'start_KYC_verification'),
     #path('subsum-webhook',views.subsum_webhook, name = 'subsum_webhook')
 ]+static(settings.MEDIA_URL,document_root = settings.MEDIA_ROOT)
