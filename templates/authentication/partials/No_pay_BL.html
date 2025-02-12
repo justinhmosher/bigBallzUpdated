@@ -4,16 +4,18 @@
       {% block trophy %}
       {% endblock %}
       <div class="dropdown-menu">
+          <a href="{% url 'baseballSL:messages' 1 %}" class="dropdown-item">Messages</a></li>
           <a href="{% url 'authentication:tournaments' %}" class="dropdown-item">Tournaments</a>
           <a href="{% url 'authentication:signout'%}" class="dropdown-item">Sign Out</a>
       </div>
       <ul class="navbar-nav">
-        <li class="nav-item"><a class="nav-link" href="{% url 'baseballSL:messages' 1 %}">Messages</a></li>
         <li class="nav-item"><a class="nav-link" href="{% url 'baseballSL:leaders' 1 %}">Standings</a></li>
         <li class="nav-item"><a class="nav-link" href="{% url 'baseballSL:checking' 1 %}">Play</a></li>
         <li class="nav-item"><a class="nav-link" href="{% url 'baseballSL:room' room_name='baseball-SL' league_num=1 %}">Chat</a></li>
-        <li class="nav-item"><a class="nav-link" href="{% url 'baseballSL:payment' 1 %}">Pay</a></li>
+        <li class="nav-item"><a class="nav-link" href="{% url 'baseballSL:entry' %}">Enter</a></li>
       </ul>
+      {% block wallet %}
+      {% endblock %}
     </div>
   </nav>
 </header>

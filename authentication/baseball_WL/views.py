@@ -16,8 +16,8 @@ import requests
 from decouple import config
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
-from .models import PickBS,ScorerBS,PaidBS,PromoCodeBS,PromoUserBS,WaitlistBS,MessageBS
-from authentication.models import OfAge,Game,BaseballPlayer,ChatMessage, Pick
+from .models import PickBS,ScorerBS,PaidBS,PromoCodeBS,PromoUserBS,WaitlistBS,MessageBS,Group
+from authentication.models import OfAge,Game,BaseballPlayer,ChatMessage,Pick,Wallet
 from authentication.baseball_SL.models import PickBL
 from authentication.NFL_weekly_view.models import PickNW
 from authentication.forms import CreateTeam
@@ -38,6 +38,8 @@ from django.core.paginator import Paginator
 from django.db import models
 from ..views import tournaments
 from django.db.models.functions import Lower
+from coinbase_commerce.client import Client
+from authentication.utils import send_email_to_user_BL, send_paid_email
 
 @login_required
 def message_board(request, league_num):
@@ -55,9 +57,13 @@ def message_board(request, league_num):
             grouped_messages[message.week] = []
         grouped_messages[message.week].append(message)
 
+    wallet_user = Wallet.objects.get(username = request.user.username)
+    dollars = wallet_user.amount
+
     return render(request, 'baseball_WL/messages.html', {
         'grouped_messages': grouped_messages,
-        'pay_status':player.paid_status
+        'pay_status':player.paid_status,
+        'dollars':dollars
         })
 
 def custom_csrf_failure_view(request, reason=""):
@@ -93,13 +99,17 @@ def room(request, room_name, league_num):
 
     # Convert the QuerySet to a list of dictionaries
     messages = list(messages)
+
+    wallet_user = Wallet.objects.get(username = request.user.username)
+    dollars = wallet_user.amount
     
     return render(request, 'baseball_WL/room.html', {
         'room_name': room_name,
         'team': team,
         'messages': messages,
         'league_number': league_num,
-        'pay_status':player.paid_status
+        'pay_status':player.paid_status,
+        'dollars':dollars
     })
 
 def rules(request):
@@ -158,59 +168,100 @@ def signout(request):
     return redirect('baseballWL:home')
 
 @login_required
-def payment(request, league_num):
+def payment(request):
+    player = PaidBS.objects.get(username = request.user.username)
     username = request.user.username
-    player = PaidBS.objects.get(username = username)
-    if int(league_num) != player.league_number:
-        return redirect("baseballWL:payment", league_num = player.league_number)
-    user = PromoUserBS.objects.get(username = request.user.username)
-    code = user.code
-    codeuser = False
-    if code != "0000":
-        codeuser = True
+    note = f"Entry-for-{username}-minigame"
 
-    if request.method == 'POST':
-        promocode = request.POST.get('code',"").strip()
-        if not promocode:
-            promocode = "0000"
-        promouser = PromoUserBS.objects.get(username = request.user.username)
-        promouser.code = promocode
-        promouser.save()
-        if promocode != "0000":
-            codeuser = True
-        try:
-            team_count = int(request.POST.get('teamCount', 1))
-        except ValueError:
-            team_count = 1
-        if promocode != "0000":
-            total_amount = team_count * 50
-        else:
-            total_amount = team_count * 50  # $50 per team
-        info = PaidBS.objects.get(username = request.user.username)
-        info.numteams = team_count
-        info.price = total_amount
-        info.save()
+    venmo_url = f"https://venmo.com/thechosenfantasy?txn=pay&amount={50}&note={note}"
+
+    wallet_user = Wallet.objects.get(username = request.user.username)
+    dollars = wallet_user.amount
+
+    return render(request, 'baseball_WL/payment.html',
+        {
+        'dollars':dollars,
+        'venmo_url':venmo_url,
+        'pay_status':player.paid_status,
+        })
+
+@login_required
+def create_coinbase_payment(request):
+    COINBASE_API_KEY = config('COINGBASE_COMMERCE')
+    print(COINBASE_API_KEY)
+    amount = 50  # Example: $50 deposit amount
+    username = request.user.username
+    description = f"Deposit for {username}"
+
+    try:
+        client = Client(api_key=COINBASE_API_KEY)
+        print(client)
+        charge = client.charge.create(
+            name="Account Deposit",
+            description=description,
+            local_price={"amount": str(amount), "currency": "USD"},
+            pricing_type="fixed_price",
+            metadata={"user_id": request.user.id, "username": username},
+            redirect_url="https://yourwebsite.com/payment-success/",
+            cancel_url="https://yourwebsite.com/payment-failed/"
+        )
+        return JsonResponse({"checkout_url": charge.hosted_url})
+    except Exception as e:
+        return JsonResponse({"error": str(e)})
+
+def entry(request):
+    if request.method == "POST":
         username = request.user.username
-        note = f"Entry-for-{username}-minigame"
+        num_entries = int(request.POST.get("num_entries", 1))  # Default to 1 entry
+        emails = request.POST.get("emails", "")  # Group email list
+        total_cost = num_entries * 50  # $50 per entry
 
-        venmo_url = f"https://venmo.com/thechosenfantasy?txn=pay&amount={total_amount}&note={note}"
+        try:
+            wallet = Wallet.objects.get(username=username)
 
-        return HttpResponseRedirect(venmo_url)
-        #messages.success(request,"Please contact (805)377-6155 or email commissioner@thechosenfg.com for payment options")
+            if wallet.amount < total_cost:
+                # Not enough funds, redirect to deposit page
+                return JsonResponse({"success": False, "message": "Insufficient funds. <a href='/baseballWL/payment'>Make a deposit here</a>"})
 
-    else:
-        team_count = 1
-        total_amount = 100
+            # Deduct amount from wallet
+            wallet.amount -= total_cost
+            wallet.save()
 
-    context = {
-        'team_count': team_count,
-        'total_amount': total_amount,
-        'promo':codeuser,
-        'pay_status':player.paid_status
-        } 
-    print(context)
+            # Store group data
+            group_entry = Group(username=username, group=emails)
+            group_entry.save()
 
-    return render(request, 'baseball_WL/payment.html', context)
+            paid_user = PaidBS.objects.get(username=username)
+            paid_user.paid_status = True
+            paid_user.numteams = num_entries
+            paid_user.save()
+
+
+            pick = PickBS.objects.get(username = username, pick_number = 1)
+            team = pick.team_name
+
+            for i in PickBS.objects.filter(username=username):
+                if i.paid == False:
+                    i.delete()
+
+            for i in range(num_entries):
+                for j in range(10):
+                    new_pick = PickBS(team_name=team,username= username,paid = True,pick_number = j+1,teamnumber = i+1)
+                    new_pick.save()
+
+            send_paid_email(username, 1)
+
+            return JsonResponse({"success": True, "message": "Entry confirmed! Your wallet has been debited."})
+
+        except Wallet.DoesNotExist:
+            return JsonResponse({"success": False, "message": "Wallet not found. Please contact support."})
+
+    wallet_user = Wallet.objects.get(username = request.user.username)
+    dollars = wallet_user.amount
+
+    return render(request, "baseball_WL/entry.html",{
+        'dollars':dollars,
+        })
 
 @login_required
 def playerboard(request, league_num):
@@ -288,13 +339,18 @@ def playerboard(request, league_num):
     page_obj = paginator.get_page(page_number)  # Get the paginated page
 
 
+    wallet_user = Wallet.objects.get(username = request.user.username)
+    dollars = wallet_user.amount
+
     # Pass both sorted_player_counts and player_teams to the template
     return render(request, 'baseball_WL/playerboard.html', {
         'page_obj': page_obj,
         'sorted_player_counts': sorted_player_counts,
         'player_teams': dict(pick_teams),
         'player_status': player_status,
-        'total_in': total_in, })
+        'total_in': total_in, 
+        'dollars':dollars
+        })
 
 @login_required
 def leaderboard(request, league_num):
@@ -373,6 +429,9 @@ def leaderboard(request, league_num):
 
     user_data= PickBS.objects.filter(username = request.user.username)
 
+    wallet_user = Wallet.objects.get(username = request.user.username)
+    dollars = wallet_user.amount
+
     # Pass both sorted_player_counts and player_teams to the template
     return render(request, 'baseball_WL/leaderboard.html', {
         'page_obj': page_obj,
@@ -381,6 +440,7 @@ def leaderboard(request, league_num):
         'player_status': player_status,
         'total_in': total_in,
         'user_data': user_data,
+        'dollars':dollars
     })
 
 
@@ -599,10 +659,14 @@ def player_list(request, league_num):
     page_number = request.GET.get('page', 1)
     page_obj = paginator.get_page(page_number)
 
+    wallet_user = Wallet.objects.get(username = request.user.username)
+    dollars = wallet_user.amount
+
     # Pass the data to the template
     return render(request, 'baseball_WL/leaders.html', {
         'leaderboard': page_obj,
-        'pay_status':player.paid_status
+        'pay_status':player.paid_status,
+        'dollars':dollars
     })
 
 
@@ -655,7 +719,7 @@ def game(request, league_num):
                 # Retrieve the selected player
                 player_data_selected = BaseballPlayer.objects.get(name=selected_player)
                 if paid.paid_status == False:
-                    return JsonResponse({'success': False, 'message': "Features activate after payment"})
+                    return JsonResponse({"success": False, "message": "Features activate after entry. <a href='/baseballWL/entry'>Enter here.</a>"})
                 else:
                     # Use your existing game_search function
                     result = game_search(request.user.username, player_data_selected,page_num)
@@ -709,6 +773,9 @@ def game(request, league_num):
 
     total_in = int(PickBS.objects.filter(paid = True,league_number = league_num).count() / 10)
 
+    wallet_user = Wallet.objects.get(username = request.user.username)
+    dollars = wallet_user.amount
+
 
     return render(request, 'baseball_WL/game.html', 
         {'page_obj': page_obj,
@@ -717,7 +784,8 @@ def game(request, league_num):
         'start':start,
         'team':name,
         'total':total_in,
-        'pay_status':player.paid_status
+        'pay_status':player.paid_status,
+        'dollars':dollars
         })
 
 @csrf_exempt
@@ -814,7 +882,14 @@ def picking(request, league_num):
     if int(league_num) != player.league_number:
         return redirect("baseballWL:picking", league_num = player.league_number)
     total_in = int(PickBS.objects.filter(paid = True,league_number = league_num).count() / 10)
-    return render(request, 'baseball_WL/picking.html', {'total_in': total_in})
+
+    wallet_user = Wallet.objects.get(username = request.user.username)
+    dollars = wallet_user.amount
+
+    return render(request, 'baseball_WL/picking.html', {
+        'total_in': total_in,
+        'dollars':dollars
+        })
 
 @login_required
 def checking(request, league_num):

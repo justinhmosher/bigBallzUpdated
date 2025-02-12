@@ -72,3 +72,9 @@ class MessageNW(models.Model):
 
     def __str__(self):
         return f"{self.content}"
+
+class Group(models.Model):
+    username = models.CharField(max_length = 100, default = "username")
+    group = models.CharField(max_length = 100, default = "username")
+    def __str__(self):
+        return f"{self.username}"

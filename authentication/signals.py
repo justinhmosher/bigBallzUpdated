@@ -62,22 +62,3 @@ def check_player_scored_pre_save(sender, instance, **kwargs):
                 send_email_to_user(instance.name, instance.league_number)
         except Scorer.DoesNotExist:
             pass  # Handle the rare case where the instance doesn't exist (e.g., deleted)
-
-@receiver(pre_save, sender=Paid)
-def delete_unpaid_players(sender, instance, **kwargs):
-    if instance.pk:
-        # Get the previous value of the object from the database
-        previous_instance = Paid.objects.get(pk=instance.pk)
-        if instance.paid_status and not previous_instance.paid_status:
-            # Trigger the message creation only if `isin` is changed to False
-            paid = Paid.objects.get(username = instance.username)
-            pick = Pick.objects.get(username = instance.username, pick_number = 1)
-            teamcount = paid.numteams
-            for i in range(teamcount):
-                for j in range(2):
-                    new_pick = Pick(team_name=pick.team_name,username= instance.username,paid = True,pick_number = j+1,teamnumber = i+1)
-                    new_pick.save()
-            for i in Pick.objects.filter(username=instance.username):
-                if i.paid == False:
-                    i.delete()
-            send_paid_email(instance.username, instance.league_number)

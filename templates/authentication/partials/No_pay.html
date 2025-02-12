@@ -4,16 +4,18 @@
       {% block trophy %}
       {% endblock %}
       <div class="dropdown-menu">
+          <a href="{% url 'authentication:messages' 1 %}" class="dropdown-item">Messages</a></li>
           <a href="{% url 'authentication:tournaments' %}" class="dropdown-item">Tournaments</a>
           <a href="{% url 'authentication:signout'%}" class="dropdown-item">Sign Out</a>
       </div>
       <ul class="navbar-nav">
-        <li class="nav-item"><a class="nav-link" href="{% url 'authentication:messages' 1 %}">Messages</a></li>
         <li class="nav-item"><a class="nav-link" href="{% url 'authentication:leaders' 1 %}">Standings</a></li>
         <li class="nav-item"><a class="nav-link" href="{% url 'authentication:checking' 1 %}">Play</a></li>
         <li class="nav-item"><a class="nav-link" href="{% url 'authentication:room' room_name='general' league_num=1 %}">Chat</a></li>
-        <li class="nav-item"><a class="nav-link" href="{% url 'authentication:payment' 1 %}">Pay</a></li>
+        <li class="nav-item"><a class="nav-link" href="{% url 'authentication:entry' %}">Enter</a></li>
       </ul>
+      {% block wallet %}
+      {% endblock %}
     </div>
   </nav>
 </header>

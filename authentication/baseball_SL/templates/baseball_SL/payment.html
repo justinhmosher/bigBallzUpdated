@@ -4,29 +4,79 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Complete Your Payment</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <title>Make a Deposit</title>
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css">
     <link rel="stylesheet" href="{% static 'css/shared.css' %}">
     <style>
-        .center-container{
-            padding-top: 200px;
-        }
-        .payment-container {
-            width: 100%;
-            max-width: 500px;
-            padding: 25px;
-            background-color: #ffffff;
-            border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0,0,0,.1);
-        }
-        .icon-container {
+        body {
+            background-color: #f5f7fa;
             text-align: center;
+        }
+
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            margin: 30% auto;
+            justify-content: center; /* Centers horizontally */
+            align-items: center;  /* Centers vertically */
+        }
+
+        h1 {
+            font-size: 24px;
             margin-bottom: 20px;
         }
-        .icon-container i {
-            font-size: 70px;
-            color: #0056b3;
+
+        .deposit-button {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            border: none;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 5px;
+            text-decoration: none;
+            color: white;
+        }
+
+        .venmo {
+            background-color: #008CFF;
+        }
+
+        .coinbase {
+            background-color: #0052FF;
+        }
+
+        .deposit-button:hover {
+            opacity: 0.85;
+        }
+                /* Tooltip Styling */
+        .hover-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        .hover-content {
+            display: none;
+            position: absolute;
+            top: 120%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #ffffff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            white-space: nowrap;
+            z-index: 100;
+            min-width: 200px;
+        }
+
+        .hover-container:hover .hover-content {
+            display: block;
         }
         @media (max-width: 576px) {
           .navbar .nav-link {
@@ -42,63 +92,36 @@
         <img src="{% static 'Trophy-logo.svg' %}" alt="The Chosen Fantasy Games">
       </a>
 {% endblock %}
+{% block wallet %}
+<a href="{% url 'baseballSL:payment' %}" style="position: absolute; top: 17px; right: 30px; text-decoration: none; font-weight: bold; color: #ffd700">
+    ${{ dollars|floatformat:2 }}
+</a>
+{% endblock %}
 {% else %}
 {% include 'authentication/partials/No_pay_BL.html' %}
       <a class="navbar-brand" style="position: absolute; top: 10px; left: 3px;"  href="javascript:void(0);">
         <img src="{% static 'Trophy-logo.svg' %}" alt="The Chosen Fantasy Games">
       </a>
+      <a href="{% url 'baseballSL:payment' %}" style="position: absolute; top: 17px; right: 30px; text-decoration: none; font-weight: bold; color: #ffd700;">
+    ${{ dollars|floatformat:2 }}
+</a>
 {% endif %}
 <body>
-    <div class="center-container">
-        <div class="container payment-container">
-            <div class="icon-container">
-                <i class="fas fa-users"></i>
-            </div>
-            <h2 class="text-center mb-4">Team Payment</h2>
-            <form method="post" action="{% url 'baseballSL:payment' 1 %}">
-                {% csrf_token %}
-                <div class="mb-3">
-                    <label for="teamCount" class="form-label">Number of Entries:</label>
-                    <select class="form-select" id="teamCount" name="teamCount" onchange="updateTotal()">
-                        <option value="1" selected>1</option>
-                        <!-- Generating options dynamically -->
-                        <script>
-                            for (let i = 2; i <= 20; i++) {
-                                document.write(`<option value="${i}">${i}</option>`);
-                            }
-                        </script>
-                    </select>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Who referred you?</label>
-                    <input type="text" class="form-control" id="referral" name="referral">
-                </div>
-                <div class="mb-3 text-center">
-                    <p>Total Amount: <span id="totalAmount"></span></p>
-                </div>
-                <div class="d-grid">
-                    <button type="submit" class="btn btn-primary">Confirm</button>
-                </div>
-            </form>
-        </div>
+
+    <div class="container">
+        <h1>Make a Deposit</h1>
+        <p>Select a payment method to fund your account.</p>
+
+        <!-- Venmo Button -->
+        <button class="deposit-button venmo" onclick="depositWithVenmo()">Venmo</button>
+
+        <!-- Coinbase Button -->
+        <button class="deposit-button coinbase" onclick="depositWithCoinbase()">Coinbase</button>
     </div>
 
+</body>
     <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const pricePerTeam = 50;
-
-        function updateTotal() {
-            const teamCount = parseInt(document.getElementById('teamCount').value);
-            const totalAmount = teamCount * pricePerTeam;
-            document.getElementById('totalAmount').innerText = `$${totalAmount.toFixed(2)}`;
-        }
-
-        document.getElementById('teamCount').addEventListener('change', updateTotal);
-        updateTotal(); // Initial update when the page loads
-    });
-    </script>
-    <script type="text/javascript">
-      document.addEventListener("DOMContentLoaded", function() {
+    document.addEventListener("DOMContentLoaded", function() {
         const logo = document.querySelector('.navbar-brand img');
         const dropdownMenu = document.querySelector('.dropdown-menu');
 
@@ -115,12 +138,27 @@
             }
         });
     });
-</script>
+    </script>
 
-</body>
-<footer class="footer text-center">
-    <div class="container text-center">
-        <p><a href="terms">Terms and Conditions</a> <a href="privacy">Privacy Policy</a> <a href="tel:+18053776155">Contact Us!</a></p>
-    </div>
-</footer>
+        <script>
+        function depositWithVenmo() {
+            alert("Redirecting to Venmo...");
+            window.location.href = "{{ venmo_url }}";  // Injected from Django
+        }
+
+        function depositWithCoinbase() {
+            fetch("{% url 'baseballWL:create_coinbase_payment' %}", {
+                method: "GET",
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.checkout_url) {
+                    window.location.href = data.checkout_url; // Redirect to Coinbase payment page
+                } else {
+                    alert("Error: " + data.error);
+                }
+            })
+            .catch(error => console.error("Error:", error));
+        }
+    </script>
 </html>

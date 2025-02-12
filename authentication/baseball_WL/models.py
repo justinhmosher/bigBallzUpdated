@@ -33,7 +33,13 @@ class ScorerBS(models.Model):
     homerun_count = models.IntegerField(default=0)
     league_number = models.IntegerField(default=1)
     def __str__(self):
-        return f"{self.name}" 
+        return f"{self.name}"
+
+class Group(models.Model):
+    username = models.CharField(max_length = 100, default = "username")
+    group = models.CharField(max_length = 100, default = "username")
+    def __str__(self):
+        return f"{self.username}"
 
 class PaidBS(models.Model):
     your_primary_key = models.AutoField(primary_key=True)

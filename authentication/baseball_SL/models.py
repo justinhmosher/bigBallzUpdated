@@ -38,6 +38,12 @@ class PastPickBL(models.Model):
     def __str__(self):
         return f"{self.team_name}"
 
+class Group(models.Model):
+    username = models.CharField(max_length = 100, default = "username")
+    group = models.CharField(max_length = 100, default = "username")
+    def __str__(self):
+        return f"{self.username}"
+
 class GrandSlamBL(models.Model):
     player_name = models.CharField(max_length = 100, default = "name")
     player_ID = models.CharField(max_length= 100, default = "player ID")

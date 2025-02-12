@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Pick,Paid,NFLPlayer,Game,PastPick,BaseballPlayer,NBAPlayer,Scorer,PromoCode,PromoUser,OfAge,UserVerification,Blog,Waitlist,Message,ChatMessage,Email,Group,KYC
+from .models import Pick,Paid,NFLPlayer,Game,PastPick,BaseballPlayer,NBAPlayer,Scorer,PromoCode,PromoUser,OfAge,UserVerification,Blog,Waitlist,Message,ChatMessage,Email,Group,KYC,Wallet
 from django_ckeditor_5.widgets import CKEditor5Widget
 from django import forms
 from datetime import datetime, time
@@ -18,6 +18,9 @@ class BlogAdmin(admin.ModelAdmin):
 
 class NFLPlayerAdmin(admin.ModelAdmin):
     search_fields = ['name','team_name']
+
+class WalletAdmin(admin.ModelAdmin):
+    search_fields = ['username']
 
 
 admin.site.register(Pick)
@@ -39,3 +42,4 @@ admin.site.register(ChatMessage)
 admin.site.register(Email)
 admin.site.register(Group)
 admin.site.register(KYC)
+admin.site.register(Wallet,WalletAdmin)

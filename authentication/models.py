@@ -32,9 +32,15 @@ class Email(models.Model):
     def __str__(self):
         return f"{self.email}"
 
+class Wallet(models.Model):
+    username = models.CharField(max_length = 100, default = "email")
+    amount = models.FloatField(default=0.00)
+    def __str__(self):
+        return f"{self.username}" 
+    
 class Group(models.Model):
     username = models.CharField(max_length = 100, blank = True)
-    email = models.CharField(max_length = 100, blank = True)
+    group = models.CharField(max_length = 100, blank = True)
     def __str__(self):
         return f"{self.username}" 
 

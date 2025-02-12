@@ -21,8 +21,9 @@
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
-  <link rel="stylesheet" href="{% static 'css/shared.css' %}">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="{% static 'css/shared.css' %}">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <style>
 .bd-placeholder-img { font-size: 1.125rem; text-anchor: middle; user-select: none; }
@@ -77,11 +78,19 @@
         <img src="{% static 'Trophy-logo.svg' %}" alt="The Chosen Fantasy Games">
       </a>
 {% endblock %}
+{% block wallet %}
+    <a href="{% url 'authentication:payment' %}" style="position: absolute; top: 17px; right: 30px; text-decoration: none; font-weight: bold; color: #ffd700">
+        ${{ dollars|floatformat:2 }}
+    </a>
+{% endblock %}
 {% else %}
 {% include 'authentication/partials/No_pay.html' %}
       <a class="navbar-brand" style="position: absolute; top: 10px; left: 3px;"  href="javascript:void(0);">
         <img src="{% static 'Trophy-logo.svg' %}" alt="The Chosen Fantasy Games">
       </a>
+          <a href="{% url 'authentication:payment' %}" style="position: absolute; top: 17px; right: 30px; text-decoration: none; font-weight: bold; color: #ffd700;">
+        ${{ dollars|floatformat:2 }}
+    </a>
 {% endif %}
   <body>
 
@@ -101,9 +110,9 @@
         <h2 class="text-center"> Game starts: {{ start }}</h2>
       {% else %}
       {% if not all_teams_out %}
-        <h2 class="text-center"> Selection ends Wednesday 11:59pm PST</h2>
+        <h2 class="text-center"> Selection ends Sunday 11:59pm PST</h2>
       {% else %}
-      <h2 class="text-center">Come back Thursday to view the picks!</h2>
+      <h2 class="text-center">Come back Sunday to view the picks!</h2>
       {% endif %}
       {% endif %}
       <br>
@@ -124,20 +133,10 @@
     </div>
 </section>
 
-
-      <div class="album py-5 bg-body-tertiary">
-        {% if isin %}
-        <div class="d-flex justify-content-center">
-          {% if not all_teams_out %}
-          <h2>{{ team }} touchdown predictions:</h2>
-          {% else %}
-          <h2>{{ team }} losing predictions:</h2>
-          {% endif %}
-        </div>
-        {% endif %}
 <div class="container">
   <!-- Loop through all teams -->
   {% for team_picks in page_obj %}
+    <h2 class="text-center">{{ team_picks.0.team_name }} home run predictions:</h2>
     <h3 class="text-center">Team {{ team_picks.0.teamnumber }}</h3>
    <nav>
     <ul class="pagination justify-content-center">
@@ -312,18 +311,23 @@ $(document).ready(function () {
 
                 card.find('.bd-placeholder-img').replaceWith(`
                    <svg class="bd-placeholder-img card-img-top" width="100%" height="225" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Player Name Thumbnail" preserveAspectRatio="xMidYMid slice" focusable="false">
-              <rect width="100%" height="100%" fill="${response.pick.pick_color}"></rect>
-              <text x="50%" y="50%" fill="#ffffff" dy=".3em" text-anchor="middle" class="player-name">${response.pick.pick_name}</text>
-              <text x="50%" y="75%" fill="#ffffff" dy=".3em" text-anchor="middle">
-                <tspan>${response.pick.pick_position}</tspan> - <tspan>${response.pick.pick_team}</tspan>
-              </text>
-            </svg>
+                    <rect width="100%" height="100%" fill="${response.pick.pick_color}"></rect>
+                    <text x="50%" y="50%" fill="#ffffff" dy=".3em" text-anchor="middle" class="player-name">${response.pick.pick_name}</text>
+                    <text x="50%" y="75%" fill="#ffffff" dy=".3em" text-anchor="middle">
+                    <tspan>${response.pick.pick_position}</tspan> - <tspan>${response.pick.pick_team}</tspan>
+                    </text>
+                    </svg>
                 `);
 
                 // Clear the search results
                 $('#search-results').empty();
             } else {
-                alert(`Error: ${response.message}`);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Entry Required',
+                    html: response.message, // Allows clickable links inside the popup
+                    confirmButtonText: 'OK'
+                });
             }
         },
         error: function () {
@@ -353,6 +357,5 @@ $(document).ready(function () {
     <script src="/docs/5.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
   </body>
 </html>
-
 
 

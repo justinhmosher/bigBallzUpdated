@@ -24,7 +24,7 @@ urlpatterns = [
     path('passreset/<uidb64>/<token>',views.passreset,name='passreset'),
     path('activate/<uidb64>/<token>',views.activate,name='activate'),
     path('tournaments',views.tournaments,name='tournaments'),
-    path('payment/<int:league_num>',views.payment,name='payment'),
+    path('payment',views.payment,name='payment'),
     path('terms',views.terms,name='terms'),
     path('privacy',views.privacy,name='privacy'),
     path('confirm-email/<str:email>/',views.confirm_email,name='confirm_email'),
@@ -44,6 +44,8 @@ urlpatterns = [
     path('ckeditor5/', include('django_ckeditor_5.urls')),
     path('messages/<int:league_num>', views.message_board, name = 'messages'),
     path('update-pick', views.update_pick, name = 'update_pick'),
+    path('entry',views.entry,name='entry'),
+    path('create-coinbase-payment',views.create_coinbase_payment,name = 'create_coinbase_payment'),
     #path('verification',views.start_KYC_verification, name = 'start_KYC_verification'),
     #path('subsum-webhook',views.subsum_webhook, name = 'subsum_webhook')
 ]+static(settings.MEDIA_URL,document_root = settings.MEDIA_ROOT)
