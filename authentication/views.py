@@ -20,8 +20,8 @@ from django.http import JsonResponse
 from .forms import PlayerSearchForm, Pickform, Pick1Form, CreateTeam
 from .models import Pick,Wallet,Scorer,Paid,NFLPlayer,Game,PastPick,PromoCode,PromoUser,OfAge,UserVerification,Blog,ChatMessage,Waitlist,MessageReaction,Message,Email,KYC,Group
 from authentication.NFL_weekly_view.models import PickNW
-from authentication.baseball_SL.models import PickBL,PromoUserBL
-from authentication.baseball_WL.models import PickBS,PromoUserBS
+from authentication.baseball_SL.models import PickBL,PromoUserBL,PaidBL
+from authentication.baseball_WL.models import PickBS,PromoUserBS,PaidBS
 from django.db.models import Count,F,ExpressionWrapper,fields,OuterRef,Subquery
 from datetime import datetime, time
 from itertools import chain
