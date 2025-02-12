@@ -225,6 +225,7 @@ def entry(request):
 
 @login_required
 def payment(request):
+    player = PaidNW.objects.get(username = request.user.username)
 
     username = request.user.username
     note = f"Entry-for-{username}-minigame"
@@ -237,7 +238,9 @@ def payment(request):
     return render(request, 'NFL_weekly_view/payment.html',
         {
         'dollars':dollars,
-        'venmo_url':venmo_url
+        'venmo_url':venmo_url,
+        'pay_status':player.paid_status,
+
         })
 
 @login_required

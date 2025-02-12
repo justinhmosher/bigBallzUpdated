@@ -170,7 +170,7 @@ def signout(request):
 
 @login_required
 def payment(request):
-    player = PaidBS.objects.get(username = request.user.username)
+    player = PaidBL.objects.get(username = request.user.username)
     username = request.user.username
     note = f"Entry-for-{username}-minigame"
 
