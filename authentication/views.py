@@ -449,7 +449,7 @@ def activate(request, uidb64, token):
 			BS_paid.save()
 			BS_promo = PromoUserBS(username = myuser.username)
 			BS_promo.save()
-			wallet_user = Wallet(username = username)
+			wallet_user = Wallet(username = myuser.username)
 			wallet_user.save()
 			email = Email(email = myuser.username)
 			email.save()
