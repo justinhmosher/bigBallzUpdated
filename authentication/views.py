@@ -477,7 +477,7 @@ def entry(request):
 
             if wallet.amount < total_cost:
                 # Not enough funds, redirect to deposit page
-                return JsonResponse({"success": False, "message": "Insufficient funds. <a href='/authentication/payment'>Make a deposit here</a>"})
+                return JsonResponse({"success": False, "message": "Insufficient funds. <a href='/payment'>Make a deposit here</a>"})
 
             # Deduct amount from wallet
             wallet.amount -= total_cost
