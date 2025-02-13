@@ -466,56 +466,58 @@ logger = logging.getLogger(__name__)
 
 @login_required
 def entry(request):
-    if request.method == "POST":
-        username = request.user.username
-        num_entries = int(request.POST.get("num_entries", 1))  # Default to 1 entry
-        emails = request.POST.get("emails", "")  # Group email list
-        total_cost = num_entries * 50  # $50 per entry
+	player = Paid.objects.get(username = request.user.username)
+	if request.method == "POST":
+		username = request.user.username
+		num_entries = int(request.POST.get("num_entries", 1))  # Default to 1 entry
+		emails = request.POST.get("emails", "")  # Group email list
+		total_cost = num_entries * 50  # $50 per entry
 
-        try:
-            wallet = Wallet.objects.get(username=username)
+		try:
+			wallet = Wallet.objects.get(username=username)
 
-            if wallet.amount < total_cost:
-                # Not enough funds, redirect to deposit page
-                return JsonResponse({"success": False, "message": "Insufficient funds. <a href='/payment'>Make a deposit here</a>"})
+			if wallet.amount < total_cost:
+				# Not enough funds, redirect to deposit page
+				return JsonResponse({"success": False, "message": "Insufficient funds. <a href='/payment'>Make a deposit here</a>"})
 
-            # Deduct amount from wallet
-            wallet.amount -= total_cost
-            wallet.save()
+			# Deduct amount from wallet
+			wallet.amount -= total_cost
+			wallet.save()
 
-            # Store group data
-            group_entry = Group(username=username, group=emails)
-            group_entry.save()
+			# Store group data
+			group_entry = Group(username=username, group=emails)
+			group_entry.save()
 
-            paid_user = Paid.objects.get(username=username)
-            paid_user.paid_status = True
-            paid_user.numteams = num_entries
-            paid_user.save()
+			paid_user = Paid.objects.get(username=username)
+			paid_user.paid_status = True
+			paid_user.numteams = num_entries
+			paid_user.save()
 
-            pick = Pick.objects.get(username = username, pick_number = 1)
-            team = pick.team_name
+			pick = Pick.objects.get(username = username, pick_number = 1)
+			team = pick.team_name
 
-            for i in Pick.objects.filter(username=username):
-                if i.paid == False:
-                    i.delete()
+			for i in Pick.objects.filter(username=username):
+				if i.paid == False:
+					i.delete()
 
-            for i in range(num_entries):
-                for j in range(2):
-                    new_pick = Pick(team_name=team,username= username,paid = True,pick_number = j+1,teamnumber = i+1)
-                    new_pick.save()
+			for i in range(num_entries):
+				for j in range(2):
+					new_pick = Pick(team_name=team,username= username,paid = True,pick_number = j+1,teamnumber = i+1)
+					new_pick.save()
 
-            send_paid_email(username, 1)
+			send_paid_email(username, 1)
 
-            return JsonResponse({"success": True, "message": "Entry confirmed! Your wallet has been debited."})
+			return JsonResponse({"success": True, "message": "Entry confirmed! Your wallet has been debited."})
 
-        except Wallet.DoesNotExist:
-            return JsonResponse({"success": False, "message": "Wallet not found. Please contact support."})
+		except Wallet.DoesNotExist:
+			return JsonResponse({"success": False, "message": "Wallet not found. Please contact support."})
 
-    wallet_user = Wallet.objects.get(username = request.user.username)
-    dollars = wallet_user.amount
+	wallet_user = Wallet.objects.get(username = request.user.username)
+	dollars = wallet_user.amount
 
-    return render(request, "authentication/entry.html",{
+	return render(request, "authentication/entry.html",{
         'dollars':dollars,
+        'pay_status':player.paid_status,
         })
 
 @login_required

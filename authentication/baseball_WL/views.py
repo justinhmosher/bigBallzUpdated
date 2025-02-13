@@ -210,6 +210,7 @@ def create_coinbase_payment(request):
         return JsonResponse({"error": str(e)})
 
 def entry(request):
+    player = PaidBS.objects.get(username = request.user.username)
     if request.method == "POST":
         username = request.user.username
         num_entries = int(request.POST.get("num_entries", 1))  # Default to 1 entry
@@ -261,6 +262,7 @@ def entry(request):
 
     return render(request, "baseball_WL/entry.html",{
         'dollars':dollars,
+        'pay_status':player.paid_status,
         })
 
 @login_required

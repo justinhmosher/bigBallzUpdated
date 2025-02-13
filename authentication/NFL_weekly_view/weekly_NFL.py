@@ -170,6 +170,7 @@ def signout(request):
 
 @login_required
 def entry(request):
+    player = Paid.objects.get(username = request.user.username)
     if request.method == "POST":
         username = request.user.username
         num_entries = int(request.POST.get("num_entries", 1))  # Default to 1 entry
@@ -221,6 +222,7 @@ def entry(request):
 
     return render(request, "NFL_weekly_view/entry.html",{
         'dollars':dollars,
+        'pay_status':player.paid_status,
         })
 
 @login_required
